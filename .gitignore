@@ -34,3 +34,4 @@
 # customized
 *.code-workspace
 build
+.vscode
