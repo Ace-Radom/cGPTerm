@@ -33,5 +33,12 @@
 
 # customized
 *.code-workspace
+*.log
+chat*.json
+test
+test.*
+bin
+debug
+release
 build
 .vscode
