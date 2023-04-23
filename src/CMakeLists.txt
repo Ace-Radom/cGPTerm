@@ -1,8 +1,16 @@
 add_subdirectory(ezylog)
 # build ezylog subproject
 add_subdirectory(openai_api)
-# build openai-api subproject
+# build openai-api lib
 add_subdirectory(cvector)
 # build cvector subproject
+add_subdirectory(rwcfg)
+# build rwcfg lib
 
-set(UTILS ${CMAKE_CURRENT_SOURCE_DIR}/utils.c PARENT_SCOPE)
+add_library(utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils.c
+)
+target_link_libraries(utils
+    ezylog
+    iniparser
+)
