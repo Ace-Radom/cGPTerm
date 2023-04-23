@@ -32,7 +32,7 @@ int ezylog_logerror( ezylog_logger_t* __logger , const char* __msg );
 int ezylog_logfatal( ezylog_logger_t* __logger , const char* __msg );
 
 void ezylog_chglayout( ezylog_logger_t* __logger , const char* __newlayout );
-void ezylog_chgpriority( ezylog_logger_t* __logger , const char* __newpt );
+void ezylog_chgpriority( ezylog_logger_t* __logger , ezylog_priority_t __newpt );
 
 void ezylog_close( ezylog_logger_t* __logger );
 

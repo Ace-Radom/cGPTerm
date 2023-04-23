@@ -175,8 +175,8 @@ void ezylog_chglayout( ezylog_logger_t* __logger , const char* __newlayout ){
  * @param __logger ezylog logger
  * @param __newpt new priority need to be set
 */
-void ezylog_chgpriority( ezylog_logger_t* __logger , const char* __newpt ){
-    strcpy( __logger -> __pt , __newpt );
+void ezylog_chgpriority( ezylog_logger_t* __logger , ezylog_priority_t __newpt ){
+    __logger -> __pt = __newpt;
     return;
 }
 
