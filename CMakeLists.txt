@@ -11,7 +11,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
-add_executable(main main.c)
+add_executable(main main.c ${UTILS})
 target_link_libraries(main
     ${CURSES_LIBRARIES}
     ezylog
