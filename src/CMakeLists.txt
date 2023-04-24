@@ -6,6 +6,8 @@ add_subdirectory(cvector)
 # build cvector subproject
 add_subdirectory(rwcfg)
 # build rwcfg lib
+add_subdirectory(argparse)
+# build argparse lib
 
 add_library(utils
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.c

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(cGPTerm VERSION 1.0)
 
-set(CMAKE_C_FLAGS "-Wall -Wno-incompatible-pointer-types")
+set(CMAKE_C_FLAGS "-Wall -g")
 
 set(LIBRARY_OUTPUT_PATH    ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
@@ -20,4 +20,5 @@ target_link_libraries(main
     ncursesw
     ezylog
     rwcfg
+    argparse
 )
