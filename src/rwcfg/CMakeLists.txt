@@ -10,4 +10,5 @@ add_library(rwcfg SHARED
 target_link_libraries(rwcfg
     utils
     iniparser
+    ezylog
 )

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(cGPTerm VERSION 1.0)
 
-set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_C_FLAGS "-Wall -Wno-incompatible-pointer-types")
 
 set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses REQUIRED)
