@@ -3,10 +3,6 @@ project(cGPTerm VERSION 1.0)
 
 set(CMAKE_C_FLAGS "-Wall -Wno-incompatible-pointer-types")
 
-set(CURSES_NEED_NCURSES TRUE)
-find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_DIR})
-
 set(LIBRARY_OUTPUT_PATH    ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
@@ -21,7 +17,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 add_executable(main main.c ${UTILS})
 target_link_libraries(main
-    ${CURSES_LIBRARIES}
+    ncursesw
     ezylog
     rwcfg
 )
