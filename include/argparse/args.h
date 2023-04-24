@@ -21,7 +21,7 @@ extern struct arg_lit* arg_help;
 extern struct arg_str* arg_set_apikey;
 extern struct arg_dbl* arg_set_timeout;
 extern struct arg_lit* arg_set_gentitle;
-extern struct arg_str* arg_set_saveprefix;
+extern struct arg_str* arg_set_saveperfix;
 extern struct arg_str* arg_set_loglevel;
 
 // ---------------------------- argtable2 ----------------------------

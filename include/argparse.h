@@ -5,13 +5,11 @@
 extern "C" {
 #endif
 
-#include<stdlib.h>
-#include<string.h>
-
-#include<argtable2.h>
-
+#include"rwcfg.h"
 #include"argparse/args.h"
 #include"argparse/gav.h"
+
+int args_actions_setcfg();
 
 #ifdef __cplusplus
 }

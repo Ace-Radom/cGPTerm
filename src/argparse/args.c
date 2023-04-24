@@ -9,7 +9,7 @@ struct arg_lit* arg_help = NULL;
 struct arg_str* arg_set_apikey = NULL;
 struct arg_dbl* arg_set_timeout = NULL;
 struct arg_lit* arg_set_gentitle = NULL;
-struct arg_str* arg_set_saveprefix = NULL;
+struct arg_str* arg_set_saveperfix = NULL;
 struct arg_str* arg_set_loglevel = NULL;
 
 // ---------------------------- argtable2 ----------------------------
@@ -25,7 +25,7 @@ void args_init(){
     arg_set_apikey     = arg_str0( NULL , "set-apikey"     , "<OpenAI API Key>" , "Set API Key for OpenAI"                                 );
     arg_set_timeout    = arg_dbl0( NULL , "set-timeout"    , "<API Timeout>"    , "Set maximum waiting time for API requests"              );
     arg_set_gentitle   = arg_lit0( NULL , "set-gentitle"   ,                      "Set whether to automatically generate a title for chat" );
-    arg_set_saveprefix = arg_str0( NULL , "set-saveprefix" , "<Prefix>"         , "Set chat history file's save perfix"                    );
+    arg_set_saveperfix = arg_str0( NULL , "set-saveperfix" , "<Prefix>"         , "Set chat history file's save perfix"                    );
     arg_set_loglevel   = arg_str0( NULL , "set-loglevel"   , "<Log Level>"      , "Set log level: DEBUG, INFO, ERROR, FATAL"               );
 
     end_arg = arg_end( 20 );
@@ -35,7 +35,7 @@ void args_init(){
         arg_set_apikey,
         arg_set_timeout,
         arg_set_gentitle,
-        arg_set_saveprefix,
+        arg_set_saveperfix,
         arg_set_loglevel,
         end_arg
     };

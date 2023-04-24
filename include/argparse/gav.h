@@ -15,7 +15,7 @@ extern "C" {
 #define gota_set_apikey     arg_set_apikey     -> count > 0 ? true : false
 #define gota_set_timeout    arg_set_timeout    -> count > 0 ? true : false
 #define gota_set_gentitle   arg_set_gentitle   -> count > 0 ? true : false
-#define gota_set_saveprefix arg_set_saveprefix -> count > 0 ? true : false
+#define gota_set_saveperfix arg_set_saveperfix -> count > 0 ? true : false
 #define gota_set_loglevel   arg_set_loglevel   -> count > 0 ? true : false
 
 // gav stands for Get Arg Value
@@ -24,7 +24,7 @@ extern "C" {
 #define gav_set_apikey     arg_set_apikey     -> sval[0]
 #define gav_set_timeout    arg_set_timeout    -> dval[0]
 #define gav_set_gentitle   gota_set_gentitle
-#define gav_set_saveprefix arg_set_saveprefix -> sval[0]
+#define gav_set_saveperfix arg_set_saveperfix -> sval[0]
 #define gav_set_loglevel   arg_set_loglevel   -> sval[0]
 
 #ifdef __cplusplus
