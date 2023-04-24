@@ -11,6 +11,7 @@ extern "C" {
 #include<argtable2.h>
 
 #include"argparse/args.h"
+#include"argparse/gav.h"
 
 #ifdef __cplusplus
 }

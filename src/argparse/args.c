@@ -15,7 +15,7 @@ struct arg_str* arg_set_loglevel = NULL;
 // ---------------------------- argtable2 ----------------------------
 
 struct arg_end* end_arg = NULL;
-void* argtable[] = { NULL };
+void* argtable[] = { NULL , NULL , NULL , NULL , NULL , NULL , NULL };
 
 // -------------------------- args function --------------------------
 

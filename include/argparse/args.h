@@ -30,17 +30,6 @@ extern struct arg_str* arg_set_loglevel;
 extern struct arg_end* end_arg;
 extern void* argtable[];
 
-// -------------------------- arg get value --------------------------
-
-// gav stands for Get Arg Value
-
-#define gav_help           arg_help           -> count > 0 ? true : false
-#define gav_set_apikey     arg_set_apikey     -> sval[0]
-#define gav_set_timeout    arg_set_timeout    -> dval[0]
-#define gav_set_gentitle   arg_set_gentitle   -> count > 0 ? true : false
-#define gav_set_saveprefix arg_set_saveprefix -> sval[0]
-#define gav_set_loglevel   arg_set_loglevel   -> sval[0]
-
 // -------------------------- args function --------------------------
 
 void args_init();
