@@ -28,6 +28,31 @@ int rconfig( const char* __inipath ){
     return 0;
 }
 
+int config_setstr( const char* __entry , const char* __value ){
+    return iniparser_set( config , __entry , __value );
+}
+
+int config_setdouble( const char* __entry , double __value ){
+    char* chgtemp = ( char* ) malloc( 16 );
+    // double -> str change temp
+    sprintf( chgtemp , "%2lf" , __value );
+    int set_return = iniparser_set( config , __entry , chgtemp );
+    free( chgtemp );
+    return set_return;
+}
+
+int wconfig( const char* __inipath ){
+    FILE* iniout = fopen( __inipath , "w" );
+    if ( iniout == NULL )
+    {
+        fprintf( stderr , "[wconfig] -> Open config file \"%s\" failed\n" , __inipath );
+        return -1;
+    }
+    iniparser_dump_ini( config , iniout );
+    fclose( iniout );
+    return 0;
+}
+
 /**
  * @brief close config ini
 */
