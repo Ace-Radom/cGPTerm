@@ -8,18 +8,32 @@
  * @return Priority, when unrecognized priority str appeared return INFO
 */
 ezylog_priority_t parse_str_to_priority( char* __str ){
-    char* __strallupr = __str;
-    for ( ; *__str != '\0' ; __str++ )
-        *__str = toupper( *__str );
-    if ( strcmp( __strallupr , "DEBUG" ) == 0 )
+    char* str = ( char* ) malloc( strlen( __str ) );
+    strcpy( str , __str );
+    char* strallupr = str;
+    for ( ; *str != '\0' ; str++ )
+        *str = toupper( *str );
+    if ( strcmp( strallupr , "DEBUG" ) == 0 )
+    {
+        free( strallupr );
         return EZYLOG_PRIORITY_DEBUG;
-    else if ( strcmp( __strallupr , "INFO" ) == 0 )
+    } 
+    else if ( strcmp( strallupr , "INFO" ) == 0 )
+    {
+        free( strallupr );
         return EZYLOG_PRIORITY_INFO;
-    else if ( strcmp( __strallupr , "ERROR" ) == 0 )
+    }  
+    else if ( strcmp( strallupr , "ERROR" ) == 0 )
+    {
+        free( strallupr );
         return EZYLOG_PRIORITY_ERROR;
-    else if ( strcmp( __strallupr , "FATAL" ) == 0 )
+    }
+    else if ( strcmp( strallupr , "FATAL" ) == 0 )
+    {
+        free( strallupr );
         return EZYLOG_PRIORITY_FATAL;
-
+    }
+    free( strallupr );
     return EZYLOG_PRIORITY_INFO;
     // unrecognized priority, set to INFO
 }
