@@ -1,4 +1,4 @@
-#include"rwcfg/parseinistr.h"
+#include"ezylog/typeparser.h"
 
 /**
  * @brief parse string to ezylog priority
@@ -7,7 +7,7 @@
  * 
  * @return Priority, when unrecognized priority str appeared return INFO
 */
-ezylog_priority_t parse_str_to_elp( char* __str ){
+ezylog_priority_t parse_str_to_priority( char* __str ){
     char* __strallupr = __str;
     for ( ; *__str != '\0' ; __str++ )
         *__str = toupper( *__str );
@@ -22,4 +22,14 @@ ezylog_priority_t parse_str_to_elp( char* __str ){
 
     return EZYLOG_PRIORITY_INFO;
     // unrecognized priority, set to INFO
+}
+
+char* parse_priority_to_str( ezylog_priority_t __p ){
+    switch ( __p ) {
+        case EZYLOG_PRIORITY_DEBUG: return "DEBUG";
+        case EZYLOG_PRIORITY_INFO:  return "INFO";
+        case EZYLOG_PRIORITY_ERROR: return "ERROR";
+        case EZYLOG_PRIORITY_FATAL: return "FATAL";
+    }
+    return NULL;
 }

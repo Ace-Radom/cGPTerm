@@ -24,7 +24,6 @@ extern const ezylog_format_t formats[];
 
 char* get_curtime( unsigned short int __accuracy );
 
-char* parse_priority( ezylog_priority_t __p );
 void parse_layout( char* __s , const char* __layout , const char* __time , const char* __logger , const char* __msg  , const ezylog_priority_t __priority , const char* __addimsg );
 
 #ifdef __cplusplus

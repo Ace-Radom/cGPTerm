@@ -30,16 +30,6 @@ char* get_curtime( unsigned short int __accuracy ){
     return curtime;
 }
 
-char* parse_priority( ezylog_priority_t __p ){
-    switch ( __p ) {
-        case EZYLOG_PRIORITY_DEBUG: return "DEBUG";
-        case EZYLOG_PRIORITY_INFO:  return "INFO";
-        case EZYLOG_PRIORITY_ERROR: return "ERROR";
-        case EZYLOG_PRIORITY_FATAL: return "FATAL";
-    }
-    return NULL;
-}
-
 void parse_layout( char* __s , const char* __layout , const char* __time , const char* __logger , const char* __msg  , const ezylog_priority_t __priority , const char* __addimsg ){
 
     const char *p = __layout;
@@ -68,10 +58,10 @@ void parse_layout( char* __s , const char* __layout , const char* __time , const
                 case 'a': value = ( void* ) __addimsg; break;
 
                 case 'p':
-                    value = ( void* ) parse_priority( __priority );
+                    value = ( void* ) parse_priority_to_str( __priority );
                     break;
                 case 'P':
-                    sprintf( ( char* ) value , "%-5s" , parse_priority( __priority ) );
+                    sprintf( ( char* ) value , "%-5s" , parse_priority_to_str( __priority ) );
                     break;
                 
                 default: // unrecognizable format

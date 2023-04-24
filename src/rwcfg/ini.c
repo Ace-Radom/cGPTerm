@@ -24,7 +24,7 @@ int rconfig( const char* __inipath ){
     OPENAI_API_TIMEOUT = iniparser_getdouble( config , "DEFAULT:OPENAI_API_TIMEOUT" , 30.0 );
     AUTO_GENERATE_TITLE = iniparser_getboolean( config , "DEFAULT:AUTO_GENERATE_TITLE" , true );
     strcpy( CHAT_SAVE_PERFIX , iniparser_getstring( config , "DEFAULT:CHAT_SAVE_PERFIX" , NULL ) );
-    LOG_LEVEL = parse_str_to_elp( ( char* ) iniparser_getstring( config , "DEFAULT:LOG_LEVEL" , "INFO" ) );
+    LOG_LEVEL = parse_str_to_priority( ( char* ) iniparser_getstring( config , "DEFAULT:LOG_LEVEL" , "INFO" ) );
     return 0;
 }
 

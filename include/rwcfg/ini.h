@@ -12,7 +12,7 @@ extern "C" {
 
 #include"iniparser.h"
 #include"utils.h"
-#include"parseinistr.h"
+#include"ezylog/typeparser.h"
 
 int rconfig( const char* __inipath );
 void cconfig();
