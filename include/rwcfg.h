@@ -7,6 +7,8 @@ extern "C" {
 
 #include"rwcfg/ini.h"
 
+#define CFG_DEFAULT_PATH "./config.ini"
+
 int setcfg_OPENAI_API_KEY( char* __api_key );
 int setcfg_OPENAI_API_TIMEOUT( double __timeout );
 int setcfg_AUTO_GENERATE_TITLE();
