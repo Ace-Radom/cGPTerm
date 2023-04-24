@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include<stdbool.h>
+
 #include"args.h"
 
 // gota stands for Got Arg
