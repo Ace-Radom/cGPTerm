@@ -30,7 +30,7 @@ int args_actions_setcfg(){
     }
 
     if ( action_num != 0 )
-        wconfig( CFG_DEFAULT_PATH );
+        wconfig( cfginipath );
 
     return action_num;
 }
