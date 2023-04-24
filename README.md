@@ -9,6 +9,8 @@ Chat with GPT in Terminal
 
 目前仅目标实现Linux环境下的各项功能 其余平台暂不做考虑
 
+Still in Working, no function achieved yet
+
 ### 项目依赖
 
 | 依赖库名 | 开发用版本 |
