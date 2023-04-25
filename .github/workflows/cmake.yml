@@ -25,8 +25,8 @@ jobs:
     - name: Install libcurl
       run: sudo apt install libcurl4-openssl-dev -y
 
-    - name: Install libncursesw
-      run: sudo apt install libncursesw5-dev -y
+    # - name: Install libncursesw
+    #   run: sudo apt install libncursesw5-dev -y
 
     - name: Install libargtable
       run: sudo apt install libargtable2-dev -y
