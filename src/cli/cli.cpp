@@ -8,11 +8,12 @@ int start_CLI(){
     {
         std::string input;
         std::cout << "> ";
-        std::cin >> input;
-        std::cout << input << std::endl;
+        std::getline( std::cin , input );
         if ( input == "quit" )
         {
-            return 0;
+            break;
         }
+        openai_send_chatrequest( input.c_str() );
     }
+    return 0;
 }

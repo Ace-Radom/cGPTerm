@@ -9,6 +9,7 @@
 #include"argparse.h"
 #include"utils.h"
 #include"ezylog.h"
+#include"openai_api.h"
 #include"cli.hpp"
 
 int main( int argc , char** argv ){
@@ -76,11 +77,17 @@ int main( int argc , char** argv ){
 
     // from here: cGPTerm main service
 
+    ezylog_logdebug( logger , "config set not triggered, start launching cGPTerm main service" );
+    
+    openai_init();
+    ezylog_logdebug( logger , "openai service initialization complete" );
+
     printf( "Hi, welcome to chat with GPT. Type `/help` to display available commands.\n" );
     ezylog_loginfo( logger , "cGPTerm main service launch" );
     int CLI_returncode = start_CLI();
     // transfer into CXX - CLI is written in C++ because of unknown error with zh characters
     
+    openai_free();
 
 stopmain:
     cconfig();

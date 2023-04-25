@@ -7,6 +7,8 @@
 #include<string>
 
 extern "C" {
+
+#include"openai_api.h"
     
 #endif
 

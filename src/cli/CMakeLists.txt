@@ -5,3 +5,6 @@ aux_source_directory(. CLI_SRC)
 add_library(cli SHARED
     ${CLI_SRC}
 )
+target_link_libraries(cli
+    openaiapi
+)
