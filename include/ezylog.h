@@ -19,8 +19,8 @@ extern "C" {
 #define EL_PT_BELOW_SET      2
 
 typedef struct {
-    char* __name[32];
-    char* __layout[32];
+    char __name[32];
+    char __layout[32];
     FILE* __f;
     ezylog_priority_t __pt;
     pthread_mutex_t __mutex;
