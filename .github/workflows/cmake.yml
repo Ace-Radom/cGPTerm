@@ -30,6 +30,9 @@ jobs:
 
     - name: Install libargtable
       run: sudo apt install libargtable2-dev -y
+    
+    - name: Install libjansson
+      run: sudo apt install libjansson-dev -y
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
