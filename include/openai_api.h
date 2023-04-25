@@ -36,7 +36,7 @@ typedef struct {
 extern openai_t* openai;
 
 void openai_init();
-
+void openai_send_chatrequest( const char* __usrmsg );
 void openai_free();
 
 #ifdef __cplusplus
