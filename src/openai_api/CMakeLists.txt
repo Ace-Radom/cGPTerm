@@ -9,4 +9,7 @@ add_library(openaiapi SHARED
 )
 target_link_libraries(openaiapi
     curl
+    pthread
+    jansson
+    ezylog
 )
