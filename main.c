@@ -9,6 +9,7 @@
 #include"argparse.h"
 #include"utils.h"
 #include"ezylog.h"
+#include"cli.hpp"
 
 int main( int argc , char** argv ){
     usrhome = getenv( "HOME" );
@@ -67,11 +68,23 @@ int main( int argc , char** argv ){
     if ( action_setcfg_num > 0 )
         goto stopmain;
         // wrote new config, stop
+    // parse args; show help if triggered; when new config set, goto stopmain
 
-    while ( 1 ) {}
+    // ============================================================================================
+    //                                      Finish args parse
+    // ============================================================================================
+
+    // from here: cGPTerm main service
+
+    printf( "Hi, welcome to chat with GPT. Type `/help` to display available commands.\n" );
+    ezylog_loginfo( logger , "cGPTerm main service launch" );
+    int CLI_returncode = start_CLI();
+    // transfer into CXX - CLI is written in C++ because of unknown error with zh characters
+    
 
 stopmain:
     cconfig();
+    printf( "Goodbye\n" );
     ezylog_loginfo( logger , "cGPTerm master process shutting down..." );
     ezylog_close( logger );
     return 0;
