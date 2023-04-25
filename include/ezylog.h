@@ -14,7 +14,7 @@ extern "C" {
 #include"ezylog/elenum.h"
 
 #define NOTMSG_IN_LOG_MAX_LENGTH 128
-#define LOG_MSG_MAX_LENGTH 2048
+#define LOG_MSG_MAX_LENGTH 32767
 #define EL_MUTEX_LOCK_FAILED 1
 #define EL_PT_BELOW_SET      2
 

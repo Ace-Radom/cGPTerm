@@ -69,7 +69,8 @@ int ezylog_logdebug( ezylog_logger_t* __logger , const char* __format , ... ){
     // parse log msg
 
     parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_DEBUG , NULL );
-    strcat( msg_to_write , "\n" );
+    if ( strcmp( msg_to_write + strlen( msg_to_write ) - 1 , "\n" ) != 0 )
+        strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
     fflush( __logger -> __f );
     // flush file IO buf
@@ -106,7 +107,8 @@ int ezylog_loginfo( ezylog_logger_t* __logger , const char* __format , ... ){
     // parse log msg
 
     parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_INFO , NULL );
-    strcat( msg_to_write , "\n" );
+    if ( strcmp( msg_to_write + strlen( msg_to_write ) - 1 , "\n" ) != 0 )
+        strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
     fflush( __logger -> __f );
     // flush file IO buf
@@ -143,7 +145,8 @@ int ezylog_logerror( ezylog_logger_t* __logger , const char* __format , ... ){
     // parse log msg
 
     parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_ERROR , NULL );
-    strcat( msg_to_write , "\n" );
+    if ( strcmp( msg_to_write + strlen( msg_to_write ) - 1 , "\n" ) != 0 )
+        strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
     fflush( __logger -> __f );
     // flush file IO buf
@@ -180,7 +183,8 @@ int ezylog_logfatal( ezylog_logger_t* __logger , const char* __format , ... ){
     // parse log msg
 
     parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_FATAL , NULL );
-    strcat( msg_to_write , "\n" );
+    if ( strcmp( msg_to_write + strlen( msg_to_write ) - 1 , "\n" ) != 0 )
+        strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
     fflush( __logger -> __f );
     // flush file IO buf
