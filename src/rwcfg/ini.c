@@ -1,5 +1,25 @@
 #include"rwcfg/ini.h"
 
+int create_config( const char* __inipath ){
+    FILE* Fcfg = fopen( __inipath , "w" );
+    if ( Fcfg == NULL )
+    {
+        fprintf( stderr , "[create_config] -> create config file \"%s\" failed\n" , __inipath );
+        return -1;
+    }
+    ini_t* _config = iniparser_load( __inipath );
+    iniparser_set( _config , "DEFAULT"                     , NULL              ); // section DEFAULT
+    iniparser_set( _config , "DEFAULT:OPENAI_API_KEY"      , NULL              );
+    iniparser_set( _config , "DEFAULT:OPENAI_API_TIMEOUT"  , "30.0"            );
+    iniparser_set( _config , "DEFAULT:AUTO_GENERATE_TITLE" , "True"            );
+    iniparser_set( _config , "DEFAULT:CHAT_SAVE_PERFIX"    , "./chat_history_" );
+    iniparser_set( _config , "DEFAULT:LOG_LEVEL"           , "INFO"            );
+    iniparser_dump_ini( _config , Fcfg );
+    iniparser_freedict( _config );
+    fclose( Fcfg );
+    return 0;
+}
+
 /**
  * @brief read config ini
  * 
@@ -14,7 +34,7 @@ int rconfig( const char* __inipath ){
     if ( config == NULL )
     {
         fprintf( stderr , "[rconfig] -> cannot open config ini: %s\n " , __inipath );
-        return 1;
+        return -1;
     }
 
     OPENAI_API_KEY = ( char* ) malloc( 64 );

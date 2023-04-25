@@ -34,3 +34,8 @@ int args_actions_setcfg(){
 
     return action_num;
 }
+
+void print_help(){
+    arg_print_glossary( stdout , argtable , ARG_PRINT_GLOSSARY_FORMAT );
+    return;
+}

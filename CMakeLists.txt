@@ -17,7 +17,8 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 add_executable(main main.c ${UTILS})
 target_link_libraries(main
-    ncursesw
+    utils
+    # ncursesw
     ezylog
     rwcfg
     argparse

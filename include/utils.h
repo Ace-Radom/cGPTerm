@@ -22,6 +22,11 @@ extern bool AUTO_GENERATE_TITLE;
 extern char* CHAT_SAVE_PERFIX;
 extern ezylog_priority_t LOG_LEVEL;
 
+extern char* usrhome;       // ~
+extern char* cfgdir;        // ~/.cgpterm
+extern char* logpath;       // ~/.cgpterm/chat.log
+extern char* cfginipath;    // ~/.cgpterm/config.ini
+
 #ifdef __cplusplus
 }
 #endif

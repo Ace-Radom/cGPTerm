@@ -14,6 +14,7 @@ extern "C" {
 #include"utils.h"
 #include"ezylog/typeparser.h"
 
+int create_config( const char* __inipath );
 int rconfig( const char* __inipath );
 int config_setstr( const char* __entry , const char* __value );
 int config_setdouble( const char* __entry , double __value );

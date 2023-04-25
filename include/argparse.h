@@ -10,6 +10,7 @@ extern "C" {
 #include"argparse/gav.h"
 
 int args_actions_setcfg();
+void print_help();
 
 #ifdef __cplusplus
 }
