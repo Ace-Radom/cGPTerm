@@ -54,14 +54,25 @@ int main( int argc , char** argv ){
     if ( gota_help )
     {
         print_help();
-        ezylog_logdebug( logger , "help printed" );
+        ezylog_logdebug( logger , "help message printed" );
         goto stopmain;
     }
-    args_actions_setcfg();
-    cconfig();
+    int action_setcfg_num = args_actions_setcfg();
+    if ( action_setcfg_num == -1 )
+    {
+        fprintf( stderr , "[main] -> Failed to write new configs, stop\n" );
+        ezylog_logfatal( logger , "write new config failed, stop" );
+        goto stopmain;
+    } // write new config failed
+    if ( action_setcfg_num > 0 )
+        goto stopmain;
+        // wrote new config, stop
+
+    while ( 1 ) {}
 
 stopmain:
-    ezylog_logdebug( logger , "cGPTerm master process shutdown..." );
+    cconfig();
+    ezylog_loginfo( logger , "cGPTerm master process shutting down..." );
     ezylog_close( logger );
     return 0;
     

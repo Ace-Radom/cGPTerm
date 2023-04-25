@@ -10,4 +10,6 @@ add_library(argparse SHARED
 target_link_libraries(argparse
     argtable2
     rwcfg
+    ezylog
+    utils
 )

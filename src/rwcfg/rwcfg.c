@@ -20,5 +20,5 @@ int setcfg_CHAT_SAVE_PERFIX( const char* __perfix ){
 }
 
 int setcfg_LOG_LEVEL( const char* __level ){
-    return config_setstr( "DEFAULT:LOG_LEVEL" , parse_priority_to_str( parse_str_to_priority( __level ) ) );
+    return config_setstr( "DEFAULT:LOG_LEVEL" , __level );
 }

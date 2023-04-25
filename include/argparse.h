@@ -8,6 +8,7 @@ extern "C" {
 #include"rwcfg.h"
 #include"argparse/args.h"
 #include"argparse/gav.h"
+#include"utils.h"
 
 int args_actions_setcfg();
 void print_help();
