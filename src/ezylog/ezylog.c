@@ -46,12 +46,12 @@ ezylog_logger_t* ezylog_init( const char* __name , const char* __layout , const 
  * @brief log debug message to a logger
  * 
  * @param __logger ezylog logger
- * @param __msg debug log message
+ * @param __format msg format (same as sprintf)
 */
-int ezylog_logdebug( ezylog_logger_t* __logger , const char* __msg ){
+int ezylog_logdebug( ezylog_logger_t* __logger , const char* __format , ... ){
     if ( pthread_mutex_lock( &( __logger -> __mutex ) ) != 0 )
     {
-        fprintf( stderr , "[ezylog_loginfo] -> lock mutex failed, log stop\n" );
+        fprintf( stderr , "[ezylog_logdebug] -> lock mutex failed, log stop\n" );
         return EL_MUTEX_LOCK_FAILED;
     }
 
@@ -61,11 +61,19 @@ int ezylog_logdebug( ezylog_logger_t* __logger , const char* __msg ){
         return EL_PT_BELOW_SET;
     }
 
-    long msg_to_write_len = strlen( __msg ) + NOTMSG_IN_LOG_MAX_LENGTH;
-    char* msg_to_write = ( char* ) malloc( msg_to_write_len );
-    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , __msg , EZYLOG_PRIORITY_DEBUG , NULL );
+    va_list args;
+    va_start( args , __format );
+    char* msg_to_write = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    char* msg = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    vsprintf( msg , __format , args );
+    // parse log msg
+
+    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_DEBUG , NULL );
     strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
+    fflush( __logger -> __f );
+    // flush file IO buf
+    free( msg );
     free( msg_to_write );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
@@ -75,9 +83,9 @@ int ezylog_logdebug( ezylog_logger_t* __logger , const char* __msg ){
  * @brief log info message to a logger
  * 
  * @param __logger ezylog logger
- * @param __msg info log message
+ * @param __format msg format (same as sprintf)
 */
-int ezylog_loginfo( ezylog_logger_t* __logger , const char* __msg ){
+int ezylog_loginfo( ezylog_logger_t* __logger , const char* __format , ... ){
     if ( pthread_mutex_lock( &( __logger -> __mutex ) ) != 0 )
     {
         fprintf( stderr , "[ezylog_loginfo] -> lock mutex failed, log stop\n" );
@@ -90,11 +98,19 @@ int ezylog_loginfo( ezylog_logger_t* __logger , const char* __msg ){
         return EL_PT_BELOW_SET;
     }
 
-    long msg_to_write_len = strlen( __msg ) + NOTMSG_IN_LOG_MAX_LENGTH;
-    char* msg_to_write = ( char* ) malloc( msg_to_write_len );
-    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , __msg , EZYLOG_PRIORITY_INFO , NULL );
+    va_list args;
+    va_start( args , __format );
+    char* msg_to_write = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    char* msg = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    vsprintf( msg , __format , args );
+    // parse log msg
+
+    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_INFO , NULL );
     strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
+    fflush( __logger -> __f );
+    // flush file IO buf
+    free( msg );
     free( msg_to_write );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
@@ -104,12 +120,12 @@ int ezylog_loginfo( ezylog_logger_t* __logger , const char* __msg ){
  * @brief log error message to a logger
  * 
  * @param __logger ezylog logger
- * @param __msg error log message
+ * @param __format msg format (same as sprintf)
 */
-int ezylog_logerror( ezylog_logger_t* __logger , const char* __msg ){
+int ezylog_logerror( ezylog_logger_t* __logger , const char* __format , ... ){
     if ( pthread_mutex_lock( &( __logger -> __mutex ) ) != 0 )
     {
-        fprintf( stderr , "[ezylog_loginfo] -> lock mutex failed, log stop\n" );
+        fprintf( stderr , "[ezylog_logerror] -> lock mutex failed, log stop\n" );
         return EL_MUTEX_LOCK_FAILED;
     }
 
@@ -119,11 +135,19 @@ int ezylog_logerror( ezylog_logger_t* __logger , const char* __msg ){
         return EL_PT_BELOW_SET;
     }
 
-    long msg_to_write_len = strlen( __msg ) + NOTMSG_IN_LOG_MAX_LENGTH;
-    char* msg_to_write = ( char* ) malloc( msg_to_write_len );
-    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , __msg , EZYLOG_PRIORITY_ERROR , NULL );
+    va_list args;
+    va_start( args , __format );
+    char* msg_to_write = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    char* msg = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    vsprintf( msg , __format , args );
+    // parse log msg
+
+    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_ERROR , NULL );
     strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
+    fflush( __logger -> __f );
+    // flush file IO buf
+    free( msg );
     free( msg_to_write );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
@@ -133,12 +157,12 @@ int ezylog_logerror( ezylog_logger_t* __logger , const char* __msg ){
  * @brief log fatal message to a logger
  * 
  * @param __logger ezylog logger
- * @param __msg fatal log message
+ * @param __format msg format (same as sprintf)
 */
-int ezylog_logfatal( ezylog_logger_t* __logger , const char* __msg ){
+int ezylog_logfatal( ezylog_logger_t* __logger , const char* __format , ... ){
     if ( pthread_mutex_lock( &( __logger -> __mutex ) ) != 0 )
     {
-        fprintf( stderr , "[ezylog_loginfo] -> lock mutex failed, log stop\n" );
+        fprintf( stderr , "[ezylog_logfatal] -> lock mutex failed, log stop\n" );
         return EL_MUTEX_LOCK_FAILED;
     }
 
@@ -148,11 +172,19 @@ int ezylog_logfatal( ezylog_logger_t* __logger , const char* __msg ){
         return EL_PT_BELOW_SET;
     }
 
-    long msg_to_write_len = strlen( __msg ) + NOTMSG_IN_LOG_MAX_LENGTH;
-    char* msg_to_write = ( char* ) malloc( msg_to_write_len );
-    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , __msg , EZYLOG_PRIORITY_FATAL , NULL );
+    va_list args;
+    va_start( args , __format );
+    char* msg_to_write = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    char* msg = ( char* ) malloc( LOG_MSG_MAX_LENGTH );
+    vsprintf( msg , __format , args );
+    // parse log msg
+
+    parse_layout( msg_to_write , __logger -> __layout , get_curtime( 0 ) , __logger -> __name , msg , EZYLOG_PRIORITY_FATAL , NULL );
     strcat( msg_to_write , "\n" );
     fputs( msg_to_write , __logger -> __f );
+    fflush( __logger -> __f );
+    // flush file IO buf
+    free( msg );
     free( msg_to_write );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;

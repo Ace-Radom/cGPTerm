@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ezylog VERSION 1.0)
+project(ezylog VERSION 1.2)
 
 # ezylog subproject: a thread-safe, lightweight, pure C implementation of a logging library
 

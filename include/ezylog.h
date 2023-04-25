@@ -14,6 +14,7 @@ extern "C" {
 #include"ezylog/elenum.h"
 
 #define NOTMSG_IN_LOG_MAX_LENGTH 128
+#define LOG_MSG_MAX_LENGTH 2048
 #define EL_MUTEX_LOCK_FAILED 1
 #define EL_PT_BELOW_SET      2
 
@@ -26,10 +27,10 @@ typedef struct {
 } ezylog_logger_t;
 
 ezylog_logger_t* ezylog_init( const char* __name , const char* __layout , const char* __logfile , const ezylog_logmode_t __mode , const ezylog_priority_t __pt );
-int ezylog_logdebug( ezylog_logger_t* __logger , const char* __msg );
-int ezylog_loginfo( ezylog_logger_t* __logger , const char* __msg );
-int ezylog_logerror( ezylog_logger_t* __logger , const char* __msg );
-int ezylog_logfatal( ezylog_logger_t* __logger , const char* __msg );
+int ezylog_logdebug( ezylog_logger_t* __logger , const char* __format , ... );
+int ezylog_loginfo( ezylog_logger_t* __logger , const char* __format , ... );
+int ezylog_logerror( ezylog_logger_t* __logger , const char* __format , ... );
+int ezylog_logfatal( ezylog_logger_t* __logger , const char* __format , ... );
 
 void ezylog_chglayout( ezylog_logger_t* __logger , const char* __newlayout );
 void ezylog_chgpriority( ezylog_logger_t* __logger , ezylog_priority_t __newpt );
