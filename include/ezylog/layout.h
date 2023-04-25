@@ -14,6 +14,7 @@ extern "C" {
 #include<sys/time.h>
 
 #include"elenum.h"
+#include"typeparser.h"
 
 typedef struct {
     char type;

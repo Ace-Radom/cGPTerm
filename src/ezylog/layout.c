@@ -19,12 +19,12 @@ char* get_curtime( unsigned short int __accuracy ){
     // get current time stamp
     strftime( buf , 30 , "%Y-%m-%d %T" , localtime( &curtime_ts ) );
     if ( __accuracy == 0 )
-        sprintf( curtime , "%s.%ld" , buf , tv.tv_usec );
+        sprintf( curtime , "%s.%06ld" , buf , tv.tv_usec );
         // no microseconds accuracy require (default: 6bit)
     else
     {
         int accuarcy_div = pow( 10 , 6 - __accuracy );
-        sprintf( curtime , "%s.%ld" , buf , tv.tv_usec / accuarcy_div );
+        sprintf( curtime , "%s.%0*ld" , buf , __accuracy , tv.tv_usec / accuarcy_div );
         // microseconds accuracy require (1~6bit)
     }
     return curtime;
