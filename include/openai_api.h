@@ -33,10 +33,16 @@ typedef struct {
     double credit_used_this_month;
 } openai_t;
 
+typedef struct {
+    const char* msg;
+    char* response;
+} openai_datatransfer_t;
+
 extern openai_t* openai;
+extern bool request_working;
 
 void openai_init();
-void openai_send_chatrequest( const char* __usrmsg );
+void openai_send_chatrequest( openai_datatransfer_t* __data );
 void openai_free();
 
 #ifdef __cplusplus

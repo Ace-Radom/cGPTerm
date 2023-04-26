@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include<stdbool.h>
+#include<termios.h>
 
 #include"ezylog.h"
 #include"openai_api.h"

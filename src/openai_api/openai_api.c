@@ -1,27 +1,29 @@
 #include"openai_api.h"
 
 openai_t* openai = NULL;
+bool request_working = false;
+
+typedef struct {
+    char* ptr;
+    size_t size;
+} curl_chat_data_t;
 
 size_t write_callback_chat( char* ptr , size_t size , size_t nmemb , void* userdata ){
+    curl_chat_data_t* response_data = ( curl_chat_data_t* ) userdata;
+    // link callback and main request thread, transfer data
     size_t realsize = size * nmemb;
-    json_t* root;
-    json_error_t error;
 
-    root = json_loads( ptr , 0 , &error );
-    if ( !root )
+    response_data -> ptr = realloc( response_data -> ptr , response_data -> size + realsize + 1 );
+    if ( response_data -> ptr == NULL )
     {
-        fprintf( stderr , "[openai_api->write_callback] -> response json error at line %d: %s\n" , error.line , error.text );
+        fprintf( stderr , "[openai_api->write_callback] -> realloc data transfer buf failed\n" );
         return 0;
-    } // json error
+    } // realloc failed
 
-    json_t* response_msg = json_object_get( root , "choices" );
-    response_msg = json_array_get( response_msg , 0 );
-    response_msg = json_object_get( response_msg , "message" );
-    json_array_append_new( openai -> messages , response_msg );
-    const char* text = json_string_value( json_object_get( response_msg , "content" ) );
-    printf( "ChatGPT:\n%s\n" , text );
-    ezylog_loginfo( logger , "ChatGPT: %s" , text );
-    ezylog_logdebug( logger , "GPT Response raw: %s" , ptr );
+    memcpy( &( response_data -> ptr[response_data->size] ) , ptr , realsize );
+    response_data -> size += realsize;
+    response_data -> ptr[response_data->size] = '\0';
+    // copy response this turn
     return realsize;
 }
 
@@ -59,17 +61,25 @@ void openai_init(){
     return;
 }
 
-void openai_send_chatrequest( const char* __usrmsg ){
+void openai_send_chatrequest( openai_datatransfer_t* __data ){
+    request_working = true;
+    const char* __usrmsg = __data -> msg;
+    // unpack transfer data
+
     CURL* curl;
     CURLcode res;
+    curl_chat_data_t response_data = { NULL , 0 , false };
     curl = curl_easy_init();
     if ( !curl )
     {
         fprintf( stderr , "[openai_send_chatrequest] -> init curl failed\n" );
+        request_working = false;
         return;
-    }
+    } // curl init error
 
     ezylog_loginfo( logger , "> %s" , __usrmsg );
+    char* text;
+    // return var
 
     json_t* new_usrmsg = json_object();
     json_object_set_new( new_usrmsg , "role" , json_string( "user" ) );
@@ -86,17 +96,45 @@ void openai_send_chatrequest( const char* __usrmsg ){
     curl_easy_setopt( curl , CURLOPT_URL , openai -> endpoint );
     curl_easy_setopt( curl , CURLOPT_HTTPHEADER , openai -> headers );
     curl_easy_setopt( curl , CURLOPT_POSTFIELDS , request_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
     curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , write_callback_chat );
     curl_easy_setopt( curl , CURLOPT_TIMEOUT_MS , ( int ) ( OPENAI_API_TIMEOUT * 1000 ) );
     // make curl request
 
     res = curl_easy_perform( curl );
+        
     if ( res != CURLE_OK )
     {
         fprintf( stderr , "send request failed: %s\n" , curl_easy_strerror( res ) );
+        text = NULL;
+        goto request_stop;
     }
+
+    json_t* root;
+    json_error_t error;
+
+    root = json_loads( response_data.ptr , 0 , &error );
+    if ( !root )
+    {
+        fprintf( stderr , "[openai_api->write_callback] -> response json error at line %d: %s\n" , error.line , error.text );
+        text = NULL;
+        goto request_stop;
+    } // json error
+
+    json_t* response_msg = json_object_get( root , "choices" );
+    response_msg = json_array_get( response_msg , 0 );
+    response_msg = json_object_get( response_msg , "message" );
+    json_array_append_new( openai -> messages , response_msg );
+    text = json_string_value( json_object_get( response_msg , "content" ) );
+    ezylog_loginfo( logger , "ChatGPT: %s" , text );
+    ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
+
+request_stop:
     curl_easy_cleanup( curl );
     free( request_data );
+    free( response_data.ptr );
+    __data -> response = text;
+    request_working = false;
     return;
 }
 

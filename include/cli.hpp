@@ -5,6 +5,8 @@
 
 #include<iostream>
 #include<string>
+#include<thread>
+#include"cli/toolkit.hpp"
 
 extern "C" {
 
@@ -13,6 +15,7 @@ extern "C" {
 #endif
 
 int start_CLI();
+// this is an api for main.c
 
 #ifdef __cplusplus
 }
