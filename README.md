@@ -21,14 +21,13 @@ Chat with GPT in Terminal
 - 自动创建 `config.ini` 配置文件
 - 通过命令行对 `config.ini` 内的值进行更改
 - 自建log库 支持 `DEBUG` `INFO` `ERROR` `FATAL` 层级
-- 基本的API访问：可以正常与ChatGPT交流 但还没有任何错误特判
+- 基本的API访问：可以正常与ChatGPT交流
 - 基本的交互界面
     - 在等待GPT回复时显示 `ChatGPT is thinking...`
     - 在等待回复时锁死终端 不回显并隐藏光标 在回复后解锁
 
 目前正在开发的功能：
 
-- 进一步扩充API交互 增加错误返回解析
 - 实现部分底层的斜杠命令：`/timeout` `/model` `/last` `/help` `/exit`
 - tokens 统计 逐步实现 `/tokens` 命令
 - credit 统计 逐步实现 `/usage` 命令
@@ -51,6 +50,11 @@ Chat with GPT in Terminal
 - 自建段落式Markdown解析库 用于适配流式输出的文本解析【若找到更好的替代方法会取消】
 - 流式输出
 
+### 目前已知的问题
+
+- 在Debian 11.6, zsh下测试中发现：中文无法正确退格（以确定为utf8编码）
+  
+    目前不清楚是程序问题还是zsh的问题 但我编写的极其简单的 `cin >> string` 遇到了一模一样的问题 若这个问题普遍存在将是个很头疼的事 但以我的能力可能是没什么办法 `setlocale` 什么的都试过了
 
 ### 项目依赖
 
