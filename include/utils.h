@@ -6,12 +6,16 @@ extern "C" {
 #endif
 
 #include<stdbool.h>
+#include<termios.h>
 
 #include"ezylog.h"
 #include"openai_api.h"
 #include"iniparser.h"
 
 typedef dictionary ini_t;
+
+extern struct termios* old_attr;
+extern struct termios* new_attr;
 
 extern ezylog_logger_t* logger;
 extern ini_t* config;

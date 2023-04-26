@@ -1,5 +1,8 @@
 #include"utils.h"
 
+struct termios* old_attr = NULL;
+struct termios* new_attr = NULL;
+
 ezylog_logger_t* logger = NULL;
 ini_t* config = NULL;
 
