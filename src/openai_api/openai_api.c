@@ -61,8 +61,10 @@ void openai_init(){
     return;
 }
 
-void openai_send_chatrequest( const char* __usrmsg , char* __response ){
+void openai_send_chatrequest( openai_datatransfer_t* __data ){
     request_working = true;
+    const char* __usrmsg = __data -> msg;
+    // unpack transfer data
 
     CURL* curl;
     CURLcode res;
@@ -72,7 +74,6 @@ void openai_send_chatrequest( const char* __usrmsg , char* __response ){
     {
         fprintf( stderr , "[openai_send_chatrequest] -> init curl failed\n" );
         request_working = false;
-        __response = NULL;
         return;
     } // curl init error
 
@@ -125,7 +126,6 @@ void openai_send_chatrequest( const char* __usrmsg , char* __response ){
     response_msg = json_object_get( response_msg , "message" );
     json_array_append_new( openai -> messages , response_msg );
     text = json_string_value( json_object_get( response_msg , "content" ) );
-    printf( "ChatGPT:\n%s\n" , text );
     ezylog_loginfo( logger , "ChatGPT: %s" , text );
     ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
 
@@ -133,7 +133,7 @@ request_stop:
     curl_easy_cleanup( curl );
     free( request_data );
     free( response_data.ptr );
-    __response = text;
+    __data -> response = text;
     request_working = false;
     return;
 }
