@@ -21,12 +21,10 @@ Chat with GPT in Terminal
 - 自动创建 `config.ini` 配置文件
 - 通过命令行对 `config.ini` 内的值进行更改
 - 自建log库 支持 `DEBUG` `INFO` `ERROR` `FATAL` 层级
-- 基本的API访问：可以正常与ChatGPT交流 但还没有任何特判
-- 最基本的交互界面 输入 `quit` 退出
-
-目前需要解决的问题：
-
-- 在等待回复时不回显
+- 基本的API访问：可以正常与ChatGPT交流 但还没有任何错误特判
+- 基本的交互界面
+    - 在等待GPT回复时显示 `ChatGPT is thinking...`
+    - 在等待回复时锁死终端 不回显并隐藏光标 在回复后解锁
 
 目前正在开发的功能：
 
