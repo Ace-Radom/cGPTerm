@@ -14,9 +14,6 @@ extern "C" {
 
 typedef dictionary ini_t;
 
-extern struct termios* old_attr;
-extern struct termios* new_attr;
-
 extern ezylog_logger_t* logger;
 extern ini_t* config;
 

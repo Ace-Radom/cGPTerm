@@ -1,11 +1,11 @@
 #include"openai_api.h"
 
 openai_t* openai = NULL;
+bool request_working = false;
 
 typedef struct {
     char* ptr;
     size_t size;
-    bool is_done;
 } curl_chat_data_t;
 
 size_t write_callback_chat( char* ptr , size_t size , size_t nmemb , void* userdata ){
@@ -24,18 +24,7 @@ size_t write_callback_chat( char* ptr , size_t size , size_t nmemb , void* userd
     response_data -> size += realsize;
     response_data -> ptr[response_data->size] = '\0';
     // copy response this turn
-    response_data -> is_done = true;
     return realsize;
-}
-
-void print_wait_msg( const char* __msg ){
-    static int counter = 0;
-    const char *progress[] = {".  ", ".. ", "...", " ..", "  .", "   "};
-    printf( "%s %s\r" , __msg , progress[counter%6] );
-    fflush( stdout );
-    counter++;
-    sleep( 100 );
-    return;
 }
 
 void openai_init(){
@@ -72,7 +61,9 @@ void openai_init(){
     return;
 }
 
-void openai_send_chatrequest( const char* __usrmsg ){
+void openai_send_chatrequest( const char* __usrmsg , char* __response ){
+    request_working = true;
+
     CURL* curl;
     CURLcode res;
     curl_chat_data_t response_data = { NULL , 0 , false };
@@ -80,10 +71,14 @@ void openai_send_chatrequest( const char* __usrmsg ){
     if ( !curl )
     {
         fprintf( stderr , "[openai_send_chatrequest] -> init curl failed\n" );
+        request_working = false;
+        __response = NULL;
         return;
     } // curl init error
 
     ezylog_loginfo( logger , "> %s" , __usrmsg );
+    char* text;
+    // return var
 
     json_t* new_usrmsg = json_object();
     json_object_set_new( new_usrmsg , "role" , json_string( "user" ) );
@@ -106,12 +101,11 @@ void openai_send_chatrequest( const char* __usrmsg ){
     // make curl request
 
     res = curl_easy_perform( curl );
-    // while ( !response_data.is_done )
-    //     print_wait_msg( "ChatGPT is thinking" );
         
     if ( res != CURLE_OK )
     {
         fprintf( stderr , "send request failed: %s\n" , curl_easy_strerror( res ) );
+        text = NULL;
         goto request_stop;
     }
 
@@ -122,6 +116,7 @@ void openai_send_chatrequest( const char* __usrmsg ){
     if ( !root )
     {
         fprintf( stderr , "[openai_api->write_callback] -> response json error at line %d: %s\n" , error.line , error.text );
+        text = NULL;
         goto request_stop;
     } // json error
 
@@ -129,7 +124,7 @@ void openai_send_chatrequest( const char* __usrmsg ){
     response_msg = json_array_get( response_msg , 0 );
     response_msg = json_object_get( response_msg , "message" );
     json_array_append_new( openai -> messages , response_msg );
-    const char* text = json_string_value( json_object_get( response_msg , "content" ) );
+    text = json_string_value( json_object_get( response_msg , "content" ) );
     printf( "ChatGPT:\n%s\n" , text );
     ezylog_loginfo( logger , "ChatGPT: %s" , text );
     ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
@@ -138,6 +133,8 @@ request_stop:
     curl_easy_cleanup( curl );
     free( request_data );
     free( response_data.ptr );
+    __response = text;
+    request_working = false;
     return;
 }
 
