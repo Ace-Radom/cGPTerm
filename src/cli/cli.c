@@ -1,4 +1,4 @@
-#include"cli.hpp"
+#include"cli.h"
 
 /**
  * @brief start cGPTerm CLI
@@ -8,41 +8,44 @@ int start_CLI(){
 
     while ( 1 )
     {
-        std::string input;
-        std::cout << "> ";
-        std::getline( std::cin , input );
-        if ( input.size() == 0 )
+        char* input;
+        printf( "> " );
+        input = readline( NULL );
+        if ( !input || *input == '\0' )
             continue;
-        if ( input == "quit" )
+        if ( strcmp( input , "quit" ) == 0 )
             break;
         
         turn_off_echo();
         write_ANSI( HIDE_CURSOR );
         // turn off echo; hide cursor
         openai_datatransfer_t data;
-        data.msg = input.c_str();
+        data.msg = ( char* ) malloc( strlen( input ) + 1 );
+        strcpy( data.msg , input );
         data.response = NULL;
         // build transfer data
-        std::thread send_request( openai_send_chatrequest , &data );
-        std::this_thread::sleep_for( std::chrono::microseconds( 10 ) );
+        pthread_t send_request;
+        int ptrc = pthread_create( &send_request , NULL , openai_send_chatrequest , ( void* ) &data ); // pthread return code
+        usleep( 10000 );
         // start request; wait 10 ms in order to let openai_send_chatrequest to lock request_working (-> true)
         while ( request_working )
         {
             print_wait_msg( "ChatGPT is thinking" );
         } // until request done: print wait msg
-        std::cout << "\r                             \r" << std::flush;
-        send_request.join();
+        printf( "\r                             \r" );
+        fflush( stdout );
+        pthread_join( send_request , NULL );
+        // clean wait msg, request thread join
         reset_terattr();
         write_ANSI( SHOW_CURSOR );
-        // request join; reset attr; show cursor
-        // clean wait msg
+        // reset attr; show cursor
         if ( data.response )
         {
             if ( HTTP_Response_code / 100 != 4 )
-                std::cout << "ChatGPT:" << std::endl << data.response << std::endl;
+                printf( "ChatGPT:\n%s\n" , data.response );
             else
             {
-                std::cout << "Request Error: " << data.response << std::endl;
+                printf( "Request Error: %s\n" , data.response );
                 openai_msg_popback();
             } // request error, pop last user's msg
         }

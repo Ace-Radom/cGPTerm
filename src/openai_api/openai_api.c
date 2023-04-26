@@ -62,9 +62,10 @@ void openai_init(){
     return;
 }
 
-void openai_send_chatrequest( openai_datatransfer_t* __data ){
+void openai_send_chatrequest( void* __data ){
     request_working = true;
-    const char* __usrmsg = __data -> msg;
+    openai_datatransfer_t* data = ( openai_datatransfer_t* ) __data;
+    const char* __usrmsg = data -> msg;
     // unpack transfer data
 
     CURL* curl;
@@ -151,7 +152,7 @@ request_stop:
     curl_easy_cleanup( curl );
     free( request_data );
     free( response_data.ptr );
-    __data -> response = text;
+    data -> response = text;
     request_working = false;
     return;
 }

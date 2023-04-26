@@ -1,13 +1,15 @@
-#ifndef _TOOLKIT_HPP_
-#define _TOOLKIT_HPP_
+#ifndef _TOOLKIT_H_
+#define _TOOLKIT_H_
 
-#include<iostream>
-#include<string>
-#include<thread>
-#include<chrono>
-#include<termios.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include<stdio.h>
+#include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
+#include<termios.h>
 
 #define HIDE_CURSOR "\033[?25l"
 #define SHOW_CURSOR "\033[?25h"
@@ -21,6 +23,10 @@ void turn_off_echo();
 
 void write_ANSI( const char* __ANSI );
 
-void print_wait_msg( std::string __msg );
+void print_wait_msg( const char* __msg );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

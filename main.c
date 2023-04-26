@@ -4,15 +4,18 @@
 #include<string.h>
 #include<unistd.h>
 #include<sys/stat.h>
+#include<locale.h>
 
 #include"rwcfg.h"
 #include"argparse.h"
 #include"utils.h"
 #include"ezylog.h"
 #include"openai_api.h"
-#include"cli.hpp"
+#include"cli.h"
 
 int main( int argc , char** argv ){
+    setlocale( LC_ALL , "" );
+
     usrhome = getenv( "HOME" );
     // get usr home absolute path
     cfgdir = ( char* ) malloc( strlen( usrhome ) + strlen( "/.cgpterm" ) + 1 );

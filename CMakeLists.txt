@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(cGPTerm VERSION 1.0)
 
 set(CMAKE_C_FLAGS "-Wall -g")
-set(CMAKE_CXX_FLAGS "-Wall -g")
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 11)
+add_definitions(-D _DEFAULT_SOURCE)
+add_definitions(-D _GNU_SOURCE)
 
 set(LIBRARY_OUTPUT_PATH    ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)

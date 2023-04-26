@@ -1,8 +1,8 @@
-#include"cli/toolkit.hpp"
+#include"cli/toolkit.h"
 
 struct termios ori_attr;
 
-const std::string wait_char[] = { ".  " , ".. " , "..." , " .." , "  ." , "   " };
+const char* wait_char[] = { ".  " , ".. " , "..." , " .." , "  ." , "   " };
 
 void get_original_terattr(){
     tcgetattr( STDIN_FILENO , &ori_attr );
@@ -28,10 +28,13 @@ void write_ANSI( const char* __ANSI ){
     return;
 }
 
-void print_wait_msg( std::string __msg ){
+void print_wait_msg( const char* __msg ){
     static int counter = 0;
-    std::cout << __msg << wait_char[counter%6] << '\r' << std::flush;
-    counter++;
-    std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );
+    printf( "%s%s\r" , __msg , wait_char[counter] );
+    fflush( stdout );
+    counter == 5 ? counter = 0 
+                 : counter++;
+    usleep( 100000 );
+    // sleep 100 ms
     return;
 }

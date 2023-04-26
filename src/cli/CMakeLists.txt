@@ -7,4 +7,6 @@ add_library(cli SHARED
 )
 target_link_libraries(cli
     openaiapi
+    pthread
+    readline
 )
