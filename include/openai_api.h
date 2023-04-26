@@ -40,10 +40,13 @@ typedef struct {
 
 extern openai_t* openai;
 extern bool request_working;
+extern long HTTP_Response_code;
 
 void openai_init();
 void openai_send_chatrequest( openai_datatransfer_t* __data );
 void openai_free();
+
+void openai_msg_popback();
 
 #ifdef __cplusplus
 }

@@ -11,10 +11,10 @@ int start_CLI(){
         std::string input;
         std::cout << "> ";
         std::getline( std::cin , input );
+        if ( input.size() == 0 )
+            continue;
         if ( input == "quit" )
-        {
             break;
-        }
         
         turn_off_echo();
         write_ANSI( HIDE_CURSOR );
@@ -38,8 +38,17 @@ int start_CLI(){
         // clean wait msg
         if ( data.response )
         {
-            std::cout << "ChatGPT:" << std::endl << data.response << std::endl;
+            if ( HTTP_Response_code / 100 != 4 )
+                std::cout << "ChatGPT:" << std::endl << data.response << std::endl;
+            else
+            {
+                std::cout << "Request Error: " << data.response << std::endl;
+                openai_msg_popback();
+            } // request error, pop last user's msg
         }
+        else
+            openai_msg_popback();
+        // same: request error, pop last user's msg
     }
     return 0;
 }
