@@ -10,20 +10,30 @@ int start_CLI(){
     {
         char* input;
         input = readline( "> " );
-        if ( !input || *input == '\0' )
+        char* input_trim = trim( input );
+        if ( !input_trim || *input_trim == '\0' )
             continue;
-        if ( strcmp( input , "quit" ) == 0 )
-            break;
+        if ( input_trim[0] == '/' )
+        {
+            int hscrc = handle_slash_command( input_trim ); // handle slash command return code
+            add_history( input_trim );
+            free( input_trim );
+            if ( hscrc == -1 )
+                break;
+            // /exit input, break    
+            continue;
+        }
+        // input parts
 
-        add_history( input );
+        add_history( input_trim );
         // add input to history list
         
         turn_off_echo();
         write_ANSI( HIDE_CURSOR );
         // turn off echo; hide cursor
         openai_datatransfer_t data;
-        data.msg = ( char* ) malloc( strlen( input ) + 1 );
-        strcpy( data.msg , input );
+        data.msg = ( char* ) malloc( strlen( input_trim ) + 1 );
+        strcpy( data.msg , input_trim );
         data.response = NULL;
         // build transfer data
         pthread_t send_request;

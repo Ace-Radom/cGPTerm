@@ -38,3 +38,23 @@ void print_wait_msg( const char* __msg ){
     // sleep 100 ms
     return;
 }
+
+/**
+ * @brief erase space at begin and end of a str
+*/
+char* trim( char* __str ){
+    int i = 0;
+    int j = strlen( __str ) - 1;
+    while ( __str[i] == ' ' )
+        ++i;
+    while ( __str[j] == ' ' )
+        --j;
+    if ( i > j )
+        return NULL;
+    // here: i > j means there are only spaces in this str
+    // if continue, it will lead to segmentation fault, therefore return NULL here
+    char* newstr = ( char* ) malloc( strlen( __str ) );
+    strncpy( newstr , __str + i , j - i + 1 );
+    newstr[j-i+1] = '\0';
+    return newstr;
+}

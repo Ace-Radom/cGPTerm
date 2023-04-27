@@ -11,6 +11,8 @@ extern "C" {
 #include<string.h>
 #include<termios.h>
 
+#include"slashcmd.h"
+
 #define HIDE_CURSOR "\033[?25l"
 #define SHOW_CURSOR "\033[?25h"
 
@@ -24,6 +26,9 @@ void turn_off_echo();
 void write_ANSI( const char* __ANSI );
 
 void print_wait_msg( const char* __msg );
+
+
+char* trim( char* __str );
 
 #ifdef __cplusplus
 }
