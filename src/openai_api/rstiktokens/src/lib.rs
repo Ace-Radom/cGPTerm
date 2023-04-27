@@ -1,14 +1,15 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+extern crate libc;
+use libc::c_char;
+use std::ffi::CStr;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use tiktoken_rs::cl100k_base;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[no_mangle]
+pub extern "C" fn count_tokens( ptr: *const c_char ) -> usize {
+    let c_str = unsafe { CStr::from_ptr( ptr ) };
+    let msg = c_str.to_str().expect( "" );
+
+    let bpe = cl100k_base().unwrap();
+    let tokens = bpe.encode_with_special_tokens( msg );
+    return tokens.len();
 }
