@@ -4,7 +4,8 @@ const char* slash_commands[] = {
     "/tokens",
     "/timeout",
     "/help",
-    "/exit"
+    "/exit",
+    NULL
 };
 
 /**

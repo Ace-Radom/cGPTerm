@@ -39,6 +39,33 @@ void print_wait_msg( const char* __msg ){
     return;
 }
 
+char* rl_completion_slash_command_search( const char* text , int state ){
+    static int list_index , len;
+    const char* cmd;
+
+    if ( !state )
+    {
+        list_index = 0;
+        len = strlen( text );
+    } // init
+
+    while ( ( cmd = slash_commands[list_index++] ) )
+    {
+        if ( strncmp( cmd , text , len ) == 0 )
+        {
+            return strdup( cmd );
+        }
+    }
+    return NULL;
+}
+
+char** rl_attempted_completion_callback( const char* text , int start , int end ){
+    char** matches = ( char** ) NULL;
+    matches = rl_completion_matches( text , rl_completion_slash_command_search );
+    return matches;
+}
+
+
 /**
  * @brief erase space at begin and end of a str
 */
