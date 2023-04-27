@@ -17,6 +17,7 @@ extern "C" {
 
 #include"ezylog.h"
 #include"utils.h"
+#include"openai_api/tiktokens.h"
 
 typedef struct {
     char* endpoint;
