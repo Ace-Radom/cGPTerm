@@ -17,6 +17,7 @@ extern "C" {
 
 #include"ezylog.h"
 #include"utils.h"
+#include"openai_api/tiktokens.h"
 
 typedef struct {
     char* endpoint;
@@ -24,7 +25,7 @@ typedef struct {
     json_t* messages;
     char* model;
     int tokens_limit;
-    long long total_tokens_spent;
+    long total_tokens_spent;
     int current_tokens;
     char* title;
 
@@ -40,10 +41,13 @@ typedef struct {
 
 extern openai_t* openai;
 extern bool request_working;
+extern long HTTP_Response_code;
 
 void openai_init();
-void openai_send_chatrequest( openai_datatransfer_t* __data );
+void openai_send_chatrequest( void* __data );
 void openai_free();
+
+void openai_msg_popback();
 
 #ifdef __cplusplus
 }

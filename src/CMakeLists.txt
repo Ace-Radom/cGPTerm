@@ -2,8 +2,6 @@ add_subdirectory(ezylog)
 # build ezylog subproject
 add_subdirectory(openai_api)
 # build openai-api lib
-add_subdirectory(cvector)
-# build cvector subproject
 add_subdirectory(rwcfg)
 # build rwcfg lib
 add_subdirectory(argparse)

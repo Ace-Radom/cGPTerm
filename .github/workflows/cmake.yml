@@ -34,6 +34,9 @@ jobs:
     - name: Install libjansson
       run: sudo apt install libjansson-dev -y
 
+    - name: Install GNU libreadline
+      run: sudo apt install libreadline-dev -y
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type

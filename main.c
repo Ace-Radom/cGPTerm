@@ -4,15 +4,18 @@
 #include<string.h>
 #include<unistd.h>
 #include<sys/stat.h>
+#include<locale.h>
 
 #include"rwcfg.h"
 #include"argparse.h"
 #include"utils.h"
 #include"ezylog.h"
 #include"openai_api.h"
-#include"cli.hpp"
+#include"cli.h"
 
 int main( int argc , char** argv ){
+    setlocale( LC_ALL , "" );
+
     usrhome = getenv( "HOME" );
     // get usr home absolute path
     cfgdir = ( char* ) malloc( strlen( usrhome ) + strlen( "/.cgpterm" ) + 1 );
@@ -77,21 +80,20 @@ int main( int argc , char** argv ){
 
     // from here: cGPTerm main service
 
-    ezylog_logdebug( logger , "config set not triggered, start launching cGPTerm main service" );
-    
+    ezylog_logdebug( logger , "config set not triggered, start initializing openai service" );
     openai_init();
     ezylog_logdebug( logger , "openai service initialization complete" );
 
     printf( "Hi, welcome to chat with GPT. Type `/help` to display available commands.\n" );
     ezylog_loginfo( logger , "cGPTerm main service launch" );
     int CLI_returncode = start_CLI();
-    // transfer into CXX - CLI is written in C++ because of unknown error with zh characters
     
+    printf( "Total tokens spent: %ld\n" , openai -> total_tokens_spent );
+    ezylog_loginfo( logger , "Total tokens spent: %d" , openai -> total_tokens_spent );
     openai_free();
 
 stopmain:
     cconfig();
-    printf( "Goodbye\n" );
     ezylog_loginfo( logger , "cGPTerm master process shutting down..." );
     ezylog_close( logger );
     return 0;

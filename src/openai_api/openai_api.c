@@ -2,6 +2,7 @@
 
 openai_t* openai = NULL;
 bool request_working = false;
+long HTTP_Response_code = 0;
 
 typedef struct {
     char* ptr;
@@ -55,15 +56,20 @@ void openai_init(){
     json_array_append_new( openai -> messages , prompt );
     // prompt init
 
+    openai -> current_tokens += count_tokens_message( prompt );
+    ezylog_logdebug( logger , "prompt tokens: %ld" , openai -> current_tokens );
+    // count prompt tokens and add to current_tokens
+
     curl_global_init( CURL_GLOBAL_ALL );
     // curl init
 
     return;
 }
 
-void openai_send_chatrequest( openai_datatransfer_t* __data ){
+void openai_send_chatrequest( void* __data ){
     request_working = true;
-    const char* __usrmsg = __data -> msg;
+    openai_datatransfer_t* data = ( openai_datatransfer_t* ) __data;
+    const char* __usrmsg = data -> msg;
     // unpack transfer data
 
     CURL* curl;
@@ -72,7 +78,8 @@ void openai_send_chatrequest( openai_datatransfer_t* __data ){
     curl = curl_easy_init();
     if ( !curl )
     {
-        fprintf( stderr , "[openai_send_chatrequest] -> init curl failed\n" );
+        fprintf( stderr , "[openai_send_chatrequest] -> curl init failed\n" );
+        ezylog_logerror( logger , "curl init failed" );
         request_working = false;
         return;
     } // curl init error
@@ -102,13 +109,18 @@ void openai_send_chatrequest( openai_datatransfer_t* __data ){
     // make curl request
 
     res = curl_easy_perform( curl );
-        
     if ( res != CURLE_OK )
     {
         fprintf( stderr , "send request failed: %s\n" , curl_easy_strerror( res ) );
+        ezylog_logerror( logger , "send request failed: %s" , curl_easy_strerror( res ) );
         text = NULL;
         goto request_stop;
     }
+
+    ezylog_logdebug( logger , "Response got, total size: %ld" , response_data.size );
+
+    curl_easy_getinfo( curl , CURLINFO_RESPONSE_CODE , &HTTP_Response_code );
+    // get api response code and parse it later
 
     json_t* root;
     json_error_t error;
@@ -116,24 +128,38 @@ void openai_send_chatrequest( openai_datatransfer_t* __data ){
     root = json_loads( response_data.ptr , 0 , &error );
     if ( !root )
     {
-        fprintf( stderr , "[openai_api->write_callback] -> response json error at line %d: %s\n" , error.line , error.text );
+        fprintf( stderr , "[openai_send_chatrequest] -> response json error at line %d: %s\n" , error.line , error.text );
         text = NULL;
         goto request_stop;
     } // json error
-
-    json_t* response_msg = json_object_get( root , "choices" );
-    response_msg = json_array_get( response_msg , 0 );
-    response_msg = json_object_get( response_msg , "message" );
-    json_array_append_new( openai -> messages , response_msg );
-    text = json_string_value( json_object_get( response_msg , "content" ) );
-    ezylog_loginfo( logger , "ChatGPT: %s" , text );
-    ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
+    
+    if ( HTTP_Response_code / 100 == 4 )
+    {
+        json_t* response_errormsg = json_object_get( root , "error" );
+        text = json_string_value( json_object_get( response_errormsg , "message" ) );
+        ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
+        ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+        // because of unknown format problem (openai's error response contains \n), using json_dumps here
+    } // parse response code, match 4xx errros
+    else
+    {
+        json_t* response_msg = json_object_get( root , "choices" );
+        response_msg = json_array_get( response_msg , 0 );
+        response_msg = json_object_get( response_msg , "message" );
+        json_array_append_new( openai -> messages , response_msg );
+        text = json_string_value( json_object_get( response_msg , "content" ) );
+        ezylog_loginfo( logger , "ChatGPT: %s" , text );
+        ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
+        openai -> current_tokens = json_integer_value( json_object_get( json_object_get( root , "usage" ) , "total_tokens" ) );
+        openai -> total_tokens_spent += openai -> current_tokens;
+        // count tokens
+    } // response code 200 OK (most likely)
 
 request_stop:
     curl_easy_cleanup( curl );
     free( request_data );
     free( response_data.ptr );
-    __data -> response = text;
+    data -> response = text;
     request_working = false;
     return;
 }
@@ -146,5 +172,16 @@ void openai_free(){
         free( openai -> title );
     free( openai );
     curl_global_cleanup();
+    return;
+}
+
+void openai_msg_popback(){
+    size_t msglist_size = json_array_size( openai -> messages );
+    if ( msglist_size <= 1 )
+    {
+        return;
+    } // here: normally msglist size can not be 0 because of the prompt message;
+      // anyway when there's only prompt message in the list then it can not be pop.
+    json_array_remove( openai -> messages , msglist_size - 1 );
     return;
 }
