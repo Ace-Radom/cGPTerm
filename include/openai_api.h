@@ -25,7 +25,7 @@ typedef struct {
     json_t* messages;
     char* model;
     int tokens_limit;
-    long long total_tokens_spent;
+    long total_tokens_spent;
     int current_tokens;
     char* title;
 

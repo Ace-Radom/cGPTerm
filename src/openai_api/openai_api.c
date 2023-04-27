@@ -56,6 +56,10 @@ void openai_init(){
     json_array_append_new( openai -> messages , prompt );
     // prompt init
 
+    openai -> current_tokens += count_tokens_message( prompt );
+    ezylog_logdebug( logger , "prompt tokens: %ld" , openai -> current_tokens );
+    // count prompt tokens and add to current_tokens
+
     curl_global_init( CURL_GLOBAL_ALL );
     // curl init
 
