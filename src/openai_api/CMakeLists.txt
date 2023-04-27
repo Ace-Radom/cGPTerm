@@ -4,10 +4,10 @@ project(openai_api VERSION 1.0)
 # openai_api subproject: requesting information from the openai api using the curl library
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CARGO_ARG "build")
+    set(CARGO_ARG build)
     set(TARGET_DIR "debug")
 else()
-    set(CARGO_ARG "build --release")
+    set(CARGO_ARG build --release)
     set(TARGET_DIR "release")
 endif()
 set(rstiktokens_a ${CMAKE_SOURCE_DIR}/src/openai_api/rstiktokens/target/${TARGET_DIR}/libtiktokens.a)
