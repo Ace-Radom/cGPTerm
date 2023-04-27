@@ -9,12 +9,14 @@ int start_CLI(){
     while ( 1 )
     {
         char* input;
-        printf( "> " );
-        input = readline( NULL );
+        input = readline( "> " );
         if ( !input || *input == '\0' )
             continue;
         if ( strcmp( input , "quit" ) == 0 )
             break;
+
+        add_history( input );
+        // add input to history list
         
         turn_off_echo();
         write_ANSI( HIDE_CURSOR );
