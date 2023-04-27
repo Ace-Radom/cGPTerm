@@ -150,6 +150,9 @@ void openai_send_chatrequest( void* __data ){
         text = json_string_value( json_object_get( response_msg , "content" ) );
         ezylog_loginfo( logger , "ChatGPT: %s" , text );
         ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
+        openai -> current_tokens = json_integer_value( json_object_get( json_object_get( root , "usage" ) , "total_tokens" ) );
+        openai -> total_tokens_spent += openai -> current_tokens;
+        // count tokens
     } // response code 200 OK (most likely)
 
 request_stop:
