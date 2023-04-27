@@ -5,11 +5,9 @@ Chat with GPT in Terminal
 
 这是一个将 @xiaoxx970 的使用Python实现的 [GPT-Term](https://github.com/xiaoxx970/chatgpt-in-terminal) 项目以C/C++实现的方式重构的计划
 
-目标为用C++实现CLI界面交互 C实现后端 尽可能还原原版界面和各项功能 但在遇到还原功能困难的时候会选择用其他的实现方法替代
+目标为用近乎纯C实现CLI界面交互和后端 尽可能还原原版界面和各项功能 但在遇到还原功能困难的时候会选择用其他的实现方法替代
 
 开发工作在Linux环境下进行 由于这个项目更多是出于好玩和C语言练习的目的而发起的 目前不会太考虑可移植性问题
-
-~~不要问我为什么用C++做前端 问就是尝试用C做前端时候宽字符报错了一晚上~~
 
 自现在起 main分支下是最近的功能实现版本 开发分支位于dev
 
@@ -32,13 +30,13 @@ Chat with GPT in Terminal
 - tokens 统计 逐步实现 `/tokens` 命令
 - credit 统计 逐步实现 `/usage` 命令
 - `/copy` 命令 包括整个回答和代码段的拷贝
+- 绑定Tabs 实现斜杠命令自动补全
+- 在CLI上的斜杠命令匹配提示
+- 在输入未定义的斜杠命令时提示一个用户最有可能想输入的命令
 
 已经计划实现 但在研究实现方法的功能：
 
 - 多行模式
-- 绑定Tabs 实现斜杠命令自动补全
-- 在CLI上的斜杠命令匹配提示
-- 在输入未定义的斜杠命令时提示一个用户最有可能想输入的命令
 - 守护线程和自动标题生成
 - 聊天记录保存和加载
 
@@ -52,9 +50,7 @@ Chat with GPT in Terminal
 
 ### 目前已知的问题
 
-- 在Debian 11.6, zsh下测试中发现：中文无法正确退格（以确定为utf8编码）
-  
-    目前不清楚是程序问题还是zsh的问题 但我编写的极其简单的 `cin >> string` 遇到了一模一样的问题 若这个问题普遍存在将是个很头疼的事 但以我的能力可能是没什么办法 `setlocale` 什么的都试过了
+- 用户输入数据处理依赖于GNU Readline 之前的中文退格问题已经解决 但在中文退格时仍有可能删除掉行开头的 `>` (非严重问题)
 
 ### 项目依赖
 
@@ -63,3 +59,4 @@ Chat with GPT in Terminal
 | `argtable` | 2.13 | 命令行参数解析 | `sudo apt install libargtable2-dev` |
 | `curl4-openssl` | 7.74.0 | API对接 | `sudo apt install libcurl4-openssl-dev` |
 | `jansson` | 2.13.1 | json解析 | `sudo apt install libjansson-dev` |
+| `GNU readline` | 8.1 | 命令行输入 历史记录 Tab补全 | `sudo apt install libreadline-dev` |
