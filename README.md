@@ -1,6 +1,8 @@
 # cGPTerm
 Chat with GPT in Terminal
 
+<img src="https://img.shields.io/github/actions/workflow/status/Ace-Radom/cGPTerm/cmake.yml?branch=main" /> <img src="https://img.shields.io/github/languages/top/Ace-Radom/cGPTerm"> <img src="https://img.shields.io/github/license/Ace-Radom/cGPTerm"> <img src="https://img.shields.io/badge/Platform-Linux-green" />
+
 ## 简介
 
 这是一个将 @xiaoxx970 的使用Python实现的 [GPT-Term](https://github.com/xiaoxx970/chatgpt-in-terminal) 项目以近乎纯C实现的方式重构的计划
