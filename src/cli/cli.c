@@ -13,7 +13,10 @@ int start_CLI(){
         char* input;
         input = readline( "> " );
         if ( input == NULL )
+        {
+            printf( "\033[1A\r" );
             continue;
+        }
         // fix segmentation fault caused by EOF input
         char* input_trim = trim( input );
         if ( !input_trim || *input_trim == '\0' )
@@ -46,7 +49,10 @@ int start_CLI(){
         usleep( 10000 );
         // start request; wait 10 ms in order to let openai_send_chatrequest to lock request_working (-> true)
         while ( request_working )
-            print_wait_msg( "ChatGPT is thinking" );
+        {
+            crstatus( "[bold][bright cyan]ChatGPT is thinking...\r" , "green" );
+            usleep( 100000 );
+        }
         // until request done: print wait msg
         printf( "\r                             \r" );
         fflush( stdout );

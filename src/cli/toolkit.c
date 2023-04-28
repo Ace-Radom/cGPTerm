@@ -2,8 +2,6 @@
 
 struct termios ori_attr;
 
-const char* wait_char[] = { ".  " , ".. " , "..." , " .." , "  ." , "   " };
-
 void get_original_terattr(){
     tcgetattr( STDIN_FILENO , &ori_attr );
     return;
@@ -25,17 +23,6 @@ void turn_off_echo(){
 
 void write_ANSI( const char* __ANSI ){
     write( STDIN_FILENO , __ANSI , strlen( __ANSI ) );
-    return;
-}
-
-void print_wait_msg( const char* __msg ){
-    static int counter = 0;
-    printf( "%s%s\r" , __msg , wait_char[counter] );
-    fflush( stdout );
-    counter == 5 ? counter = 0 
-                 : counter++;
-    usleep( 100000 );
-    // sleep 100 ms
     return;
 }
 

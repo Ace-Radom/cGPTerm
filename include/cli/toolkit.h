@@ -31,8 +31,6 @@ void turn_off_echo();
 
 void write_ANSI( const char* __ANSI );
 
-void print_wait_msg( const char* __msg );
-
 char** rl_attempted_completion_callback( const char* text , int start , int end );
 char* rl_completion_search( const char* text , int state );
 
