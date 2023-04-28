@@ -12,6 +12,9 @@ int start_CLI(){
     {
         char* input;
         input = readline( "> " );
+        if ( input == NULL )
+            continue;
+        // fix segmentation fault caused by EOF input
         char* input_trim = trim( input );
         if ( !input_trim || *input_trim == '\0' )
             continue;
