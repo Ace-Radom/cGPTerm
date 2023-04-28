@@ -16,8 +16,6 @@ extern "C" {
 #include"utils.h"
 #include"crich.h"
 
-#define CLEAR_LAST_ERROR_PRINT printf( "\r                                                  \r" );
-
 extern const char* slash_commands[];
 
 int handle_slash_command( const char* __slashcmd );

@@ -13,6 +13,8 @@ int start_CLI(){
     {
         char* input;
         input = readline( "> " );
+        printf( "\033[2K\r" );
+        // clear possible output
         if ( input == NULL )
         {
             printf( "\033[1A\r" );
@@ -55,7 +57,7 @@ int start_CLI(){
             usleep( 100000 );
         }
         // until request done: print wait msg
-        printf( "\r                             \r" );
+        printf( "\r\033[2K\r" );
         fflush( stdout );
         pthread_join( send_request , NULL );
         // clean wait msg, request thread join

@@ -81,7 +81,7 @@ int handle_slash_command( const char* __slashcmd ){
             if ( new_timeout > 0 )
             {
                 OPENAI_API_TIMEOUT = new_timeout;
-                CLEAR_LAST_ERROR_PRINT;
+                printf( "\r\033[2K\r" );
                 crprint( "[dim]API timeout set to [green]%.2lfs[/].\n" , OPENAI_API_TIMEOUT );
                 ezylog_loginfo( logger , "API timeout set to %lfs" , OPENAI_API_TIMEOUT );
                 free( new_timeout_str );
@@ -89,7 +89,7 @@ int handle_slash_command( const char* __slashcmd ){
             }
             else
             {
-                CLEAR_LAST_ERROR_PRINT;
+                printf( "\r\033[2K\r" );
                 crprint( "[red]API timeout cannot be less than 0s\n" );
             } // illegal input
         }
@@ -97,16 +97,16 @@ int handle_slash_command( const char* __slashcmd ){
         {
             if ( new_timeout == 0 && new_timeout_str[0] == '0' )
             {
-                CLEAR_LAST_ERROR_PRINT;
+                printf( "\r\033[2K\r" );
                 crprint( "[red]API timeout cannot be less than 0s\n" );
             }
             else
             {
-                CLEAR_LAST_ERROR_PRINT;
+                printf( "\r\033[2K\r" );
                 crprint( "[red]API timeout must be an integer or a float\n" );
             }
         } // illegal input
-        printf( "\033[2A\r                                             \r" );
+        printf( "\033[2A\r\033[2K\r" );
         fflush( stdout );
         // clear last "Please input new API timeout" output
         // also: before all error output here old error output need to be cleaned
