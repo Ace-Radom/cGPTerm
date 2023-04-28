@@ -76,6 +76,7 @@ int ezylog_logdebug( ezylog_logger_t* __logger , const char* __format , ... ){
     // flush file IO buf
     free( msg );
     free( msg_to_write );
+    va_end( args );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
 }
@@ -114,6 +115,7 @@ int ezylog_loginfo( ezylog_logger_t* __logger , const char* __format , ... ){
     // flush file IO buf
     free( msg );
     free( msg_to_write );
+    va_end( args );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
 }
@@ -152,6 +154,7 @@ int ezylog_logerror( ezylog_logger_t* __logger , const char* __format , ... ){
     // flush file IO buf
     free( msg );
     free( msg_to_write );
+    va_end( args );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
 }
@@ -190,6 +193,7 @@ int ezylog_logfatal( ezylog_logger_t* __logger , const char* __format , ... ){
     // flush file IO buf
     free( msg );
     free( msg_to_write );
+    va_end( args );
     pthread_mutex_unlock( &( __logger -> __mutex ) );
     return 0;
 }
