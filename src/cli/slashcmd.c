@@ -8,6 +8,10 @@ const char* slash_commands[] = {
     NULL
 };
 
+int disable_history_browsing_callback( void ){
+    return 0;
+}
+
 /**
  * @brief handle slash command
  * 
@@ -67,7 +71,10 @@ int handle_slash_command( const char* __slashcmd ){
         free( temp );
 
     ask_timeout:
+        rl_bind_key( '\e' , disable_history_browsing_callback );
         new_timeout_str = readline( "Please input new API timeout: " );
+        rl_unbind_key( '\e' );
+        // disable history view when asking new timeout
         new_timeout = strtod( new_timeout_str , NULL );
         if ( new_timeout != 0 )
         {
