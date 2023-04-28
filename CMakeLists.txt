@@ -13,6 +13,8 @@ add_library(iniparser SHARED
     ${CMAKE_SOURCE_DIR}/iniparser/src/dictionary.c
     ${CMAKE_SOURCE_DIR}/iniparser/src/iniparser.c
 )
+include_directories(${CMAKE_SOURCE_DIR}/cpprich/include)
+add_subdirectory(cpprich)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
@@ -26,4 +28,5 @@ target_link_libraries(cgpterm
     argparse
     openaiapi
     cli
+    cpprich
 )

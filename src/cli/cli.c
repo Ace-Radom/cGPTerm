@@ -43,9 +43,8 @@ int start_CLI(){
         usleep( 10000 );
         // start request; wait 10 ms in order to let openai_send_chatrequest to lock request_working (-> true)
         while ( request_working )
-        {
             print_wait_msg( "ChatGPT is thinking" );
-        } // until request done: print wait msg
+        // until request done: print wait msg
         printf( "\r                             \r" );
         fflush( stdout );
         pthread_join( send_request , NULL );
@@ -56,10 +55,14 @@ int start_CLI(){
         if ( data.response )
         {
             if ( HTTP_Response_code / 100 != 4 )
-                printf( "ChatGPT:\n%s\n" , data.response );
+            {
+                crprint( "[bold][bright cyan]ChatGPT:\n" );
+                printf( "%s\n" , data.response );
+            }
             else
             {
-                printf( "Request Error: %s\n" , data.response );
+                crprint( "[bold][red]Request Error: " );
+                printf( "%s\n" , data.response );
                 openai_msg_popback();
             } // request error, pop last user's msg
         }

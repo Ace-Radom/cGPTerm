@@ -14,6 +14,7 @@ extern "C" {
 #include<readline/readline.h>
 
 #include"slashcmd.h"
+#include"crich.h"
 
 #define HIDE_CURSOR "\033[?25l"
 #define SHOW_CURSOR "\033[?25h"

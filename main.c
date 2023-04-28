@@ -12,6 +12,7 @@
 #include"ezylog.h"
 #include"openai_api.h"
 #include"cli.h"
+#include"crich.h"
 
 int main( int argc , char** argv ){
     setlocale( LC_ALL , "" );
@@ -84,11 +85,13 @@ int main( int argc , char** argv ){
     openai_init();
     ezylog_logdebug( logger , "openai service initialization complete" );
 
-    printf( "Hi, welcome to chat with GPT. Type `/help` to display available commands.\n" );
+    crprint( "[dim]Hi, welcome to chat with GPT. Type `[bright magenta]/help[/]` to display available commands.\n" );
     ezylog_loginfo( logger , "cGPTerm main service launch" );
     int CLI_returncode = start_CLI();
     
-    printf( "Total tokens spent: %ld\n" , openai -> total_tokens_spent );
+    printf( "Exiting...\n" );
+    crprint( "[bright magenta]Total tokens spent: %ld\n" , openai -> total_tokens_spent );
+    // printf( "Total tokens spent: %ld\n" , openai -> total_tokens_spent );
     ezylog_loginfo( logger , "Total tokens spent: %d" , openai -> total_tokens_spent );
     openai_free();
 

@@ -14,6 +14,9 @@ extern "C" {
 #include"openai_api.h"
 #include"ezylog.h"
 #include"utils.h"
+#include"crich.h"
+
+#define CLEAR_LAST_ERROR_PRINT printf( "\r                                                  \r" );
 
 extern const char* slash_commands[];
 

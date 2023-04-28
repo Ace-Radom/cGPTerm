@@ -16,6 +16,7 @@ extern "C" {
 
 #include"openai_api.h"
 #include"cli/toolkit.h"
+#include"crich.h"
 
 int start_CLI();
 // this is an api for main.c
