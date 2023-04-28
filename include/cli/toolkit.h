@@ -33,6 +33,7 @@ void write_ANSI( const char* __ANSI );
 
 char** rl_attempted_completion_callback( const char* text , int start , int end );
 char* rl_completion_search( const char* text , int state );
+void rl_completion_display_matches_hook_callback( char** matches , int num_matches , int max_length );
 
 // ===============================================
 // ================== str Tools ==================

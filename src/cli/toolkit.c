@@ -52,6 +52,20 @@ char** rl_attempted_completion_callback( const char* text , int start , int end 
     return matches;
 }
 
+void rl_completion_display_matches_hook_callback( char** matches , int num_matches , int max_length ){
+    int end = rl_end;
+    printf( "\n\033[2K\r" );
+    for ( int i = 1 ; i <= num_matches ; i++ )
+        crprint( "[bright magenta]%s  " , matches[i] );
+    // print all options
+    printf( "\033[1A\r" );
+    rl_redisplay();
+    rl_point = end;
+    rl_forced_update_display();
+    // reset readline status
+    return;
+}
+
 
 /**
  * @brief erase space at begin and end of a str

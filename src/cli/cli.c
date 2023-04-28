@@ -7,6 +7,7 @@ int start_CLI(){
     get_original_terattr();
 
     rl_attempted_completion_function = rl_attempted_completion_callback;
+    rl_completion_display_matches_hook = rl_completion_display_matches_hook_callback;
 
     while ( 1 )
     {
