@@ -9,6 +9,16 @@ const char* slash_commands[] = {
     NULL
 };
 
+void disable_history_search(void){
+    rl_bind_keyseq( "\\e[A" , NULL ); // disable up arrow key
+    rl_bind_keyseq( "\\e[B" , NULL ); // disable down arrow key
+}
+
+void enable_history_search( void ){
+    rl_bind_keyseq( "\\e[A" , rl_history_search_backward ); // enable up arrow key
+    rl_bind_keyseq( "\\e[B" , rl_history_search_forward );  // enable down arrow key
+}
+
 /**
  * @brief handle slash command
  * 
@@ -68,8 +78,9 @@ int handle_slash_command( const char* __slashcmd ){
         free( temp );
 
     ask_timeout:
+        disable_history_search();
         new_timeout_str = readline( "Please input new API timeout: " );
-        // disable history view when asking new timeout
+        enable_history_search();
         new_timeout = strtod( new_timeout_str , NULL );
         if ( new_timeout != 0 )
         {
@@ -140,7 +151,9 @@ int handle_slash_command( const char* __slashcmd ){
         free( temp );
 
     ask_model:
+        disable_history_search();
         new_model = readline( "Please input new Model: " );
+        enable_history_search();
         // disable history view when asking new timeout
         if ( openai_set_model( new_model ) == 0 )
         {
