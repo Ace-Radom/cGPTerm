@@ -177,6 +177,7 @@ void print_slash_command_help(){
     crprint( "[bold]Available commands:\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
+    crprint( "    [bright magenta]/model[/] [bold]\\[model_name][/]\t\t- Change AI model\n" );
     crprint( "    [bright magenta]/help[/]\t\t\t- Show this help message\n" );
     crprint( "    [bright magenta]/exit[/]\t\t\t- Exit the application\n" );
     return;
