@@ -8,6 +8,9 @@ extern "C" {
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<errno.h>
+#include<time.h>
+#include<sys/time.h>
 
 #include<readline/readline.h>
 #include<readline/history.h>
@@ -18,6 +21,7 @@ extern "C" {
 #include"crich.h"
 
 extern const char* slash_commands[];
+extern char* chat_history_save_file_generated_path;
 
 int handle_slash_command( const char* __slashcmd );
 

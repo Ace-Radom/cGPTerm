@@ -48,6 +48,7 @@ void openai_send_chatrequest( void* __data );
 void openai_free();
 
 int openai_set_model( char* __new_model );
+int openai_save_history( FILE* __f );
 
 void openai_msg_popback();
 

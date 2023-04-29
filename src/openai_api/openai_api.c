@@ -212,6 +212,10 @@ int openai_set_model( char* __new_model ){
     return 0;
 }
 
+int openai_save_history( FILE* __f ){
+    return json_dumpf( openai -> messages , __f , JSON_INDENT( 4 ) );;
+}
+
 void openai_msg_popback(){
     size_t msglist_size = json_array_size( openai -> messages );
     if ( msglist_size <= 1 )

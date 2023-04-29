@@ -1,7 +1,11 @@
 #include"cli/slashcmd.h"
 
+/**
+ * @brief all available slash commands. they will be searched by rl_completion_slash_command_search
+*/
 const char* slash_commands[] = {
     "/tokens",
+    "/save",
     "/timeout",
     "/model",
     "/help",
@@ -9,7 +13,7 @@ const char* slash_commands[] = {
     NULL
 };
 
-void disable_history_search(void){
+void disable_history_search( void ){
     rl_bind_keyseq( "\\e[A" , NULL ); // disable up arrow key
     rl_bind_keyseq( "\\e[B" , NULL ); // disable down arrow key
 }
@@ -17,6 +21,34 @@ void disable_history_search(void){
 void enable_history_search( void ){
     rl_bind_keyseq( "\\e[A" , rl_history_search_backward ); // enable up arrow key
     rl_bind_keyseq( "\\e[B" , rl_history_search_forward );  // enable down arrow key
+}
+
+char* chat_history_save_file_generated_path = NULL;
+
+/**
+ * @brief this startup hook will automaticlly generate a file name for chat history save file
+*/
+void save_chat_history_startup_hook( void ){
+    chat_history_save_file_generated_path = ( char* ) malloc( 256 );
+    strcpy( chat_history_save_file_generated_path , CHAT_SAVE_PERFIX );
+    // copy chat save perfix to here
+
+    char* curtime = ( char* ) malloc( 40 );
+    struct timeval tv;
+    gettimeofday( &tv , NULL );
+    time_t curtime_ts = tv.tv_sec;
+    strftime( curtime , 40 , "%Y-%m-%d_%H,%M,%S" , localtime( &curtime_ts ) );
+    // get current time str
+
+    strcat( chat_history_save_file_generated_path , curtime );
+    strcat( chat_history_save_file_generated_path , ".json" );
+    // build file name
+
+    rl_insert_text( chat_history_save_file_generated_path );
+    
+    free( curtime );
+    rl_startup_hook = NULL;
+    // reset hook
 }
 
 /**
@@ -27,6 +59,11 @@ void enable_history_search( void ){
  * @return 0 when slash command successfully handled; 1 when unrecognized slash command occured; -1 when /exit triggered
 */
 int handle_slash_command( const char* __slashcmd ){
+
+// ===================================================================================
+// ===================================== /tokens =====================================
+// ===================================================================================
+
     if ( strcmp( __slashcmd , "/tokens" ) == 0 )
     {
         ezylog_logdebug( logger , "/tokens command triggered" );
@@ -41,6 +78,66 @@ int handle_slash_command( const char* __slashcmd ){
         free( current_tokens_str );
         return 0;
     } // /tokens
+
+// =================================================================================
+// ===================================== /save =====================================
+// =================================================================================
+
+    if ( strncmp( __slashcmd , "/save" , 5 ) == 0 )
+    {
+        ezylog_logdebug( logger , "/save command triggered" );
+        char* save_path;
+
+        if ( strlen( __slashcmd ) == 5 )
+        {
+            disable_history_search();
+            rl_startup_hook = save_chat_history_startup_hook;
+            // print default (generated) save file path
+            save_path = readline( "Save to: " );
+            enable_history_search();
+        } // only input '/save', goto generate filename and save
+        else
+        {
+            char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+            strcpy( temp , __slashcmd );
+            char* token = strtok( temp , " " );
+            token = strtok( NULL , " " );
+            // get the second part str
+            save_path = ( char* ) malloc( strlen( token ) + 1 );
+            strcpy( save_path , token );
+        } // save path given
+
+        FILE* savef = fopen( save_path , "w" );
+        if ( savef == NULL )
+        {
+            crprint( "[red]Save chat history to '[bold]%s[/]' failed, check log for more informations\n" , save_path );
+            char* errmsg = strerror( errno );
+            // get error message
+            ezylog_logerror( logger , "Save chat history to '%s' failed: errno %d, error message \"%s\"" , save_path , errno , errmsg );
+            return 0;
+        } // open save file failed; log error message
+
+        int rc = openai_save_history( savef );
+        if ( rc == -1 )
+        {
+            crprint( "[red]Save chat history to '[bold]%s[/]' failed due to unknown error\n" , save_path );
+            ezylog_logerror( logger , "Save chat history to '%s' failed due to unknown error" , save_path );
+        } // dump json failed
+        else
+        {
+            crprint( "[dim]Chat history saved to: [green]%s[/]\n" , save_path );
+            ezylog_loginfo( logger , "Chat history saved to: '%s'" , save_path );
+        }
+        fclose( savef );
+        if ( chat_history_save_file_generated_path != NULL )
+            free( chat_history_save_file_generated_path );
+        free( save_path );
+        return 0;
+    }
+
+// ====================================================================================
+// ===================================== /timeout =====================================
+// ====================================================================================
 
     if ( strncmp( __slashcmd , "/timeout" , 8 ) == 0 )
     {
@@ -126,6 +223,10 @@ int handle_slash_command( const char* __slashcmd ){
         goto ask_timeout;
     } // /timeout TIMEOUT
 
+// ==================================================================================
+// ===================================== /model =====================================
+// ==================================================================================
+
     if ( strncmp( __slashcmd , "/model" , 6 ) == 0 )
     {
         ezylog_logdebug( logger , "/model command triggered" );
@@ -161,7 +262,6 @@ int handle_slash_command( const char* __slashcmd ){
         disable_history_search();
         new_model = readline( "Please input new Model: " );
         enable_history_search();
-        // disable history view when asking new timeout
         if ( openai_set_model( new_model ) == 0 )
         {
             printf( "\r\033[2K\r" );
@@ -180,6 +280,10 @@ int handle_slash_command( const char* __slashcmd ){
         // clear last "Please input new Model" output
         goto ask_model;
     } // /model MODEL
+
+// ========================================================================================
+// ===================================== /help, /exit =====================================
+// ========================================================================================
 
     if ( strcmp( __slashcmd , "/help" ) == 0 )
     {
