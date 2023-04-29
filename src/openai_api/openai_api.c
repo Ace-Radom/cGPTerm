@@ -71,7 +71,6 @@ void openai_init(){
     // prompt init
 
     openai -> current_tokens += count_tokens_message( prompt );
-    ezylog_logdebug( logger , "prompt tokens: %ld" , openai -> current_tokens );
     // count prompt tokens and add to current_tokens
 
     curl_global_init( CURL_GLOBAL_ALL );
@@ -143,6 +142,7 @@ void openai_send_chatrequest( void* __data ){
     if ( !root )
     {
         fprintf( stderr , "[openai_send_chatrequest] -> response json error at line %d: %s\n" , error.line , error.text );
+        ezylog_logerror( logger , "response json error at line %d: %s" , error.line , error.text );
         text = NULL;
         goto request_stop;
     } // json error
@@ -214,6 +214,55 @@ int openai_set_model( char* __new_model ){
 
 int openai_save_history( FILE* __f ){
     return json_dumpf( openai -> messages , __f , JSON_INDENT( 4 ) );;
+}
+
+void openai_load_history( const char* __history_file ){
+    ezylog_logdebug( logger , "load history triggered" );
+    FILE* savef = fopen( __history_file , "r" );
+    if ( savef == NULL )
+    {
+        crprint( "[red]Failed to load chat history from '[bold]%s[/]', check log for more informations\n" , __history_file );
+        char* errmsg = strerror( errno );
+        // get error message
+        ezylog_logerror( logger , "Failed to load chat history from '%s': errno %d, error message \"%s\"" , __history_file , errno , errmsg );
+        return;
+    } // open file failed
+
+    json_t* history;
+    json_error_t error;
+    
+    history = json_loadf( savef , JSON_DISABLE_EOF_CHECK , &error );
+    if ( !history )
+    {
+        crprint( "[red]Failed to load chat history from '[bold]%s[/]' due to illegal format, check log for more information\n" , __history_file );
+        ezylog_logerror( logger , "Failed to load chat history from '%s' due to illegal format: at line %d: %s" , __history_file , error.line , error.text );
+        fclose( savef );
+        return;
+    } // illegal json format
+
+    openai -> messages = json_copy( history );
+
+    json_t* this_msg;
+    for ( int i = 1 ; i < json_array_size( openai -> messages ) ; i++ ) // system prompt should never be print
+    {
+        this_msg = json_array_get( openai -> messages , i );
+        char* role = json_string_value( json_object_get( this_msg , "role" ) );
+        char* content = json_string_value( json_object_get( this_msg , "content" ) );
+        if ( strcmp( role , "user" ) == 0 )
+        {
+            printf( "> %s\n" , content );
+        } // this msg is a user input
+        else
+        {
+            crprint( "[bold][bright cyan]ChatGPT:\n" );
+            printf( "%s\n" , content );
+        } // this msg is a ChatGPT response
+    } // print history message
+    crprint( "[dim]Chat history successfully loaded from: [bright magenta]%s[/]\n" , __history_file );
+    ezylog_loginfo( logger , "Chat history successfully loaded from: \"%s\"" , __history_file );
+    json_decref( history );
+    fclose( savef );
+    return;
 }
 
 void openai_msg_popback(){

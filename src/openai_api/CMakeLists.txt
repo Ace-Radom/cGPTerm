@@ -28,5 +28,6 @@ target_link_libraries(openaiapi
     pthread
     jansson
     ezylog
+    cpprich
     ${rstiktokens_a}
 )

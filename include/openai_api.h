@@ -10,6 +10,7 @@ extern "C" {
 #include<unistd.h>
 #include<string.h>
 #include<stdbool.h>
+#include<errno.h>
 
 #include<curl/curl.h>
 #include<pthread.h>
@@ -18,6 +19,7 @@ extern "C" {
 #include"ezylog.h"
 #include"utils.h"
 #include"openai_api/tiktokens.h"
+#include"crich.h"
 
 typedef struct {
     char* endpoint;
@@ -49,6 +51,7 @@ void openai_free();
 
 int openai_set_model( char* __new_model );
 int openai_save_history( FILE* __f );
+void openai_load_history( const char* __history_file );
 
 void openai_msg_popback();
 

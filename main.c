@@ -56,7 +56,11 @@ int main( int argc , char** argv ){
     // ============================================================================================
 
     args_init();
-    args_parse( argc , argv );
+    int args_parse_rc = args_parse( argc , argv );
+    if ( args_parse_rc != 0 )
+        goto stopmain;
+    // illegal args
+    
     if ( gota_help )
     {
         print_help();
@@ -87,6 +91,10 @@ int main( int argc , char** argv ){
 
     crprint( "[dim]Hi, welcome to chat with GPT. Type `[bright magenta]/help[/]` to display available commands.\n" );
     ezylog_loginfo( logger , "cGPTerm main service launch" );
+
+    if ( gota_load )
+        openai_load_history( gav_load );
+
     int CLI_returncode = start_CLI();
     
     printf( "Exiting...\n" );
