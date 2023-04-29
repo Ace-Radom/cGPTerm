@@ -81,7 +81,7 @@ char* trim( char* __str ){
         return NULL;
     // here: i > j means there are only spaces in this str
     // if continue, it will lead to segmentation fault, therefore return NULL here
-    char* newstr = ( char* ) malloc( strlen( __str ) );
+    char* newstr = ( char* ) malloc( strlen( __str ) + 1 );
     strncpy( newstr , __str + i , j - i + 1 );
     newstr[j-i+1] = '\0';
     return newstr;
