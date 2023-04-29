@@ -5,6 +5,20 @@ bool request_working = false;
 long HTTP_Response_code = 0;
 
 typedef struct {
+    char* model;
+    int tokens_limit;
+} chat_model_list_t;
+
+const chat_model_list_t chat_models[] = {
+    { "gpt-4-32k"          , 32768 },
+    { "gpt-4-32k-0314"     , 32768 },
+    { "gpt-4"              , 8192  },
+    { "gpt-4-0314"         , 8192  },
+    { "gpt-3.5-turbo"      , 4096  },
+    { "gpt-3.5-turbo-0301" , 4096  }
+};
+
+typedef struct {
     char* ptr;
     size_t size;
 } curl_chat_data_t;
@@ -173,6 +187,29 @@ void openai_free(){
     free( openai );
     curl_global_cleanup();
     return;
+}
+
+int openai_set_model( char* __new_model ){
+    char* str = ( char* ) malloc( strlen( __new_model ) + 1 );
+    strcpy( str , __new_model );
+    char* new_model_alllower = str;
+    for ( ; *str != '\0' ; str++ )
+        *str = tolower( *str );
+    // get all lower new model name
+    int index = -1;
+    for ( int i = 0 ; i < sizeof( chat_models ) / sizeof( chat_model_list_t ) ; i++ )
+        if ( strcmp( new_model_alllower , chat_models[i].model ) == 0 )
+        {
+            index = i;
+            break;
+        } // found
+    free( new_model_alllower );
+    if ( index == -1 )
+        return -1;
+    // not found, __new_model is illegal
+    strcpy( openai -> model , chat_models[index].model );
+    openai -> tokens_limit = chat_models[index].tokens_limit;
+    return 0;
 }
 
 void openai_msg_popback(){

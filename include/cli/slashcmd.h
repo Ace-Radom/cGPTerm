@@ -10,6 +10,7 @@ extern "C" {
 #include<string.h>
 
 #include<readline/readline.h>
+#include<readline/history.h>
 
 #include"openai_api.h"
 #include"ezylog.h"

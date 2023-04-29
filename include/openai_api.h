@@ -47,6 +47,8 @@ void openai_init();
 void openai_send_chatrequest( void* __data );
 void openai_free();
 
+int openai_set_model( char* __new_model );
+
 void openai_msg_popback();
 
 #ifdef __cplusplus

@@ -3,14 +3,11 @@
 const char* slash_commands[] = {
     "/tokens",
     "/timeout",
+    "/model",
     "/help",
     "/exit",
     NULL
 };
-
-int disable_history_browsing_callback( void ){
-    return 0;
-}
 
 /**
  * @brief handle slash command
@@ -71,9 +68,7 @@ int handle_slash_command( const char* __slashcmd ){
         free( temp );
 
     ask_timeout:
-        rl_bind_key( '\e' , disable_history_browsing_callback );
         new_timeout_str = readline( "Please input new API timeout: " );
-        rl_unbind_key( '\e' );
         // disable history view when asking new timeout
         new_timeout = strtod( new_timeout_str , NULL );
         if ( new_timeout != 0 )
@@ -112,6 +107,59 @@ int handle_slash_command( const char* __slashcmd ){
         // also: before all error output here old error output need to be cleaned
         goto ask_timeout;
     } // /timeout TIMEOUT
+
+    if ( strncmp( __slashcmd , "/model" , 6 ) == 0 )
+    {
+        ezylog_logdebug( logger , "/model command triggered" );
+        char* new_model;
+
+        if ( strlen( __slashcmd ) == 6 )
+        {
+            crprint( "\n[green]Model list: '[bold]gpt-3.5-turbo[/]', '[bold]gpt-4[/]', '[bold]gpt-4-32k[/]'\033[1A\r" );
+            goto ask_model;
+        }
+        // only input "/model", goto ask new model
+
+        char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+        strcpy( temp , __slashcmd );
+        char* token = strtok( temp , " " );
+        token = strtok( NULL , " " );
+        // get the second part str
+        new_model = token;
+        if ( openai_set_model( new_model ) == 0 )
+        {
+            crprint( "[dim]Model has been set to [green]'%s'[/].\n" , openai -> model );
+            ezylog_loginfo( logger , "Model has been set to '%s'" , openai -> model );
+            free( temp );
+            return 0;
+        } // set successfully
+        else
+            crprint( "\n[red]Model can only be '[bold]gpt-3.5-turbo[/]', '[bold]gpt-4[/]', '[bold]gpt-4-32k[/]'\033[1A\r" );
+        // illegal model
+
+        free( temp );
+
+    ask_model:
+        new_model = readline( "Please input new Model: " );
+        // disable history view when asking new timeout
+        if ( openai_set_model( new_model ) == 0 )
+        {
+            printf( "\r\033[2K\r" );
+            crprint( "[dim]Model has been set to [green]'%s'[/].\n" , openai -> model );
+            ezylog_loginfo( logger , "Model has been set to '%s'" , openai -> model );
+            free( new_model );
+            return 0;
+        } // set successfully
+        else
+        {
+            printf( "\r\033[2K\r" );
+            crprint( "[red]Model can only be '[bold]gpt-3.5-turbo[/]', '[bold]gpt-4[/]', '[bold]gpt-4-32k[/]'\n" );
+        } // illegal model
+        printf( "\033[2A\r\033[2K\r" );
+        fflush( stdout );
+        // clear last "Please input new Model" output
+        goto ask_model;
+    } // /model MODEL
 
     if ( strcmp( __slashcmd , "/help" ) == 0 )
     {
