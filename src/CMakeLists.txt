@@ -15,4 +15,5 @@ add_library(utils
 target_link_libraries(utils
     ezylog
     iniparser
+    pthread
 )

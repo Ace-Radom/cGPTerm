@@ -19,6 +19,7 @@ extern "C" {
 #include"ezylog.h"
 #include"utils.h"
 #include"openai_api/tiktokens.h"
+#include"openai_api/curlfunctions.h"
 #include"crich.h"
 
 typedef struct {

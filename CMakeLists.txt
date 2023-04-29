@@ -36,4 +36,6 @@ target_link_libraries(cgpterm
     openaiapi
     cli
     cpprich
+    pthread
+    curl
 )

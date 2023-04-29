@@ -6,6 +6,9 @@
 #include<sys/stat.h>
 #include<locale.h>
 
+#include<pthread.h>
+#include<curl/curl.h>
+
 #include"rwcfg.h"
 #include"argparse.h"
 #include"utils.h"
@@ -13,6 +16,8 @@
 #include"openai_api.h"
 #include"cli.h"
 #include"crich.h"
+
+void get_remote_version();
 
 int main( int argc , char** argv ){
     setlocale( LC_ALL , "" );
@@ -85,6 +90,24 @@ int main( int argc , char** argv ){
 
     // from here: cGPTerm main service
 
+    curl_global_init( CURL_GLOBAL_ALL );
+    curl_version_info_data *curl_version_data = curl_version_info( CURLVERSION_NOW );
+    curl_userangel_data = ( char* ) malloc( 16 );
+    sprintf( curl_userangel_data , "curl/%s" , curl_version_data -> version );
+    // curl init
+
+    pthread_mutex_init( &remote_version_mutex , NULL );
+    // init access remote version mutex
+
+    pthread_t get_remote_version_thread;
+    pthread_attr_t get_remote_version_thread_attr;
+    pthread_attr_init( &get_remote_version_thread_attr );
+    pthread_attr_setdetachstate( &get_remote_version_thread_attr , PTHREAD_CREATE_DETACHED );
+    ezylog_logdebug( logger , "start getting remote version in background" );
+    pthread_create( &get_remote_version_thread , &get_remote_version_thread_attr , get_remote_version , NULL );
+    pthread_attr_destroy( &get_remote_version_thread_attr );
+    // get remote version in background
+
     ezylog_logdebug( logger , "config set not triggered, start initializing openai service" );
     openai_init();
     ezylog_logdebug( logger , "openai service initialization complete" );
@@ -102,11 +125,81 @@ int main( int argc , char** argv ){
     // printf( "Total tokens spent: %ld\n" , openai -> total_tokens_spent );
     ezylog_loginfo( logger , "Total tokens spent: %d" , openai -> total_tokens_spent );
     openai_free();
+    curl_global_cleanup();
 
 stopmain:
     cconfig();
     ezylog_loginfo( logger , "cGPTerm master process shutting down..." );
     ezylog_close( logger );
     return 0;
-    
+} // main
+
+void get_remote_version(){
+    CURL* curl;
+    CURLcode res;
+    curl_data_t response_data = { NULL , 0 };
+    curl = curl_easy_init();
+    if ( !curl )
+    {
+        ezylog_logerror( logger , "curl init failed when getting remote version" );
+        pthread_mutex_lock( &remote_version_mutex );
+        remote_version = "Unknown";
+        pthread_mutex_unlock( &remote_version_mutex );
+        return;
+    } // curl init error, set remote_version to "Unknown"
+
+    curl_easy_setopt( curl , CURLOPT_URL , "https://api.github.com/repos/Ace-Radom/cGPTerm/releases" );
+    curl_easy_setopt( curl , CURLOPT_HTTPGET , 1L );
+    curl_easy_setopt( curl , CURLOPT_USERAGENT , curl_userangel_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , curl_write_callback_function );
+    curl_easy_setopt( curl , CURLOPT_TIMEOUT , 10 );
+    // remote version ask's timeout is set to 10s
+    // make curl request
+
+    res = curl_easy_perform( curl );
+    if ( res != CURLE_OK )
+    {
+        ezylog_logerror( logger , "send request failed when getting remote version: " , curl_easy_strerror( res ) );
+        pthread_mutex_lock( &remote_version_mutex );
+        remote_version = "Unknown";
+        pthread_mutex_unlock( &remote_version_mutex );
+        goto request_stop;
+    }
+
+    long response_code;
+    curl_easy_getinfo( curl , CURLINFO_RESPONSE_CODE , &response_code );
+
+    json_t* root;
+    json_error_t error;
+
+    root = json_loads( response_data.ptr , 0 , &error );
+    if ( !root )
+    {
+        ezylog_logerror( logger , "when getting remote version, response json error at line %d: %s" , error.line , error.text );
+        remote_version = "Unknown";
+        goto request_stop;
+    } // json error
+
+    if ( response_code != 200 )
+    {
+        ezylog_logerror( logger , "getting remote version failed: GitHub API responsed %ld" , response_code );
+        ezylog_logerror( logger , "Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+        pthread_mutex_lock( &remote_version_mutex );
+        remote_version = "Unknown";
+        pthread_mutex_unlock( &remote_version_mutex );
+        goto request_stop;
+    } // response code is not 200 OK, error occured
+
+    json_t* remote_version_jsonobj = json_array_get( root , 0 );
+    remote_version_jsonobj = json_object_get( remote_version_jsonobj , "tag_name" );
+    remote_version = json_string_value( remote_version_jsonobj );
+    // get remote version from GitHub API response: response[0]["tag_name"]
+    ezylog_logdebug( logger , "Remote version got: %s" , remote_version );
+
+request_stop:
+    curl_easy_cleanup( curl );
+    free( response_data.ptr );
+    json_decref( root );
+    return;
 }

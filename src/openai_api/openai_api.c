@@ -18,30 +18,6 @@ const chat_model_list_t chat_models[] = {
     { "gpt-3.5-turbo-0301" , 4096  }
 };
 
-typedef struct {
-    char* ptr;
-    size_t size;
-} curl_chat_data_t;
-
-size_t write_callback_chat( char* ptr , size_t size , size_t nmemb , void* userdata ){
-    curl_chat_data_t* response_data = ( curl_chat_data_t* ) userdata;
-    // link callback and main request thread, transfer data
-    size_t realsize = size * nmemb;
-
-    response_data -> ptr = realloc( response_data -> ptr , response_data -> size + realsize + 1 );
-    if ( response_data -> ptr == NULL )
-    {
-        fprintf( stderr , "[openai_api->write_callback] -> realloc data transfer buf failed\n" );
-        return 0;
-    } // realloc failed
-
-    memcpy( &( response_data -> ptr[response_data->size] ) , ptr , realsize );
-    response_data -> size += realsize;
-    response_data -> ptr[response_data->size] = '\0';
-    // copy response this turn
-    return realsize;
-}
-
 void openai_init(){
     openai = ( openai_t* ) malloc( sizeof( openai_t ) );
     openai -> endpoint = "https://api.openai.com/v1/chat/completions";
@@ -73,9 +49,6 @@ void openai_init(){
     openai -> current_tokens += count_tokens_message( prompt );
     // count prompt tokens and add to current_tokens
 
-    curl_global_init( CURL_GLOBAL_ALL );
-    // curl init
-
     return;
 }
 
@@ -87,12 +60,12 @@ void openai_send_chatrequest( void* __data ){
 
     CURL* curl;
     CURLcode res;
-    curl_chat_data_t response_data = { NULL , 0 , false };
+    curl_data_t response_data = { NULL , 0 };
     curl = curl_easy_init();
     if ( !curl )
     {
         fprintf( stderr , "[openai_send_chatrequest] -> curl init failed\n" );
-        ezylog_logerror( logger , "curl init failed" );
+        ezylog_logerror( logger , "curl init failed when sending chat request" );
         request_working = false;
         return;
     } // curl init error
@@ -117,7 +90,7 @@ void openai_send_chatrequest( void* __data ){
     curl_easy_setopt( curl , CURLOPT_HTTPHEADER , openai -> headers );
     curl_easy_setopt( curl , CURLOPT_POSTFIELDS , request_data );
     curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
-    curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , write_callback_chat );
+    curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , curl_write_callback_function );
     curl_easy_setopt( curl , CURLOPT_TIMEOUT_MS , ( int ) ( OPENAI_API_TIMEOUT * 1000 ) );
     // make curl request
 
@@ -185,7 +158,6 @@ void openai_free(){
     if ( openai -> title )
         free( openai -> title );
     free( openai );
-    curl_global_cleanup();
     return;
 }
 
