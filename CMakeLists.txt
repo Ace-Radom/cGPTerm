@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
-project(cGPTerm VERSION 1.0)
+project(cGPTerm)
 
 set(CMAKE_C_FLAGS "-Wall -g")
 add_definitions(-D _DEFAULT_SOURCE)
 add_definitions(-D _GNU_SOURCE)
+
+if(EXISTS ${CMAKE_SOURCE_DIR}/VERSION)
+    file(READ ${CMAKE_SOURCE_DIR}/VERSION CGPTERM_VERSION)
+    add_definitions(-D CGPTERM_VERSION=${CGPTERM_VERSION})
+else()
+    message(FATAL "VERSION doesn't exist")
+endif()
 
 set(LIBRARY_OUTPUT_PATH    ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
