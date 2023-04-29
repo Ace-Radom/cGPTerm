@@ -30,8 +30,15 @@ int handle_slash_command( const char* __slashcmd ){
     if ( strcmp( __slashcmd , "/tokens" ) == 0 )
     {
         ezylog_logdebug( logger , "/tokens command triggered" );
-        crprint( "[bright magenta]Total Tokens Spent:[/] %ld\n" , openai -> total_tokens_spent );
-        crprint( "[green]Current Tokens:[/] %d/[bold]%d[/]\n" , openai -> current_tokens , openai -> tokens_limit );
+        char* total_tokens_spent_str = ( char* ) malloc( 64 );
+        char* current_tokens_str = ( char* ) malloc( 64 );
+        sprintf( total_tokens_spent_str , "[bright magenta]Total Tokens Spent:[/] \t%ld" , openai -> total_tokens_spent );
+        sprintf( current_tokens_str , "[green]Current Tokens:[/] \t%d/%d" , openai -> current_tokens , openai -> tokens_limit );
+        crpanel( "token_summary" , 40 , "bold" , 2 , total_tokens_spent_str , current_tokens_str );
+        // crprint( "[bright magenta]Total Tokens Spent:[/] %ld\n" , openai -> total_tokens_spent );
+        // crprint( "[green]Current Tokens:[/] %d/%d[/]\n" , openai -> current_tokens , openai -> tokens_limit );
+        free( total_tokens_spent_str );
+        free( current_tokens_str );
         return 0;
     } // /tokens
 
