@@ -14,6 +14,7 @@ extern "C" {
 
 #include<readline/readline.h>
 #include<readline/history.h>
+#include<pthread.h>
 
 #include"openai_api.h"
 #include"ezylog.h"

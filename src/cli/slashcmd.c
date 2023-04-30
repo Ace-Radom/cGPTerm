@@ -8,6 +8,7 @@ const char* slash_commands[] = {
     "/save",
     "/timeout",
     "/model",
+    "/version",
     "/help",
     "/exit",
     NULL
@@ -72,8 +73,6 @@ int handle_slash_command( const char* __slashcmd ){
         sprintf( total_tokens_spent_str , "[bright magenta]Total Tokens Spent:[/] \t%ld" , openai -> total_tokens_spent );
         sprintf( current_tokens_str , "[green]Current Tokens:[/] \t%d/%d" , openai -> current_tokens , openai -> tokens_limit );
         crpanel( "token_summary" , 40 , "bold" , 2 , total_tokens_spent_str , current_tokens_str );
-        // crprint( "[bright magenta]Total Tokens Spent:[/] %ld\n" , openai -> total_tokens_spent );
-        // crprint( "[green]Current Tokens:[/] %d/%d[/]\n" , openai -> current_tokens , openai -> tokens_limit );
         free( total_tokens_spent_str );
         free( current_tokens_str );
         return 0;
@@ -133,7 +132,7 @@ int handle_slash_command( const char* __slashcmd ){
             free( chat_history_save_file_generated_path );
         free( save_path );
         return 0;
-    }
+    } // /save FILE
 
 // ====================================================================================
 // ===================================== /timeout =====================================
@@ -280,6 +279,26 @@ int handle_slash_command( const char* __slashcmd ){
         // clear last "Please input new Model" output
         goto ask_model;
     } // /model MODEL
+
+// ====================================================================================
+// ===================================== /version =====================================
+// ====================================================================================
+
+    if ( strcmp( __slashcmd , "/version" ) == 0 )
+    {
+        pthread_mutex_lock( &remote_version_mutex );
+        char* local_version_str = ( char* ) malloc( 36 );
+        char* remote_version_str = ( char* ) malloc( 36 );
+        if ( remote_version == NULL )
+            remote_version = "Unknown";
+        sprintf( local_version_str , "[blue]Local Version:[/]  %s" , CGPTERM_VERSION );
+        sprintf( remote_version_str , "[green]Remote Version:[/] %s" , remote_version );
+        crpanel( "Version" , 28 , "bold" , 2 , local_version_str , remote_version_str );
+        free( local_version_str );
+        free( remote_version_str );
+        pthread_mutex_unlock( &remote_version_mutex );
+        return 0;
+    } // /version
 
 // ========================================================================================
 // ===================================== /help, /exit =====================================

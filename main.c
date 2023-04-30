@@ -18,6 +18,7 @@
 #include"crich.h"
 
 void get_remote_version();
+bool is_local_latest();
 
 int main( int argc , char** argv ){
     setlocale( LC_ALL , "" );
@@ -113,7 +114,7 @@ int main( int argc , char** argv ){
     ezylog_logdebug( logger , "openai service initialization complete" );
 
     crprint( "[dim]Hi, welcome to chat with GPT. Type `[bright magenta]/help[/]` to display available commands.\n" );
-    ezylog_loginfo( logger , "cGPTerm main service launch" );
+    ezylog_loginfo( logger , "cGPTerm main service launch, local version: %s" , CGPTERM_VERSION );
 
     if ( gota_load )
         openai_load_history( gav_load );
@@ -126,6 +127,14 @@ int main( int argc , char** argv ){
     ezylog_loginfo( logger , "Total tokens spent: %d" , openai -> total_tokens_spent );
     openai_free();
     curl_global_cleanup();
+
+    pthread_mutex_lock( &remote_version_mutex );
+    if ( !is_local_latest() )
+    {
+        crprint( "New Version Available: [bold][red]%s[/][/] -> [bold][green]%s[/][/]\n" , CGPTERM_VERSION , remote_version );
+        crprint( "Visit the GitHub Site [underline][bold][blue]https://github.com/Ace-Radom/cGPTerm[/][/][/] to see what have been changed!\n" );
+    } // local not latest
+    pthread_mutex_unlock( &remote_version_mutex );
 
 stopmain:
     cconfig();
@@ -193,13 +202,28 @@ void get_remote_version(){
 
     json_t* remote_version_jsonobj = json_array_get( root , 0 );
     remote_version_jsonobj = json_object_get( remote_version_jsonobj , "tag_name" );
-    remote_version = json_string_value( remote_version_jsonobj );
+    remote_version = ( char* ) malloc( 16 );
+    strcpy( remote_version , json_string_value( remote_version_jsonobj ) );
     // get remote version from GitHub API response: response[0]["tag_name"]
-    ezylog_logdebug( logger , "Remote version got: %s" , remote_version );
+    ezylog_logdebug( logger , "Latest remote version got: %s" , remote_version );
 
 request_stop:
     curl_easy_cleanup( curl );
     free( response_data.ptr );
     json_decref( root );
     return;
+}
+
+bool is_local_latest(){
+    if ( strcmp( remote_version , "Unknown" ) == 0 )
+        return true;
+    // remote version didn't get
+
+    int local_major , local_minor , local_build;
+    int remote_major , remote_minor , remote_build;
+    sscanf( CGPTERM_VERSION , "v%d.%d.%d" , &local_major , &local_minor , &local_build );
+    sscanf( remote_version , "v%d.%d.%d" , &remote_major , &remote_minor , &remote_build );
+    long local = local_major * 10000 + local_minor * 100 + local_build;
+    long remote = remote_major * 10000 + remote_minor * 100 + remote_build;
+    return local < remote ? false : true;
 }
