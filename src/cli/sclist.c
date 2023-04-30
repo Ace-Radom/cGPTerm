@@ -5,11 +5,11 @@
 */
 const char* slash_commands[] = {
     "/tokens",
+    "/usage",
     "/save",
     "/timeout",
     "/model",
     "/version",
-    "/usage",
     "/help",
     "/exit",
     NULL

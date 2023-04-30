@@ -351,9 +351,11 @@ int handle_slash_command( const char* __slashcmd ){
 void print_slash_command_help(){
     crprint( "[bold]Available commands:\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
+    crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
     crprint( "    [bright magenta]/model[/] [bold]\\[model_name][/]\t\t- Change AI model\n" );
+    crprint( "    [bright magenta]/version[/]\t\t\t- Show cGPTerm local and remote version\n" );
     crprint( "    [bright magenta]/help[/]\t\t\t- Show this help message\n" );
     crprint( "    [bright magenta]/exit[/]\t\t\t- Exit the application\n" );
     return;
