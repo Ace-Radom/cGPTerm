@@ -240,6 +240,9 @@ void openai_load_history( const char* __history_file ){
     } // print history message
     crprint( "[dim]Chat history successfully loaded from: [bright magenta]%s[/]\n" , __history_file );
     ezylog_loginfo( logger , "Chat history successfully loaded from: \"%s\"" , __history_file );
+    printf( "\033]0;%s\007" , __history_file );
+    fflush( stdout );
+    // change CLI title
     json_decref( history );
     fclose( savef );
     return;
