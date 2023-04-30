@@ -57,8 +57,8 @@ int handle_slash_command( const char* __slashcmd ){
         char* total_tokens_spent_str = ( char* ) malloc( 64 );
         char* current_tokens_str = ( char* ) malloc( 64 );
         sprintf( total_tokens_spent_str , "[bright magenta]Total Tokens Spent:[/] \t%ld" , openai -> total_tokens_spent );
-        sprintf( current_tokens_str , "[green]Current Tokens:[/] \t%d/%d" , openai -> current_tokens , openai -> tokens_limit );
-        crpanel( "token_summary" , 40 , "bold" , 2 , total_tokens_spent_str , current_tokens_str );
+        sprintf( current_tokens_str , "[green]Current Tokens:[/] \t%d/[bold]%d[/]" , openai -> current_tokens , openai -> tokens_limit );
+        crpanel( "token_summary" , NULL , 40 , NULL , 2 , total_tokens_spent_str , current_tokens_str );
         free( total_tokens_spent_str );
         free( current_tokens_str );
         return 0;
@@ -299,8 +299,8 @@ int handle_slash_command( const char* __slashcmd ){
         char* plan_str = ( char* ) malloc( 64 );
         sprintf( total_granted_str , "[green]Total Granted:[/]\t$%.2lf" , openai -> credit_total_granted );
         sprintf( used_this_month_str , "[cyan]Used This Month:[/]\t$%.2lf" , openai -> credit_used_this_month );
-        sprintf( plan_str , "[blue]Plan:[/]\t\t%s" , openai -> credit_plan );
-        crpanel( "Credit Summary" , 36 , "bold" , 2 , total_granted_str , used_this_month_str );
+        sprintf( plan_str , "Plan: %s" , openai -> credit_plan );
+        crpanel( "Credit Summary" , plan_str , 36 , NULL , 2 , total_granted_str , used_this_month_str );
         free( total_granted_str );
         free( used_this_month_str );
         free( plan_str );
@@ -320,7 +320,7 @@ int handle_slash_command( const char* __slashcmd ){
             remote_version = "Unknown";
         sprintf( local_version_str , "[blue]Local Version:[/]  %s" , CGPTERM_VERSION );
         sprintf( remote_version_str , "[green]Remote Version:[/] %s" , remote_version );
-        crpanel( "Version" , 28 , "bold" , 2 , local_version_str , remote_version_str );
+        crpanel( "Version" , NULL , 28 , NULL , 2 , local_version_str , remote_version_str );
         free( local_version_str );
         free( remote_version_str );
         pthread_mutex_unlock( &remote_version_mutex );
