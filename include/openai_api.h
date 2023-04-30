@@ -21,6 +21,7 @@ extern "C" {
 #include"openai_api/tiktokens.h"
 #include"openai_api/curlfunctions.h"
 #include"crich.h"
+#include"cdate.h"
 
 typedef struct {
     char* endpoint;
@@ -35,6 +36,7 @@ typedef struct {
     double credit_total_granted;
     double credit_total_used;
     double credit_used_this_month;
+    char* credit_plan;
 } openai_t;
 
 typedef struct {
@@ -53,6 +55,8 @@ void openai_free();
 int openai_set_model( char* __new_model );
 int openai_save_history( FILE* __f );
 void openai_load_history( const char* __history_file );
+
+void openai_get_usage_summary();
 
 void openai_msg_popback();
 

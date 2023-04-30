@@ -16,12 +16,13 @@ extern "C" {
 #include<readline/history.h>
 #include<pthread.h>
 
+#include"sclist.h"
+#include"toolkit.h"
 #include"openai_api.h"
 #include"ezylog.h"
 #include"utils.h"
 #include"crich.h"
 
-extern const char* slash_commands[];
 extern char* chat_history_save_file_generated_path;
 
 int handle_slash_command( const char* __slashcmd );

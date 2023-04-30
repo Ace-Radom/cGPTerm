@@ -13,7 +13,7 @@ extern "C" {
 
 #include<readline/readline.h>
 
-#include"slashcmd.h"
+#include"sclist.h"
 #include"crich.h"
 
 #define HIDE_CURSOR "\033[?25l"

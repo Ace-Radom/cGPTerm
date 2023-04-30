@@ -1,19 +1,5 @@
 #include"cli/slashcmd.h"
 
-/**
- * @brief all available slash commands. they will be searched by rl_completion_slash_command_search
-*/
-const char* slash_commands[] = {
-    "/tokens",
-    "/save",
-    "/timeout",
-    "/model",
-    "/version",
-    "/help",
-    "/exit",
-    NULL
-};
-
 void disable_history_search( void ){
     rl_bind_keyseq( "\\e[A" , NULL ); // disable up arrow key
     rl_bind_keyseq( "\\e[B" , NULL ); // disable down arrow key
@@ -279,6 +265,47 @@ int handle_slash_command( const char* __slashcmd ){
         // clear last "Please input new Model" output
         goto ask_model;
     } // /model MODEL
+
+// ==================================================================================
+// ===================================== /usage =====================================
+// ==================================================================================
+
+    if ( strcmp( __slashcmd , "/usage" ) == 0 )
+    {
+        turn_off_echo();
+        write_ANSI( HIDE_CURSOR );
+        // turn off echo; hide cursor
+        while ( request_working );
+        // safety line: if still a request working, wait
+        pthread_t get_usage_summary;
+        pthread_create( &get_usage_summary , NULL , openai_get_usage_summary , NULL );
+        usleep( 10000 );
+        // start get usage request; wait 10 ms in order to let openai_get_usage to lock request_working (-> true)
+        while ( request_working )
+        {
+            crstatus( "[bold][bright blue]Getting credit usage...\r" , "green" );
+            usleep( 100000 );
+        }
+        // until request done: print wait msg
+        printf( "\r\033[2K\r" );
+        fflush( stdout );
+        pthread_join( get_usage_summary , NULL );
+        // clean wait msg, get usage request thread join
+        reset_terattr();
+        write_ANSI( SHOW_CURSOR );
+        // reset attr; show cursor
+        char* total_granted_str = ( char* ) malloc( 64 );
+        char* used_this_month_str = ( char* ) malloc( 64 );
+        char* plan_str = ( char* ) malloc( 64 );
+        sprintf( total_granted_str , "[green]Total Granted:[/]\t$%.2lf" , openai -> credit_total_granted );
+        sprintf( used_this_month_str , "[cyan]Used This Month:[/]\t$%.2lf" , openai -> credit_used_this_month );
+        sprintf( plan_str , "[blue]Plan:[/]\t\t%s" , openai -> credit_plan );
+        crpanel( "Credit Summary" , 36 , "bold" , 2 , total_granted_str , used_this_month_str );
+        free( total_granted_str );
+        free( used_this_month_str );
+        free( plan_str );
+        return 0;
+    } // /usage
 
 // ====================================================================================
 // ===================================== /version =====================================

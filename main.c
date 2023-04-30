@@ -169,7 +169,7 @@ void get_remote_version(){
     res = curl_easy_perform( curl );
     if ( res != CURLE_OK )
     {
-        ezylog_logerror( logger , "send request failed when getting remote version: " , curl_easy_strerror( res ) );
+        ezylog_logerror( logger , "send request failed when getting remote version: %s" , curl_easy_strerror( res ) );
         pthread_mutex_lock( &remote_version_mutex );
         remote_version = "Unknown";
         pthread_mutex_unlock( &remote_version_mutex );
@@ -186,6 +186,7 @@ void get_remote_version(){
     if ( !root )
     {
         ezylog_logerror( logger , "when getting remote version, response json error at line %d: %s" , error.line , error.text );
+        ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
         remote_version = "Unknown";
         goto request_stop;
     } // json error
@@ -206,11 +207,12 @@ void get_remote_version(){
     strcpy( remote_version , json_string_value( remote_version_jsonobj ) );
     // get remote version from GitHub API response: response[0]["tag_name"]
     ezylog_logdebug( logger , "Latest remote version got: %s" , remote_version );
+    
+    json_decref( root );
 
 request_stop:
     curl_easy_cleanup( curl );
     free( response_data.ptr );
-    json_decref( root );
     return;
 }
 

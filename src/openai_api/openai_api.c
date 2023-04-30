@@ -5,6 +5,12 @@ bool request_working = false;
 long HTTP_Response_code = 0;
 
 typedef struct {
+    cdate_t start_date;
+    cdate_t end_date;
+    double usage;
+} get_usage_date_data_transfer_t;
+
+typedef struct {
     char* model;
     int tokens_limit;
 } chat_model_list_t;
@@ -32,6 +38,7 @@ void openai_init(){
     openai -> credit_total_granted = 0.0;
     openai -> credit_total_used = 0.0;
     openai -> credit_used_this_month = 0.0;
+    openai -> credit_plan = NULL;
     // basic init
 
     char* authorization_bearer_header_str = ( char* ) malloc( 128 );
@@ -116,6 +123,7 @@ void openai_send_chatrequest( void* __data ){
     {
         fprintf( stderr , "[openai_send_chatrequest] -> response json error at line %d: %s\n" , error.line , error.text );
         ezylog_logerror( logger , "response json error at line %d: %s" , error.line , error.text );
+        ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
         text = NULL;
         goto request_stop;
     } // json error
@@ -234,6 +242,180 @@ void openai_load_history( const char* __history_file ){
     ezylog_loginfo( logger , "Chat history successfully loaded from: \"%s\"" , __history_file );
     json_decref( history );
     fclose( savef );
+    return;
+}
+
+void openai_get_subscription(){
+    CURL* curl;
+    CURLcode res;
+    curl_data_t response_data = { NULL , 0 };
+    curl = curl_easy_init();
+    if ( !curl )
+    {
+        ezylog_logerror( logger , "curl init failed when getting subscription" );
+        openai -> credit_total_granted = -1;
+        openai -> credit_plan = "Unknown";
+        request_working = false;
+        return;
+    } // curl init error
+
+    curl_easy_setopt( curl , CURLOPT_HTTPGET , 1L );
+    curl_easy_setopt( curl , CURLOPT_URL , "https://api.openai.com/dashboard/billing/subscription" );
+    curl_easy_setopt( curl , CURLOPT_HTTPHEADER , openai -> headers );
+    curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , curl_write_callback_function );
+    curl_easy_setopt( curl , CURLOPT_TIMEOUT_MS , ( int ) ( OPENAI_API_TIMEOUT * 1000 ) );
+    // make curl request
+
+    res = curl_easy_perform( curl );
+    if ( res != CURLE_OK )
+    {
+        ezylog_logerror( logger , "send request failed when getting subscription: %s" , curl_easy_strerror( res ) );
+        openai -> credit_total_granted = -1;
+        openai -> credit_plan = "Unknown";
+        goto request_stop;
+    }
+
+    long response_code;
+    curl_easy_getinfo( curl , CURLINFO_RESPONSE_CODE , &response_code );
+
+    json_t* root;
+    json_error_t error;
+
+    root = json_loads( response_data.ptr , 0 , &error );
+    if ( !root )
+    {
+        ezylog_logerror( logger , "when getting subscription, response json error at line %d: %s" , error.line , error.text );
+        ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
+        openai -> credit_total_granted = -1;
+        openai -> credit_plan = "Unknown";
+        goto request_stop;
+    } // json error
+
+    if ( response_code / 100 == 4 )
+    {
+        json_t* response_errormsg = json_object_get( root , "error" );
+        ezylog_logerror( logger , "OpenAI subscription API responsed Error: Code %ld, Message: \"%s\"" , response_code , json_string_value( json_object_get( response_errormsg , "message" ) ) );
+        ezylog_logdebug( logger , "Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+        openai -> credit_total_granted = -1;
+        openai -> credit_plan = "Unknown";
+    } // parse response code, match 4xx errors
+    else
+    {
+        openai -> credit_total_granted = json_real_value( json_object_get( root , "hard_limit_usd" ) );
+        json_t* title_obj = json_copy( json_object_get( json_object_get( root , "plan" ) , "title" ) );
+        openai -> credit_plan = json_string_value( title_obj );
+        ezylog_loginfo( logger , "OpenAI subcription got: credit total granted: %lf, credit plan: \"%s\"" , openai -> credit_total_granted , openai -> credit_plan );
+    } // response code 200 OK (most likely)
+    
+    json_decref( root );
+
+request_stop:
+    curl_easy_cleanup( curl );
+    free( response_data.ptr );
+    return;
+}
+
+void openai_get_usage( void* __be_data ){
+    get_usage_date_data_transfer_t* be_data = ( get_usage_date_data_transfer_t* ) __be_data;
+    char* start_date = parse_date( be_data -> start_date );
+    char* end_date = parse_date( be_data -> end_date );
+    // unpack transfer data
+
+    CURL* curl;
+    CURLcode res;
+    curl_data_t response_data = { NULL , 0 };
+    curl = curl_easy_init();
+    if ( !curl )
+    {
+        ezylog_logerror( logger , "curl init failed when getting usage between %s and %s" , start_date , end_date );
+        be_data -> usage = -1;
+        return;
+    } // curl init error
+
+    char* get_usage_url = ( char* ) malloc( 128 );
+    strcpy( get_usage_url , "https://api.openai.com/dashboard/billing/usage" );
+    strcat( get_usage_url , "?start_date=" );
+    strcat( get_usage_url , start_date );
+    strcat( get_usage_url , "&end_date=" );
+    strcat( get_usage_url , end_date );
+    // build get url
+
+    curl_easy_setopt( curl , CURLOPT_HTTPGET , 1L );
+    curl_easy_setopt( curl , CURLOPT_URL , get_usage_url );
+    curl_easy_setopt( curl , CURLOPT_HTTPHEADER , openai -> headers );
+    curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , curl_write_callback_function );
+    curl_easy_setopt( curl , CURLOPT_TIMEOUT_MS , ( int ) ( OPENAI_API_TIMEOUT * 1000 ) );
+    // make curl request
+
+    double usage_return = 0;
+
+    res = curl_easy_perform( curl );
+    if ( res != CURLE_OK )
+    {
+        ezylog_logerror( logger , "send request failed when getting usage between %s and %s" , start_date , end_date );
+        usage_return = -1;
+        goto request_stop;
+    }
+
+    long response_code;
+    curl_easy_getinfo( curl , CURLINFO_RESPONSE_CODE , &response_code );
+
+    json_t* root;
+    json_error_t error;
+
+    root = json_loads( response_data.ptr , 0 , &error );
+    if ( !root )
+    {
+        ezylog_logerror( logger , "when getting usage between %s and %s, response json error at line %d: %s" , start_date , end_date , error.line , error.text );
+        ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
+        usage_return = -1;
+        goto request_stop;
+    } // json error
+
+    if ( response_code / 100 == 4 )
+    {
+        json_t* response_errormsg = json_object_get( root , "error" );
+        ezylog_logerror( logger , "OpenAI usage API responsed Error (%s ~ %s): Code %ld, Message: \"%s\"" , start_date , end_date , response_code , json_string_value( json_object_get( response_errormsg , "message" ) ) );
+        ezylog_logdebug( logger , "Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+        usage_return = -1;
+    } // parse response code, match 4xx errors
+    else
+    {
+        usage_return = json_real_value( json_object_get( root , "total_usage" ) );
+        usage_return /= 100.0;
+        ezylog_logdebug( logger , "OpenAI usage got: %lf$ between %s and %s" , usage_return , start_date , end_date );
+    } // response code 200 OK (most likely)
+
+    json_decref( root );
+
+request_stop:
+    curl_easy_cleanup( curl );
+    free( response_data.ptr );
+    free( get_usage_url );
+    free( start_date );
+    free( end_date );
+    be_data -> usage = usage_return;
+    return;
+}
+
+void openai_get_usage_summary(){
+    request_working = true;
+    get_usage_date_data_transfer_t usage_this_month;
+    get_today_date( &usage_this_month.end_date );
+    usage_this_month.start_date = usage_this_month.end_date;
+    usage_this_month.start_date.day = 1;
+    usage_this_month.usage = 0;
+
+    pthread_t get_subscription;
+    pthread_t get_usage;
+    pthread_create( &get_subscription , NULL , openai_get_subscription , NULL );
+    pthread_create( &get_usage , NULL , openai_get_usage , ( void* ) &usage_this_month );
+    pthread_join( get_subscription , NULL );
+    pthread_join( get_usage , NULL );
+    openai -> credit_used_this_month = usage_this_month.usage;
+    request_working = false;
     return;
 }
 
