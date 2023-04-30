@@ -1,5 +1,7 @@
 #include"cli.h"
 
+bool match_exit_word( const char* __str );
+
 /**
  * @brief start cGPTerm CLI
 */
@@ -81,6 +83,36 @@ int start_CLI(){
         else
             openai_msg_popback();
         // same: request error, pop last user's msg
+
+        if ( match_exit_word( input_trim ) )
+        {
+            free( input_trim );
+            break;
+        } // match exit word
+
+        free( input_trim );
     }
     return 0;
+}
+
+bool match_exit_word( const char* __str ){
+    char* str = ( char* ) malloc( strlen( __str ) + 1 );
+    strcpy( str , __str );
+    char* stralllower = str;
+    for ( ; *str != '\0' ; str++ )
+        *str = tolower( *str );
+    if ( strcmp( stralllower , "再见" ) == 0 ||
+         strcmp( stralllower , "bye" ) == 0 ||
+         strcmp( stralllower , "goodbye" ) == 0 ||
+         strcmp( stralllower , "结束" ) == 0 ||
+         strcmp( stralllower , "end" ) == 0 ||
+         strcmp( stralllower , "退出" ) == 0 ||
+         strcmp( stralllower , "exit" ) == 0 ||
+         strcmp( stralllower , "quit" ) == 0 )
+    {
+        free( stralllower );
+        return true;
+    }
+    free( stralllower );
+    return false;
 }
