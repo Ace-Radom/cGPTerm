@@ -4,3 +4,6 @@
 [submodule "cpprich"]
 	path = cpprich
 	url = https://github.com/Ace-Radom/cpprich.git
+[submodule "pthread_pool"]
+	path = pthread_pool
+	url = https://github.com/jonhoo/pthread_pool.git
