@@ -26,9 +26,11 @@ add_dependencies(openaiapi rstiktokens)
 target_link_libraries(openaiapi
     curl
     pthread
+    pthreadpool
     jansson
     ezylog
     cpprich
     cdate
+    cvector
     ${rstiktokens_a}
 )

@@ -20,8 +20,14 @@ add_library(iniparser SHARED
     ${CMAKE_SOURCE_DIR}/iniparser/src/dictionary.c
     ${CMAKE_SOURCE_DIR}/iniparser/src/iniparser.c
 )
+include_directories(${CMAKE_SOURCE_DIR}/pthread_pool)
+add_library(pthreadpool STATIC
+    ${CMAKE_SOURCE_DIR}/pthread_pool/pthread_pool.c
+)
 include_directories(${CMAKE_SOURCE_DIR}/cpprich/include)
 add_subdirectory(cpprich)
+
+# build third party libraries
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
@@ -29,7 +35,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 add_executable(cgpterm main.c ${UTILS})
 target_link_libraries(cgpterm
     utils
-    # ncursesw
     ezylog
     rwcfg
     argparse

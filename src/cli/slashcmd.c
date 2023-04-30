@@ -272,6 +272,8 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( __slashcmd , "/usage" ) == 0 )
     {
+        ezylog_logdebug( logger , "/usage command triggered" );
+        
         turn_off_echo();
         write_ANSI( HIDE_CURSOR );
         // turn off echo; hide cursor
@@ -296,13 +298,16 @@ int handle_slash_command( const char* __slashcmd ){
         // reset attr; show cursor
         char* total_granted_str = ( char* ) malloc( 64 );
         char* used_this_month_str = ( char* ) malloc( 64 );
+        char* used_total_str = ( char* ) malloc( 64 );
         char* plan_str = ( char* ) malloc( 64 );
         sprintf( total_granted_str , "[green]Total Granted:[/]\t$%.2lf" , openai -> credit_total_granted );
-        sprintf( used_this_month_str , "[cyan]Used This Month:[/]\t$%.2lf" , openai -> credit_used_this_month );
+        sprintf( used_this_month_str , "[bright cyan]Used This Month:[/]\t$%.2lf" , openai -> credit_used_this_month );
+        sprintf( used_total_str , "[bright blue]Used Total:[/]\t\t$%.2lf" , openai -> credit_total_used );
         sprintf( plan_str , "Plan: %s" , openai -> credit_plan );
-        crpanel( "Credit Summary" , plan_str , 36 , NULL , 2 , total_granted_str , used_this_month_str );
+        crpanel( "Credit Summary" , plan_str , 36 , NULL , 3 , total_granted_str , used_this_month_str , used_total_str );
         free( total_granted_str );
         free( used_this_month_str );
+        free( used_total_str );
         free( plan_str );
         return 0;
     } // /usage

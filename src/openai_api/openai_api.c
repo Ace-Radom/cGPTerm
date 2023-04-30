@@ -305,7 +305,7 @@ void openai_get_subscription(){
         openai -> credit_total_granted = json_real_value( json_object_get( root , "hard_limit_usd" ) );
         json_t* title_obj = json_copy( json_object_get( json_object_get( root , "plan" ) , "title" ) );
         openai -> credit_plan = json_string_value( title_obj );
-        ezylog_loginfo( logger , "OpenAI subcription got: credit total granted: %lf, credit plan: \"%s\"" , openai -> credit_total_granted , openai -> credit_plan );
+        ezylog_logdebug( logger , "OpenAI subcription got: credit total granted: %lf, credit plan: \"%s\"" , openai -> credit_total_granted , openai -> credit_plan );
     } // response code 200 OK (most likely)
     
     json_decref( root );
@@ -402,18 +402,68 @@ request_stop:
 
 void openai_get_usage_summary(){
     request_working = true;
+
+    openai -> credit_total_granted = 0;
+    openai -> credit_used_this_month = 0;
+    openai -> credit_total_used = 0;
+    openai -> credit_plan = NULL;
+
     get_usage_date_data_transfer_t usage_this_month;
     get_today_date( &usage_this_month.end_date );
     usage_this_month.start_date = usage_this_month.end_date;
     usage_this_month.start_date.day = 1;
     usage_this_month.usage = 0;
+    // build the time span of this month
 
     pthread_t get_subscription;
-    pthread_t get_usage;
+    pthread_t get_usage_this_month;
     pthread_create( &get_subscription , NULL , openai_get_subscription , NULL );
-    pthread_create( &get_usage , NULL , openai_get_usage , ( void* ) &usage_this_month );
+    pthread_create( &get_usage_this_month , NULL , openai_get_usage , ( void* ) &usage_this_month );
+    // start to get credit plan, credit total granted and credit usage this month
+
+// ================================ start to get total usage ================================
+
+    void* get_total_usage_thread_pool = pool_start( openai_get_usage , 5 );
+    // create thread pool
+    c_vector get_total_usage_date_span;
+    cv_init( &get_total_usage_date_span , 10 );
+    // create args vector
+
+    cdate_t today;
+    cdate_t start_date = { 2023 , 1 , 1 };
+    cdate_t end_date = start_date;
+    get_today_date( &today );
+    while ( date_diff( start_date , today ) > 0 )
+    {
+        date_add_day( &end_date , 99 );
+        // date span max is 99 days
+
+        get_usage_date_data_transfer_t* usage_this_span = ( get_usage_date_data_transfer_t* ) malloc( sizeof( get_usage_date_data_transfer_t ) );
+        usage_this_span -> start_date = start_date;
+        usage_this_span -> end_date = end_date;
+        usage_this_span -> usage = 0;
+        cv_push_back( &get_total_usage_date_span , ( void* ) usage_this_span );
+        // build new time span data, and push it to vector
+        start_date = end_date;
+    }
+
+    for ( int i = 0 ; i < cv_len( &get_total_usage_date_span ) ; i++ )
+        pool_enqueue( get_total_usage_thread_pool , get_total_usage_date_span.items[i] , 0 );
+    // start all jobs
+    pool_wait( get_total_usage_thread_pool );
+    // wait all jobs to be finished
+
+    for ( int i = 0 ; i < cv_len( &get_total_usage_date_span ) ; i++ )
+    {
+        get_usage_date_data_transfer_t* usage_this_span = ( get_usage_date_data_transfer_t* ) get_total_usage_date_span.items[i];
+        openai -> credit_total_used += usage_this_span -> usage;
+    } // unpack datas and add all stage usage to credit_total_used
+    pool_end( get_total_usage_thread_pool );
+    cv_clean( &get_total_usage_date_span );
+    // clean up
+
     pthread_join( get_subscription , NULL );
-    pthread_join( get_usage , NULL );
+    pthread_join( get_usage_this_month , NULL );
     openai -> credit_used_this_month = usage_this_month.usage;
     request_working = false;
     return;

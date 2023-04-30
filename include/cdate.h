@@ -19,6 +19,8 @@ typedef struct {
 
 void get_today_date( cdate_t* __d );
 char* parse_date( cdate_t __date );
+void date_add_day( cdate_t* __date , int __delta );
+long date_diff( cdate_t __d1 , cdate_t __d2 );
 
 #ifdef __cplusplus
 }

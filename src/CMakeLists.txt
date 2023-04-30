@@ -20,3 +20,6 @@ target_link_libraries(utils
 add_library(cdate STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/cdate.c
 )
+add_library(cvector STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/cvector.c
+)

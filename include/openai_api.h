@@ -22,6 +22,8 @@ extern "C" {
 #include"openai_api/curlfunctions.h"
 #include"crich.h"
 #include"cdate.h"
+#include"pthread_pool.h"
+#include"cvector.h"
 
 typedef struct {
     char* endpoint;
