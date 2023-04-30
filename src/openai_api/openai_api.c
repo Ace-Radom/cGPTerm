@@ -415,6 +415,7 @@ void openai_get_usage_summary(){
     get_today_date( &usage_this_month.end_date );
     usage_this_month.start_date = usage_this_month.end_date;
     usage_this_month.start_date.day = 1;
+    date_add_day( &usage_this_month.end_date , 1 );
     usage_this_month.usage = 0;
     // build the time span of this month
 
