@@ -60,6 +60,7 @@ void openai_load_history( const char* __history_file );
 
 void openai_get_usage_summary();
 
+void openai_undo();
 void openai_msg_popback();
 
 #ifdef __cplusplus

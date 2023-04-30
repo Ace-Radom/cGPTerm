@@ -472,6 +472,20 @@ void openai_get_usage_summary(){
     return;
 }
 
+void openai_undo(){
+    size_t msglist_size = json_array_size( openai -> messages );
+    if ( msglist_size <= 1 )
+    {
+        crprint( "[dim]Nothing to undo\n" );
+        return;
+    }
+    char* last_msg = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 2 ) , "content" ) );
+    crprint( "[dim]Last question: '[green]%s[/]' and its answer has been removed.\n" );
+    openai_msg_popback();
+    openai_msg_popback();
+    return;
+}
+
 void openai_msg_popback(){
     size_t msglist_size = json_array_size( openai -> messages );
     if ( msglist_size <= 1 )
