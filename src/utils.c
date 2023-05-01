@@ -13,3 +13,8 @@ char* usrhome = NULL;
 char* cfgdir = NULL;
 char* logpath = NULL;
 char* cfginipath = NULL;
+
+char* remote_version = NULL;
+pthread_mutex_t remote_version_mutex;
+
+char* curl_userangel_data = NULL;

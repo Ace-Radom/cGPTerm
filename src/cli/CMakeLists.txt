@@ -11,4 +11,5 @@ target_link_libraries(cli
     utils
     pthread
     readline
+    cpprich
 )

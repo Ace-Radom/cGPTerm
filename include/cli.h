@@ -9,6 +9,7 @@ extern "C" {
 #include<string.h>
 #include<stdlib.h>
 #include<unistd.h>
+#include<signal.h>
 
 #include<pthread.h>
 #include<readline/readline.h>
@@ -16,6 +17,7 @@ extern "C" {
 
 #include"openai_api.h"
 #include"cli/toolkit.h"
+#include"crich.h"
 
 int start_CLI();
 // this is an api for main.c

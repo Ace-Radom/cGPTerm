@@ -2,7 +2,10 @@
 
 struct termios ori_attr;
 
-const char* wait_char[] = { ".  " , ".. " , "..." , " .." , "  ." , "   " };
+void SIGINT_handler( int signum ){
+    openai_request_abort();
+    return;
+}
 
 void get_original_terattr(){
     tcgetattr( STDIN_FILENO , &ori_attr );
@@ -25,17 +28,6 @@ void turn_off_echo(){
 
 void write_ANSI( const char* __ANSI ){
     write( STDIN_FILENO , __ANSI , strlen( __ANSI ) );
-    return;
-}
-
-void print_wait_msg( const char* __msg ){
-    static int counter = 0;
-    printf( "%s%s\r" , __msg , wait_char[counter] );
-    fflush( stdout );
-    counter == 5 ? counter = 0 
-                 : counter++;
-    usleep( 100000 );
-    // sleep 100 ms
     return;
 }
 
@@ -65,6 +57,20 @@ char** rl_attempted_completion_callback( const char* text , int start , int end 
     return matches;
 }
 
+void rl_completion_display_matches_hook_callback( char** matches , int num_matches , int max_length ){
+    int end = rl_end;
+    printf( "\n\033[2K\r" );
+    for ( int i = 1 ; i <= num_matches ; i++ )
+        crprint( "[bright magenta]%s  " , matches[i] );
+    // print all options
+    printf( "\033[1A\r" );
+    rl_redisplay();
+    rl_point = end;
+    rl_forced_update_display();
+    // reset readline status
+    return;
+}
+
 
 /**
  * @brief erase space at begin and end of a str
@@ -80,7 +86,7 @@ char* trim( char* __str ){
         return NULL;
     // here: i > j means there are only spaces in this str
     // if continue, it will lead to segmentation fault, therefore return NULL here
-    char* newstr = ( char* ) malloc( strlen( __str ) );
+    char* newstr = ( char* ) malloc( strlen( __str ) + 1 );
     strncpy( newstr , __str + i , j - i + 1 );
     newstr[j-i+1] = '\0';
     return newstr;

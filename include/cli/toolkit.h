@@ -13,12 +13,16 @@ extern "C" {
 
 #include<readline/readline.h>
 
-#include"slashcmd.h"
+#include"sclist.h"
+#include"crich.h"
+#include"openai_api.h"
 
 #define HIDE_CURSOR "\033[?25l"
 #define SHOW_CURSOR "\033[?25h"
 
 extern struct termios ori_attr;
+
+void SIGINT_handler( int signum ); 
 
 // ===============================================
 // ================== CLI Tools ==================
@@ -30,10 +34,9 @@ void turn_off_echo();
 
 void write_ANSI( const char* __ANSI );
 
-void print_wait_msg( const char* __msg );
-
 char** rl_attempted_completion_callback( const char* text , int start , int end );
 char* rl_completion_search( const char* text , int state );
+void rl_completion_display_matches_hook_callback( char** matches , int num_matches , int max_length );
 
 // ===============================================
 // ================== str Tools ==================

@@ -9,10 +9,17 @@ add_subdirectory(argparse)
 add_subdirectory(cli)
 # build cpp cli
 
-add_library(utils
+add_library(utils STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.c
 )
 target_link_libraries(utils
     ezylog
     iniparser
+    pthread
+)
+add_library(cdate STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/cdate.c
+)
+add_library(cvector STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/cvector.c
 )

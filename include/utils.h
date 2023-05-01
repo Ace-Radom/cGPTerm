@@ -8,6 +8,8 @@ extern "C" {
 #include<stdbool.h>
 #include<termios.h>
 
+#include<pthread.h>
+
 #include"ezylog.h"
 #include"openai_api.h"
 #include"iniparser.h"
@@ -27,6 +29,11 @@ extern char* usrhome;       // ~
 extern char* cfgdir;        // ~/.cgpterm
 extern char* logpath;       // ~/.cgpterm/chat.log
 extern char* cfginipath;    // ~/.cgpterm/config.ini
+
+extern char* remote_version;
+extern pthread_mutex_t remote_version_mutex;
+
+extern char* curl_userangel_data;
 
 #ifdef __cplusplus
 }
