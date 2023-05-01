@@ -239,8 +239,8 @@ void openai_load_history( const char* __history_file ){
     for ( int i = 1 ; i < json_array_size( openai -> messages ) ; i++ ) // system prompt should never be print
     {
         this_msg = json_array_get( openai -> messages , i );
-        char* role = json_string_value( json_object_get( this_msg , "role" ) );
-        char* content = json_string_value( json_object_get( this_msg , "content" ) );
+        const char* role = json_string_value( json_object_get( this_msg , "role" ) );
+        const char* content = json_string_value( json_object_get( this_msg , "content" ) );
         if ( strcmp( role , "user" ) == 0 )
         {
             printf( "> %s\n" , content );
@@ -510,6 +510,19 @@ void openai_undo(){
     crprint( "[dim]Last question: '[green]%s[/]' and its answer has been removed.\n" , last_msg );
     openai_msg_popback();
     openai_msg_popback();
+    return;
+}
+
+void openai_printlast(){
+    size_t msglist_size = json_array_size( openai -> messages );
+    if ( msglist_size <= 1 )
+    {
+        crprint( "[dim]Nothing to print\n" );
+        return;
+    }
+    char* last_response = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 1 ) , "content" ) );
+    crprint( "[bold][bright cyan]ChatGPT:\n" );
+    printf( "%s\n" , last_response );
     return;
 }
 

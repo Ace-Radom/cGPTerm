@@ -10,6 +10,7 @@ const char* slash_commands[] = {
     "/model",
     "/save",
     "/undo",
+    "/last",
     "/version",
     "/help",
     "/exit",
