@@ -15,11 +15,14 @@ extern "C" {
 
 #include"sclist.h"
 #include"crich.h"
+#include"openai_api.h"
 
 #define HIDE_CURSOR "\033[?25l"
 #define SHOW_CURSOR "\033[?25h"
 
 extern struct termios ori_attr;
+
+void SIGINT_handler( int signum ); 
 
 // ===============================================
 // ================== CLI Tools ==================

@@ -4,6 +4,9 @@ openai_t* openai = NULL;
 bool request_working = false;
 long HTTP_Response_code = 0;
 
+CURL* curl_using_now = NULL;
+bool curl_request_abort_called = false;
+
 typedef struct {
     cdate_t start_date;
     cdate_t end_date;
@@ -101,9 +104,16 @@ void openai_send_chatrequest( void* __data ){
     curl_easy_setopt( curl , CURLOPT_TIMEOUT_MS , ( int ) ( OPENAI_API_TIMEOUT * 1000 ) );
     // make curl request
 
+    curl_using_now = curl;
+
     res = curl_easy_perform( curl );
     if ( res != CURLE_OK )
     {
+        usleep( 10000 );
+        // sleep 10ms in order to wait curl_request_abort_called set to true by openai_request_abort (if abort called)
+        if ( curl_request_abort_called )
+            goto request_stop;
+        // res not CURLE_OK because of called abort
         fprintf( stderr , "send request failed: %s\n" , curl_easy_strerror( res ) );
         ezylog_logerror( logger , "send request failed: %s" , curl_easy_strerror( res ) );
         text = NULL;
@@ -151,10 +161,13 @@ void openai_send_chatrequest( void* __data ){
     } // response code 200 OK (most likely)
 
 request_stop:
-    curl_easy_cleanup( curl );
+    if ( !curl_request_abort_called )
+        curl_easy_cleanup( curl );
+    // when abort called, curl has already been cleaned up
     free( request_data );
     free( response_data.ptr );
     data -> response = text;
+    curl_using_now = NULL;
     request_working = false;
     return;
 }
@@ -470,6 +483,19 @@ void openai_get_usage_summary(){
     pthread_join( get_usage_this_month , NULL );
     openai -> credit_used_this_month = usage_this_month.usage;
     request_working = false;
+    return;
+}
+
+void openai_request_abort(){
+    if ( curl_using_now == NULL )
+        return;
+    // no curl is working
+    curl_easy_cleanup( curl_using_now );
+    curl_using_now = NULL;
+    curl_request_abort_called = true;
+    // raise request abort
+    // signal reset function is in CLI main loop
+    ezylog_loginfo( logger , "request abort called" );
     return;
 }
 

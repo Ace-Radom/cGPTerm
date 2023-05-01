@@ -50,6 +50,8 @@ extern openai_t* openai;
 extern bool request_working;
 extern long HTTP_Response_code;
 
+extern bool curl_request_abort_called;
+
 void openai_init();
 void openai_send_chatrequest( void* __data );
 void openai_free();
@@ -59,6 +61,8 @@ int openai_save_history( FILE* __f );
 void openai_load_history( const char* __history_file );
 
 void openai_get_usage_summary();
+
+void openai_request_abort();
 
 void openai_undo();
 void openai_msg_popback();

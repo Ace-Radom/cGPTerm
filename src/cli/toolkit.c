@@ -2,6 +2,11 @@
 
 struct termios ori_attr;
 
+void SIGINT_handler( int signum ){
+    openai_request_abort();
+    return;
+}
+
 void get_original_terattr(){
     tcgetattr( STDIN_FILENO , &ori_attr );
     return;

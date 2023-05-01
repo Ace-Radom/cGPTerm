@@ -8,6 +8,8 @@ bool match_exit_word( const char* __str );
 int start_CLI(){
     get_original_terattr();
 
+    signal( SIGINT , SIGINT_handler );
+
     rl_attempted_completion_function = rl_attempted_completion_callback;
     rl_completion_display_matches_hook = rl_completion_display_matches_hook_callback;
 
@@ -18,11 +20,8 @@ int start_CLI(){
         printf( "\033[2K\r" );
         // clear possible output
         if ( input == NULL )
-        {
-            printf( "\033[1A\r" );
-            continue;
-        }
-        // fix segmentation fault caused by EOF input
+            break;
+        // EOF raised, break
         char* input_trim = trim( input );
         if ( !input_trim || *input_trim == '\0' )
             continue;
@@ -83,6 +82,12 @@ int start_CLI(){
         else
             openai_msg_popback();
         // same: request error, pop last user's msg
+
+        if ( curl_request_abort_called )
+        {
+            crprint( "[bold][bright cyan]Aborted\n" );
+            curl_request_abort_called = false;
+        } // request abort raised, print abort msg and reset this signal
 
         if ( match_exit_word( input_trim ) )
         {
