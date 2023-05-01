@@ -507,7 +507,7 @@ void openai_undo(){
         return;
     }
     char* last_msg = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 2 ) , "content" ) );
-    crprint( "[dim]Last question: '[green]%s[/]' and its answer has been removed.\n" );
+    crprint( "[dim]Last question: '[green]%s[/]' and its answer has been removed.\n" , last_msg );
     openai_msg_popback();
     openai_msg_popback();
     return;
