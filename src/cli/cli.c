@@ -71,6 +71,10 @@ int start_CLI(){
             {
                 crprint( "[bold][bright cyan]ChatGPT:\n" );
                 printf( "%s\n" , data.response );
+                if ( openai -> tokens_limit - openai -> current_tokens < 500 && openai -> tokens_limit - openai -> current_tokens >= 1 )
+                    crprint( "[dim]Approaching tokens limit: %d tokens left\n" , openai -> tokens_limit - openai -> current_tokens );
+                if ( openai -> tokens_limit - openai -> current_tokens < 1 )
+                    crprint( "[red]Reached tokens limit: %d\n" , openai -> tokens_limit );
             }
             else
             {
