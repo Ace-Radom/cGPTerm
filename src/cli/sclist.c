@@ -8,6 +8,7 @@ const char* slash_commands[] = {
     "/usage",
     "/timeout",
     "/model",
+    "/rand",
     "/save",
     "/undo",
     "/last",

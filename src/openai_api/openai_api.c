@@ -34,6 +34,7 @@ void openai_init(){
     openai -> messages = json_array();
     openai -> model = ( char* ) malloc( 64 );
     strcpy( openai -> model , "gpt-3.5-turbo" );
+    openai -> temperature = 1.0;
     openai -> tokens_limit = 4096;
     openai -> total_tokens_spent = 0;
     openai -> current_tokens = 0;
@@ -92,6 +93,7 @@ void openai_send_chatrequest( void* __data ){
     json_t* request_json_root = json_object();
     json_object_set_new( request_json_root , "model" , json_string( openai -> model ) );
     json_object_set_new( request_json_root , "messages" , openai -> messages );
+    json_object_set_new( request_json_root , "temperature" , json_real( openai -> temperature ) );
     char* request_data = json_dumps( request_json_root , JSON_COMPACT );
     ezylog_logdebug( logger , "Request raw: %s" , request_data );
     // make request data
@@ -203,6 +205,11 @@ int openai_set_model( char* __new_model ){
     strcpy( openai -> model , chat_models[index].model );
     openai -> tokens_limit = chat_models[index].tokens_limit;
     return 0;
+}
+
+void openai_set_temperature( double __new_temperature ){
+    openai -> temperature = __new_temperature;
+    return;
 }
 
 int openai_save_history( FILE* __f ){

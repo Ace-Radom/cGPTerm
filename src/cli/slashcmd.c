@@ -152,7 +152,7 @@ int handle_slash_command( const char* __slashcmd ){
             }
             else
             {
-                crprint( "\n[red]API timeout cannot be less than 0s\n\r" );
+                crprint( "\n[red]API timeout cannot be less than 0s\033[1A\r" );
                 // here: print error msg in the second line, then back to the first line and print "Please input new API timeout"
             } // illegal input
         }
@@ -265,6 +265,103 @@ int handle_slash_command( const char* __slashcmd ){
         // clear last "Please input new Model" output
         goto ask_model;
     } // /model MODEL
+
+// =================================================================================
+// ===================================== /rand =====================================
+// =================================================================================
+
+    if ( strncmp( __slashcmd , "/rand" , 5 ) == 0 )
+    {
+        ezylog_logdebug( logger , "/rand command triggered" );
+        double new_temperature;
+        char* new_temperature_str;
+
+        if ( strlen( __slashcmd ) == 5 )
+            goto ask_temperature;
+        // only input "/rand", goto ask temperature
+
+        char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+        strcpy( temp , __slashcmd );
+        char* token = strtok( temp , " " );
+        token = strtok( NULL , " " );
+        // get the second part str
+        new_temperature = strtod( token , NULL );
+        if ( new_temperature != 0 )
+        {
+            if ( new_temperature > 0 && new_temperature <= 2 )
+            {
+                openai_set_temperature( new_temperature );
+                crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
+                ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
+                free( temp );
+                return 0;
+            }
+            else
+            {
+                crprint( "\n[red]Randomness must be a real number in range of 0 and 2\033[1A\r" );
+            } // illegal input
+        }
+        else
+        {
+            if ( new_temperature == 0 && token[0] == '0' )
+            {
+                openai_set_temperature( new_temperature );
+                crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
+                ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
+                free( temp );
+                return 0;
+            } // temperature is 0
+            else
+            {
+                crprint( "\n[red]Randomness must be a real number in range of 0 and 2\033[1A\r" );
+            } // illegal input
+        }
+        free( temp );
+
+    ask_temperature:
+        disable_history_search();
+        new_temperature_str = readline( "Please input new Randomness: " );
+        enable_history_search();
+        new_temperature = strtod( new_temperature_str , NULL );
+        if ( new_temperature != 0 )
+        {
+            if ( new_temperature > 0 && new_temperature <= 2 )
+            {
+                openai_set_temperature( new_temperature );
+                printf( "\r\033[2K\r" );
+                crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
+                ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
+                free( new_temperature_str );
+                return 0;
+            }
+            else
+            {
+                printf( "\r\033[2K\r" );
+                crprint( "[red]Randomness must be a real number in range of 0 and 2\n" );
+            } // illegal input
+        }
+        else
+        {
+            if ( new_temperature == 0 && new_temperature_str[0] == '0' )
+            {
+                openai_set_temperature( new_temperature );
+                printf( "\r\033[2K\r" );
+                crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
+                ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
+                free( new_temperature_str );
+                return 0;
+            } // temperature is 0
+            else
+            {
+                printf( "\r\033[2K\r" );
+                crprint( "[red]Randomness must be a real number in range of 0 and 2\n" );
+            } // illegal input
+        }
+        printf( "\033[2A\r\033[2K\r" );
+        fflush( stdout );
+        goto ask_temperature;
+    } // /rand TEMPERATURE
+
 
 // ==================================================================================
 // ===================================== /usage =====================================

@@ -30,6 +30,7 @@ typedef struct {
     struct curl_slist* headers;
     json_t* messages;
     char* model;
+    double temperature;
     int tokens_limit;
     long total_tokens_spent;
     int current_tokens;
@@ -57,6 +58,7 @@ void openai_send_chatrequest( void* __data );
 void openai_free();
 
 int openai_set_model( char* __new_model );
+void openai_set_temperature( double __new_temperature );
 int openai_save_history( FILE* __f );
 void openai_load_history( const char* __history_file );
 
