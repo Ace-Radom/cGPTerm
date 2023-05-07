@@ -436,7 +436,40 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( __slashcmd , "/last" ) == 0 )
     {
-        openai_printlast();
+        char* last_response = openai_getlast();
+        if ( !last_response )
+        {
+            crprint( "[dim]Nothing to print\n" );
+            return 0;
+        }
+        crprint( "[bold][bright cyan]ChatGPT:\n" );
+        if ( raw_mode_enable )
+        {
+            printf( "%s\n" , last_response );
+        }
+        else
+        {
+            md_set( last_response );
+            md_parse();
+            md_print();
+            printf( "\n" );
+        }
+        return 0;
+    } // /last
+
+// =================================================================================
+// ===================================== /copy =====================================
+// =================================================================================
+
+    if ( strncmp( __slashcmd , "/copy" , 5 ) == 0 )
+    {
+        char* last_response = openai_getlast();
+        if ( !last_response )
+        {
+            crprint( "[dim]Nothing to copy\n" );
+            return 0;
+        } // /copy command should not copy system prompt
+        clipboard_copy( last_response );
         return 0;
     }
 

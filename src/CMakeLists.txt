@@ -9,6 +9,12 @@ add_subdirectory(argparse)
 add_subdirectory(cli)
 # build cpp cli
 
+add_library(cclip STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/cclip.cpp
+)
+target_link_libraries(cclip
+    clip
+)
 add_library(utils STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.c
 )

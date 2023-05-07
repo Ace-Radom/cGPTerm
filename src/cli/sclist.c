@@ -13,6 +13,7 @@ const char* slash_commands[] = {
     "/save",
     "/undo",
     "/last",
+    "/copy",
     "/version",
     "/help",
     "/exit",

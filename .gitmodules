@@ -7,3 +7,6 @@
 [submodule "pthread_pool"]
 	path = pthread_pool
 	url = https://github.com/jonhoo/pthread_pool.git
+[submodule "clip"]
+	path = clip
+	url = https://github.com/dacap/clip.git

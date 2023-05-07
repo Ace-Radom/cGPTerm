@@ -26,6 +26,8 @@ add_library(pthreadpool STATIC
 )
 include_directories(${CMAKE_SOURCE_DIR}/cpprich/include)
 add_subdirectory(cpprich)
+include_directories(${CMAKE_SOURCE_DIR}/clip)
+add_subdirectory(clip)
 
 # build third party libraries
 

@@ -22,6 +22,7 @@ extern "C" {
 #include"ezylog.h"
 #include"utils.h"
 #include"crich.h"
+#include"cclip.hpp"
 
 extern char* chat_history_save_file_generated_path;
 
