@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(cGPTerm)
 
+add_compile_options(-fPIC)
 set(CMAKE_C_FLAGS "-Wall -g")
 add_definitions(-D_DEFAULT_SOURCE)
 add_definitions(-D_GNU_SOURCE)

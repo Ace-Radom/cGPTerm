@@ -23,6 +23,7 @@ extern "C" {
 #include"utils.h"
 #include"crich.h"
 #include"cclip.hpp"
+#include"cvector.h"
 
 extern char* chat_history_save_file_generated_path;
 
