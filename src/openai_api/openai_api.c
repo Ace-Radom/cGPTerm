@@ -255,10 +255,18 @@ void openai_load_history( const char* __history_file ){
         else
         {
             crprint( "[bold][bright cyan]ChatGPT:\n" );
-            md_set( content );
-            md_parse();
-            md_print();
-            printf( "\n" );
+            if ( raw_mode_enable )
+            {
+                printf( "%s\n" , content );
+            }
+            else
+            {
+                md_set( content );
+                md_parse();
+                md_print();
+                printf( "\n" );
+            }
+            
         } // this msg is a ChatGPT response
     } // print history message
     crprint( "[dim]Chat history successfully loaded from: [bright magenta]%s[/]\n" , __history_file );
@@ -532,10 +540,17 @@ void openai_printlast(){
     }
     char* last_response = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 1 ) , "content" ) );
     crprint( "[bold][bright cyan]ChatGPT:\n" );
-    md_set( last_response);
-    md_parse();
-    md_print();
-    printf( "\n" );
+    if ( raw_mode_enable )
+    {
+        printf( "%s\n" , last_response );
+    }
+    else
+    {
+        md_set( last_response );
+        md_parse();
+        md_print();
+        printf( "\n" );
+    }
     return;
 }
 

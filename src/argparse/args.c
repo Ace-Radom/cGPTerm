@@ -3,6 +3,7 @@
 // --------------------------- normal args ---------------------------
 
 struct arg_lit* arg_help = NULL;
+struct arg_lit* arg_raw = NULL;
 struct arg_str* arg_load = NULL;
 
 // --------------------------- setcfg args ---------------------------
@@ -16,12 +17,13 @@ struct arg_str* arg_set_loglevel = NULL;
 // ---------------------------- argtable2 ----------------------------
 
 struct arg_end* end_arg = NULL;
-void* argtable[] = { NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL };
+void* argtable[] = { NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL };
 
 // -------------------------- args function --------------------------
 
 void args_init(){
     arg_help = arg_lit0( "h"  , "help" ,                         "Show Help Messages and exit" );
+    arg_raw  = arg_lit0( "r"  , "raw"  ,                         "Enable raw mode"             );
     arg_load = arg_str0( NULL , "load" , "<Chat History File>" , "Load chat history from file" );
 
     arg_set_apikey     = arg_str0( NULL , "set-apikey"     , "<OpenAI API Key>" , "Set API Key for OpenAI"                                 );
@@ -34,6 +36,7 @@ void args_init(){
 
     void* args[] = {
         arg_help,
+        arg_raw,
         arg_load,
         arg_set_apikey,
         arg_set_timeout,

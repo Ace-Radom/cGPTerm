@@ -15,6 +15,7 @@ extern "C" {
 // --------------------------- normal args ---------------------------
 
 extern struct arg_lit* arg_help;
+extern struct arg_lit* arg_raw;
 extern struct arg_str* arg_load;
 
 // ------------------------- set config args -------------------------

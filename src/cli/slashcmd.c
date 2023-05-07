@@ -47,6 +47,21 @@ void save_chat_history_startup_hook( void ){
 */
 int handle_slash_command( const char* __slashcmd ){
 
+// ================================================================================
+// ===================================== /raw =====================================
+// ================================================================================
+
+    if ( strcmp( __slashcmd , "/raw" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/raw command triggered" );
+        raw_mode_enable = !raw_mode_enable;
+        if ( raw_mode_enable )
+            crprint( "[dim]Raw mode enabled, use `[bright magenta]/last[/]` to display the last answer.\n" );
+        else
+            crprint( "[dim]Raw mode disabled, use `[bright magenta]/last[/]` to display the last answer.\n" );
+        return 0;
+    } // /raw
+
 // ===================================================================================
 // ===================================== /tokens =====================================
 // ===================================================================================
@@ -463,6 +478,7 @@ int handle_slash_command( const char* __slashcmd ){
 
 void print_slash_command_help(){
     crprint( "[bold]Available commands:\n" );
+    crprint( "    [bright magenta]/raw[/]\t\t\t- Toggle raw mode (showing raw text of ChatGPT's reply)\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );

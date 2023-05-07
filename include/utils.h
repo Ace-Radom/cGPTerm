@@ -35,6 +35,8 @@ extern pthread_mutex_t remote_version_mutex;
 
 extern char* curl_userangel_data;
 
+extern bool raw_mode_enable;
+
 #ifdef __cplusplus
 }
 #endif

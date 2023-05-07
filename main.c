@@ -116,6 +116,9 @@ int main( int argc , char** argv ){
     crprint( "[dim]Hi, welcome to chat with GPT. Type `[bright magenta]/help[/]` to display available commands.\n" );
     ezylog_loginfo( logger , "cGPTerm main service launch, local version: %s" , CGPTERM_VERSION );
 
+    if ( gota_raw )
+        raw_mode_enable = true;
+
     if ( gota_load )
         openai_load_history( gav_load );
 

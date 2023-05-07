@@ -70,10 +70,17 @@ int start_CLI(){
             if ( HTTP_Response_code / 100 != 4 )
             {
                 crprint( "[bold][bright cyan]ChatGPT:\n" );
-                md_set( data.response );
-                md_parse();
-                md_print();
-                printf( "\n" );
+                if ( raw_mode_enable )
+                {
+                    printf( "%s\n" , data.response );
+                }
+                else
+                {
+                    md_set( data.response );
+                    md_parse();
+                    md_print();
+                    printf( "\n" );
+                }
                 if ( openai -> tokens_limit - openai -> current_tokens < 500 && openai -> tokens_limit - openai -> current_tokens >= 1 )
                     crprint( "[dim]Approaching tokens limit: %d tokens left\n" , openai -> tokens_limit - openai -> current_tokens );
                 if ( openai -> tokens_limit - openai -> current_tokens < 1 )

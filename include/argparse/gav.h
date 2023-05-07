@@ -12,6 +12,7 @@ extern "C" {
 // gota stands for Got Arg
 
 #define gota_help           arg_help           -> count > 0 ? true : false
+#define gota_raw            arg_raw            -> count > 0 ? true : false
 #define gota_load           arg_load           -> count > 0 ? true : false
 #define gota_set_apikey     arg_set_apikey     -> count > 0 ? true : false
 #define gota_set_timeout    arg_set_timeout    -> count > 0 ? true : false
@@ -22,6 +23,7 @@ extern "C" {
 // gav stands for Get Arg Value
 
 #define gav_help           gota_help
+#define gav_raw            gota_raw
 #define gav_load           arg_load           -> sval[0]
 #define gav_set_apikey     arg_set_apikey     -> sval[0]
 #define gav_set_timeout    arg_set_timeout    -> dval[0]
