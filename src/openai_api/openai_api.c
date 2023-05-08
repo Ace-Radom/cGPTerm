@@ -66,7 +66,7 @@ void openai_init(){
     return;
 }
 
-void openai_send_chatrequest( void* __data ){
+void* openai_send_chatrequest( void* __data ){
     request_working = true;
     openai_datatransfer_t* data = ( openai_datatransfer_t* ) __data;
     const char* __usrmsg = data -> msg;
@@ -81,11 +81,11 @@ void openai_send_chatrequest( void* __data ){
         fprintf( stderr , "[openai_send_chatrequest] -> curl init failed\n" );
         ezylog_logerror( logger , "curl init failed when sending chat request" );
         request_working = false;
-        return;
+        return NULL;
     } // curl init error
 
     ezylog_loginfo( logger , "> %s" , __usrmsg );
-    char* text;
+    const char* text;
     // return var
 
     json_t* new_usrmsg = json_object();
@@ -174,7 +174,7 @@ request_stop:
     data -> response = text;
     curl_using_now = NULL;
     request_working = false;
-    return;
+    return NULL;
 }
 
 void openai_free(){
@@ -282,7 +282,7 @@ void openai_load_history( const char* __history_file ){
     return;
 }
 
-void openai_get_subscription(){
+void* openai_get_subscription(){
     CURL* curl;
     CURLcode res;
     curl_data_t response_data = { NULL , 0 };
@@ -293,7 +293,7 @@ void openai_get_subscription(){
         openai -> credit_total_granted = -1;
         openai -> credit_plan = "Unknown";
         request_working = false;
-        return;
+        return NULL;
     } // curl init error
 
     curl_easy_setopt( curl , CURLOPT_HTTPGET , 1L );
@@ -350,10 +350,10 @@ void openai_get_subscription(){
 request_stop:
     curl_easy_cleanup( curl );
     free( response_data.ptr );
-    return;
+    return NULL;
 }
 
-void openai_get_usage( void* __be_data ){
+void* openai_get_usage( void* __be_data ){
     get_usage_date_data_transfer_t* be_data = ( get_usage_date_data_transfer_t* ) __be_data;
     char* start_date = parse_date( be_data -> start_date );
     char* end_date = parse_date( be_data -> end_date );
@@ -367,7 +367,7 @@ void openai_get_usage( void* __be_data ){
     {
         ezylog_logerror( logger , "curl init failed when getting usage between %s and %s" , start_date , end_date );
         be_data -> usage = -1;
-        return;
+        return NULL;
     } // curl init error
 
     char* get_usage_url = ( char* ) malloc( 128 );
@@ -434,10 +434,10 @@ request_stop:
     free( start_date );
     free( end_date );
     be_data -> usage = usage_return;
-    return;
+    return NULL;
 }
 
-void openai_get_usage_summary(){
+void* openai_get_usage_summary(){
     request_working = true;
 
     openai -> credit_total_granted = 0;
@@ -504,7 +504,7 @@ void openai_get_usage_summary(){
     pthread_join( get_usage_this_month , NULL );
     openai -> credit_used_this_month = usage_this_month.usage;
     request_working = false;
-    return;
+    return NULL;
 }
 
 void openai_request_abort(){
@@ -527,20 +527,20 @@ void openai_undo(){
         crprint( "[dim]Nothing to undo\n" );
         return;
     }
-    char* last_msg = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 2 ) , "content" ) );
+    const char* last_msg = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 2 ) , "content" ) );
     crprint( "[dim]Last question: '[green]%s[/]' and its answer has been removed.\n" , last_msg );
     openai_msg_popback();
     openai_msg_popback();
     return;
 }
 
-char* openai_getlast(){
+const char* openai_getlast(){
     size_t msglist_size = json_array_size( openai -> messages );
     if ( msglist_size <= 1 )
     {
         return NULL;
     }
-    char* last_response = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 1 ) , "content" ) );
+    const char* last_response = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 1 ) , "content" ) );
     return last_response;
 }
 

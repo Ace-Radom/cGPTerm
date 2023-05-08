@@ -49,7 +49,7 @@ int start_CLI(){
         data.response = NULL;
         // build transfer data
         pthread_t send_request;
-        int ptrc = pthread_create( &send_request , NULL , openai_send_chatrequest , ( void* ) &data ); // pthread return code
+        pthread_create( &send_request , NULL , openai_send_chatrequest , ( void* ) &data ); // pthread return code
         usleep( 10000 );
         // start request; wait 10 ms in order to let openai_send_chatrequest to lock request_working (-> true)
         while ( request_working )

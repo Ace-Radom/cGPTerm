@@ -17,7 +17,7 @@
 #include"cli.h"
 #include"crich.h"
 
-void get_remote_version();
+void* get_remote_version();
 bool is_local_latest();
 
 int main( int argc , char** argv ){
@@ -146,7 +146,7 @@ stopmain:
     return 0;
 } // main
 
-void get_remote_version(){
+void* get_remote_version(){
     CURL* curl;
     CURLcode res;
     curl_data_t response_data = { NULL , 0 };
@@ -157,7 +157,7 @@ void get_remote_version(){
         pthread_mutex_lock( &remote_version_mutex );
         remote_version = "Unknown";
         pthread_mutex_unlock( &remote_version_mutex );
-        return;
+        return NULL;
     } // curl init error, set remote_version to "Unknown"
 
     curl_easy_setopt( curl , CURLOPT_URL , "https://api.github.com/repos/Ace-Radom/cGPTerm/releases" );
@@ -216,7 +216,7 @@ void get_remote_version(){
 request_stop:
     curl_easy_cleanup( curl );
     free( response_data.ptr );
-    return;
+    return NULL;
 }
 
 bool is_local_latest(){

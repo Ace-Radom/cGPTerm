@@ -7,7 +7,7 @@
  * 
  * @return Priority, when unrecognized priority str appeared return INFO
 */
-ezylog_priority_t parse_str_to_priority( char* __str ){
+ezylog_priority_t parse_str_to_priority( const char* __str ){
     char* str = ( char* ) malloc( strlen( __str ) );
     strcpy( str , __str );
     char* strallupr = str;

@@ -13,7 +13,6 @@ void enable_history_search( void ){
 char* chat_history_save_file_generated_path = NULL;
 
 void search_codes( c_vector* __codelist , const char* __text ){
-    size_t index = 0;
     char* start;
     char* end;
     start = strstr( __text , "```" );
@@ -455,7 +454,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( __slashcmd , "/last" ) == 0 )
     {
-        char* last_response = openai_getlast();
+        const char* last_response = openai_getlast();
         if ( !last_response )
         {
             crprint( "[dim]Nothing to print\n" );
@@ -482,7 +481,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strncmp( __slashcmd , "/copy" , 5 ) == 0 )
     {
-        char* last_response = openai_getlast();
+        const char* last_response = openai_getlast();
         if ( !last_response )
         {
             crprint( "[dim]Nothing to copy\n" );

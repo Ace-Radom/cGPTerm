@@ -40,12 +40,12 @@ typedef struct {
     double credit_total_granted;
     double credit_total_used;
     double credit_used_this_month;
-    char* credit_plan;
+    const char* credit_plan;
 } openai_t;
 
 typedef struct {
-    const char* msg;
-    char* response;
+    char* msg;
+    const char* response;
 } openai_datatransfer_t;
 
 extern openai_t* openai;
@@ -55,7 +55,7 @@ extern long HTTP_Response_code;
 extern bool curl_request_abort_called;
 
 void openai_init();
-void openai_send_chatrequest( void* __data );
+void* openai_send_chatrequest( void* __data );
 void openai_free();
 
 int openai_set_model( char* __new_model );
@@ -63,12 +63,12 @@ void openai_set_temperature( double __new_temperature );
 int openai_save_history( FILE* __f );
 void openai_load_history( const char* __history_file );
 
-void openai_get_usage_summary();
+void* openai_get_usage_summary();
 
 void openai_request_abort();
 
 void openai_undo();
-char* openai_getlast();
+const char* openai_getlast();
 void openai_msg_popback();
 
 #ifdef __cplusplus
