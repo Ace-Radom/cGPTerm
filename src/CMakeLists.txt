@@ -15,6 +15,20 @@ add_library(cclip SHARED
 target_link_libraries(cclip
     clip
 )
+add_library(ctiktoken SHARED
+    ${CMAKE_CURRENT_SOURCE_DIR}/ctiktoken.cpp
+)
+target_link_libraries(ctiktoken
+    tiktoken
+)
+FILE(COPY 
+        ${CMAKE_SOURCE_DIR}/cpp-tiktoken/cl100k_base.tiktoken
+        ${CMAKE_SOURCE_DIR}/cpp-tiktoken/p50k_base.tiktoken
+        ${CMAKE_SOURCE_DIR}/cpp-tiktoken/r50k_base.tiktoken 
+    DESTINATION
+        "${EXECUTABLE_OUTPUT_PATH}/tokenizers"
+)
+# copy Tokenizers to exe output path
 add_library(utils STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.c
 )

@@ -37,6 +37,9 @@ jobs:
     - name: Install libx11
       run: sudo apt install libx11-dev -y
 
+    - name: Install libpcre2
+      run: sudo apt install libpcre2-dev -y
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type

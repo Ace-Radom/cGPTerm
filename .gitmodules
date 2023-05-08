@@ -10,3 +10,6 @@
 [submodule "clip"]
 	path = clip
 	url = https://github.com/dacap/clip.git
+[submodule "cpp-tiktoken"]
+	path = cpp-tiktoken
+	url = https://github.com/gh-markt/cpp-tiktoken.git

@@ -29,6 +29,8 @@ include_directories(${CMAKE_SOURCE_DIR}/cpprich/include)
 add_subdirectory(cpprich)
 include_directories(${CMAKE_SOURCE_DIR}/clip)
 add_subdirectory(clip)
+include_directories(${CMAKE_SOURCE_DIR}/cpp-tiktoken)
+add_subdirectory(cpp-tiktoken)
 
 # build third party libraries
 

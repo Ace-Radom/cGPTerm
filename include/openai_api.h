@@ -24,6 +24,7 @@ extern "C" {
 #include"cdate.h"
 #include"pthread_pool.h"
 #include"cvector.h"
+#include"ctiktoken.hpp"
 
 typedef struct {
     char* endpoint;

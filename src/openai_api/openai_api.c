@@ -57,6 +57,9 @@ void openai_init(){
     json_array_append_new( openai -> messages , prompt );
     // prompt init
 
+    cout_tokens_init();
+    // tokens counter init
+
     openai -> current_tokens += count_tokens_message( prompt );
     // count prompt tokens and add to current_tokens
 
