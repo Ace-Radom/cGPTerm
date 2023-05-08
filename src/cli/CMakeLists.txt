@@ -8,6 +8,8 @@ add_library(cli SHARED
 target_link_libraries(cli
     openaiapi
     ezylog
+    cclip
+    cvector
     utils
     pthread
     readline

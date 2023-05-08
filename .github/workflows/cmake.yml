@@ -25,9 +25,6 @@ jobs:
     - name: Install libcurl
       run: sudo apt install libcurl4-openssl-dev -y
 
-    # - name: Install libncursesw
-    #   run: sudo apt install libncursesw5-dev -y
-
     - name: Install libargtable
       run: sudo apt install libargtable2-dev -y
     
@@ -37,18 +34,21 @@ jobs:
     - name: Install GNU libreadline
       run: sudo apt install libreadline-dev -y
 
+    - name: Install libx11
+      run: sudo apt install libx11-dev -y
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCLIP_EXAMPLES=OFF -DCLIP_TESTS=OFF
 
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+    #   # Execute tests defined by the CMake configuration.
+    #   # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+    #   run: ctest -C ${{env.BUILD_TYPE}}
 

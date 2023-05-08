@@ -12,6 +12,25 @@ void enable_history_search( void ){
 
 char* chat_history_save_file_generated_path = NULL;
 
+void search_codes( c_vector* __codelist , const char* __text ){
+    size_t index = 0;
+    char* start;
+    char* end;
+    start = strstr( __text , "```" );
+    while ( start != NULL )
+    {
+        end = strstr( start + 3 , "```" );
+        if ( end == NULL )
+            break;
+        char* this_code = ( char* ) malloc( ( end - start + 8 ) * sizeof( char ) );
+        strncpy( this_code , start , end - start + 3 );
+        this_code[end-start+3] = '\0';
+        cv_push_back( __codelist , ( void* ) this_code );
+        start = strstr( end + 3 , "```" );
+    }
+    return;
+}
+
 /**
  * @brief this startup hook will automaticlly generate a file name for chat history save file
 */
@@ -436,9 +455,135 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( __slashcmd , "/last" ) == 0 )
     {
-        openai_printlast();
+        char* last_response = openai_getlast();
+        if ( !last_response )
+        {
+            crprint( "[dim]Nothing to print\n" );
+            return 0;
+        }
+        crprint( "[bold][bright cyan]ChatGPT:\n" );
+        if ( raw_mode_enable )
+        {
+            printf( "%s\n" , last_response );
+        }
+        else
+        {
+            md_set( last_response );
+            md_parse();
+            md_print();
+            printf( "\n" );
+        }
         return 0;
-    }
+    } // /last
+
+// =================================================================================
+// ===================================== /copy =====================================
+// =================================================================================
+
+    if ( strncmp( __slashcmd , "/copy" , 5 ) == 0 )
+    {
+        char* last_response = openai_getlast();
+        if ( !last_response )
+        {
+            crprint( "[dim]Nothing to copy\n" );
+            return 0;
+        } // /copy command should not copy system prompt
+
+        if ( strlen( __slashcmd ) == 5 )
+        {
+            clipboard_copy( last_response );
+            crprint( "[dim]Last reply copied to Clipboard.\n");
+            return 0;
+        } // no other args given
+
+        char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+        char* second_arg;
+        strcpy( temp , __slashcmd );
+        second_arg = strtok( temp , " " );
+        second_arg = strtok( NULL , " " );
+
+        if ( strcmp( second_arg , "all" ) == 0 )
+        {
+            clipboard_copy( last_response );
+            crprint( "[dim]Last reply copied to Clipboard.\n");
+            free( temp );
+        } // /copy all
+        else if ( strcmp( second_arg , "code" ) == 0 )
+        {
+            c_vector codelist;
+            cv_init( &codelist , 10 );
+            char* selected_code = NULL;
+            search_codes( &codelist , last_response );
+            if ( cv_len( &codelist ) == 0 )
+            {
+                crprint( "[dim]No code found.\n" );
+                cv_clean( &codelist );
+                free( temp );
+                return 0;
+            } // no code found
+            if ( cv_len( &codelist ) == 1 )
+            {
+                selected_code = ( char* ) codelist.items[0];
+                goto copy_code;
+            } // only one code block exists
+
+            // more than one code block exist
+
+            crprint( "[dim]There are more than one code in ChatGPT's last reply.\n" );
+            for ( int i = 0 ; i < cv_len( &codelist ) ; i++ )
+            {
+                crprint( "[yellow]Code [bright yellow]%d[/]:\n" , i + 1 );
+                md_set( ( char* ) codelist.items[i] );
+                md_parse();
+                md_print();
+                printf( "\n" );
+            }
+
+        ask_code_index:
+            disable_history_search();
+            char* code_index_str = readline( "Please select which code to copy: " );
+            enable_history_search();
+            int code_index = atoi( code_index_str );
+            if ( code_index > 0 && code_index <= cv_len( &codelist ) )
+            {
+                selected_code = ( char* ) codelist.items[code_index-1];
+                goto copy_code;
+            } // legal index input
+
+            printf( "\r\033[2K\r" );
+            if ( code_index <= 0 )
+                crprint( "[red]Code index must be an integer greater than 0\n" );
+            if ( code_index > cv_len( &codelist ) )
+                crprint( "[red]Code index out of range: You should input an Integer in range [bright red]1[/] ~ [bright red]%d[/]\n" , cv_len( &codelist ) );
+            // illegal index input
+            printf( "\033[2A\r\033[2K\r" );
+            fflush( stdout );
+            goto ask_code_index;
+
+        copy_code:
+            printf( "\r\033[2K\r" );
+            char* code_raw = ( char* ) malloc( strlen( selected_code ) );
+            char* bpos = strstr( selected_code , "\n" );
+            bpos++;
+            char* epos = strstr( bpos , "```" );
+            // build code begin and end index
+            strncpy( code_raw , bpos , epos - bpos );
+            code_raw[epos-bpos] = '\0';
+            // copy code raw
+            clipboard_copy( code_raw );
+            crprint( "[dim]Code copied to Clipboard.\n" );
+
+            cv_clean( &codelist );
+            free( temp );
+            free( code_index_str );
+            free( code_raw );
+        } // /copy code
+        else
+            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/copy code[/]` or `[bright magenta]/copy all[/]`" );
+        // /copy ?
+
+        return 0;
+    } // /copy
 
 // ====================================================================================
 // ===================================== /version =====================================
@@ -481,9 +626,14 @@ void print_slash_command_help(){
     crprint( "    [bright magenta]/raw[/]\t\t\t- Toggle raw mode (showing raw text of ChatGPT's reply)\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
-    crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
     crprint( "    [bright magenta]/model[/] [bold]\\[model_name][/]\t\t- Change AI model\n" );
+    crprint( "    [bright magenta]/rand[/] [bold]\\[randomness][/]\t\t- Set Model sampling temperature (0~2)\n" );
+    crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
+    crprint( "    [bright magenta]/undo[/]\t\t\t- Undo the last question and remove its answer\n" );
+    crprint( "    [bright magenta]/last[/]\t\t\t- Display last ChatGPT's reply\n" );
+    crprint( "    [bright magenta]/copy[/] [bold](all)[/]\t\t\t- Copy the full ChatGPT's last reply (raw) to Clipboard\n" );
+    crprint( "    [bright magenta]/copy[/] [bold]code[/]\t\t\t- Copy the code in ChatGPT's last reply to Clipboard\n" );
     crprint( "    [bright magenta]/version[/]\t\t\t- Show cGPTerm local and remote version\n" );
     crprint( "    [bright magenta]/help[/]\t\t\t- Show this help message\n" );
     crprint( "    [bright magenta]/exit[/]\t\t\t- Exit the application\n" );

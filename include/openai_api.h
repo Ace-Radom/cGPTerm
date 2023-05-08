@@ -67,7 +67,7 @@ void openai_get_usage_summary();
 void openai_request_abort();
 
 void openai_undo();
-void openai_printlast();
+char* openai_getlast();
 void openai_msg_popback();
 
 #ifdef __cplusplus

@@ -531,27 +531,14 @@ void openai_undo(){
     return;
 }
 
-void openai_printlast(){
+char* openai_getlast(){
     size_t msglist_size = json_array_size( openai -> messages );
     if ( msglist_size <= 1 )
     {
-        crprint( "[dim]Nothing to print\n" );
-        return;
+        return NULL;
     }
     char* last_response = json_string_value( json_object_get( json_array_get( openai -> messages , msglist_size - 1 ) , "content" ) );
-    crprint( "[bold][bright cyan]ChatGPT:\n" );
-    if ( raw_mode_enable )
-    {
-        printf( "%s\n" , last_response );
-    }
-    else
-    {
-        md_set( last_response );
-        md_parse();
-        md_print();
-        printf( "\n" );
-    }
-    return;
+    return last_response;
 }
 
 void openai_msg_popback(){
