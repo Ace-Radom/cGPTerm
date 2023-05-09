@@ -152,11 +152,15 @@ void save_chat_history_startup_hook( void ){
 */
 int handle_slash_command( const char* __slashcmd ){
 
+    char* slashcmd_headcmd_only_temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+    strcpy( slashcmd_headcmd_only_temp , __slashcmd );
+    char* slashcmd_headcmd_only = strtok( slashcmd_headcmd_only_temp , " " );
+
 // ================================================================================
 // ===================================== /raw =====================================
 // ================================================================================
 
-    if ( strcmp( __slashcmd , "/raw" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/raw" ) == 0 )
     {
         ezylog_logdebug( logger , "/raw command triggered" );
         raw_mode_enable = !raw_mode_enable;
@@ -164,6 +168,8 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Raw mode enabled, use `[bright magenta]/last[/]` to display the last answer.\n" );
         else
             crprint( "[dim]Raw mode disabled, use `[bright magenta]/last[/]` to display the last answer.\n" );
+
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /raw
 
@@ -171,7 +177,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /tokens =====================================
 // ===================================================================================
 
-    if ( strcmp( __slashcmd , "/tokens" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/tokens" ) == 0 )
     {
         ezylog_logdebug( logger , "/tokens command triggered" );
         char* total_tokens_spent_str = ( char* ) malloc( 64 );
@@ -181,6 +187,7 @@ int handle_slash_command( const char* __slashcmd ){
         crpanel( "token_summary" , NULL , 40 , NULL , 2 , total_tokens_spent_str , current_tokens_str );
         free( total_tokens_spent_str );
         free( current_tokens_str );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /tokens
 
@@ -188,7 +195,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /save =====================================
 // =================================================================================
 
-    if ( strncmp( __slashcmd , "/save" , 5 ) == 0 )
+    if ( strncmp( slashcmd_headcmd_only , "/save" , 5 ) == 0 )
     {
         ezylog_logdebug( logger , "/save command triggered" );
         char* save_path;
@@ -219,6 +226,7 @@ int handle_slash_command( const char* __slashcmd ){
             char* errmsg = strerror( errno );
             // get error message
             ezylog_logerror( logger , "Save chat history to '%s' failed: errno %d, error message \"%s\"" , save_path , errno , errmsg );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // open save file failed; log error message
 
@@ -237,6 +245,7 @@ int handle_slash_command( const char* __slashcmd ){
         if ( chat_history_save_file_generated_path != NULL )
             free( chat_history_save_file_generated_path );
         free( save_path );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /save FILE
 
@@ -244,7 +253,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /timeout =====================================
 // ====================================================================================
 
-    if ( strncmp( __slashcmd , "/timeout" , 8 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/timeout" ) == 0 )
     {
         ezylog_logdebug( logger , "/timeout command triggered" );
         double new_timeout;
@@ -268,6 +277,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]API timeout set to [green]%.2lfs[/].\n" , OPENAI_API_TIMEOUT );
                 ezylog_loginfo( logger , "API timeout set to %lfs" , OPENAI_API_TIMEOUT );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -300,6 +310,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]API timeout set to [green]%.2lfs[/].\n" , OPENAI_API_TIMEOUT );
                 ezylog_loginfo( logger , "API timeout set to %lfs" , OPENAI_API_TIMEOUT );
                 free( new_timeout_str );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -332,7 +343,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /model =====================================
 // ==================================================================================
 
-    if ( strncmp( __slashcmd , "/model" , 6 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/model" ) == 0 )
     {
         ezylog_logdebug( logger , "/model command triggered" );
         char* new_model;
@@ -355,6 +366,7 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Model has been set to [green]'%s'[/].\n" , openai -> model );
             ezylog_loginfo( logger , "Model has been set to '%s'" , openai -> model );
             free( temp );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // set successfully
         else
@@ -373,6 +385,7 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Model has been set to [green]'%s'[/].\n" , openai -> model );
             ezylog_loginfo( logger , "Model has been set to '%s'" , openai -> model );
             free( new_model );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // set successfully
         else
@@ -390,7 +403,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /system =====================================
 // ===================================================================================
 
-    if ( strncmp( __slashcmd , "/system" , 7 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/system" ) == 0 )
     {
         ezylog_logdebug( logger , "/system command triggered" );
         char* new_prompt;
@@ -416,6 +429,7 @@ int handle_slash_command( const char* __slashcmd ){
         crprint( "[dim]System prompt has been modified to '%s'\n" , new_prompt );
         ezylog_loginfo( logger , "System prompt has been modified to '%s'" , new_prompt );
         free( new_prompt );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     }
 
@@ -423,7 +437,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /rand =====================================
 // =================================================================================
 
-    if ( strncmp( __slashcmd , "/rand" , 5 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/rand" ) == 0 )
     {
         ezylog_logdebug( logger , "/rand command triggered" );
         double new_temperature;
@@ -447,6 +461,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -462,6 +477,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             } // temperature is 0
             else
@@ -485,6 +501,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( new_temperature_str );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -502,6 +519,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( new_temperature_str );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             } // temperature is 0
             else
@@ -520,7 +538,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /usage =====================================
 // ==================================================================================
 
-    if ( strcmp( __slashcmd , "/usage" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/usage" ) == 0 )
     {
         ezylog_logdebug( logger , "/usage command triggered" );
         
@@ -559,6 +577,7 @@ int handle_slash_command( const char* __slashcmd ){
         free( used_this_month_str );
         free( used_total_str );
         free( plan_str );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /usage
 
@@ -566,18 +585,20 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /undo, /last =====================================
 // ========================================================================================
 
-    if ( strcmp( __slashcmd , "/undo" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/undo" ) == 0 )
     {
         openai_undo();
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /undo
 
-    if ( strcmp( __slashcmd , "/last" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/last" ) == 0 )
     {
         const char* last_response = openai_getlast();
         if ( !last_response )
         {
             crprint( "[dim]Nothing to print\n" );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         }
         crprint( "[bold][bright cyan]ChatGPT:\n" );
@@ -592,6 +613,7 @@ int handle_slash_command( const char* __slashcmd ){
             md_print();
             printf( "\n" );
         }
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /last
 
@@ -599,12 +621,13 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /copy =====================================
 // =================================================================================
 
-    if ( strncmp( __slashcmd , "/copy" , 5 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/copy" ) == 0 )
     {
         const char* last_response = openai_getlast();
         if ( !last_response )
         {
             crprint( "[dim]Nothing to copy\n" );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // /copy command should not copy system prompt
 
@@ -612,6 +635,7 @@ int handle_slash_command( const char* __slashcmd ){
         {
             clipboard_copy( last_response );
             crprint( "[dim]Last reply copied to Clipboard.\n");
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // no other args given
 
@@ -638,6 +662,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]No code found.\n" );
                 cv_clean( &codelist );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             } // no code found
             if ( cv_len( &codelist ) == 1 )
@@ -701,6 +726,7 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/copy code[/]` or `[bright magenta]/copy all[/]`" );
         // /copy ?
 
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /copy
 
@@ -708,7 +734,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /version =====================================
 // ====================================================================================
 
-    if ( strcmp( __slashcmd , "/version" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/version" ) == 0 )
     {
         pthread_mutex_lock( &remote_version_mutex );
         char* local_version_str = ( char* ) malloc( 36 );
@@ -721,6 +747,7 @@ int handle_slash_command( const char* __slashcmd ){
         free( local_version_str );
         free( remote_version_str );
         pthread_mutex_unlock( &remote_version_mutex );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /version
 
@@ -728,7 +755,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /list =====================================
 // =================================================================================
 
-    if ( strcmp( __slashcmd , "/list" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/list" ) == 0 )
     {
         char* api_key_hide = ( char* ) malloc( 16 );
         strncpy( api_key_hide , OPENAI_API_KEY , 3 );
@@ -747,6 +774,7 @@ int handle_slash_command( const char* __slashcmd ){
         crprint( "    [bright magenta]AI Model:[/]\t\t\t%s\n"              , openai -> model );
         crprint( "    [bright magenta]AI Randomness:[/]\t\t%.2lf\n"        , openai -> temperature );
         free( api_key_hide );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /list
 
@@ -754,13 +782,15 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /help, /exit =====================================
 // ========================================================================================
 
-    if ( strcmp( __slashcmd , "/help" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/help" ) == 0 )
     {
         print_slash_command_help();
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /help
-    if ( strcmp( __slashcmd , "/exit" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/exit" ) == 0 )
     {
+        free( slashcmd_headcmd_only_temp );
         return -1;
     } // /exit, ready to break
 
@@ -787,6 +817,7 @@ int handle_slash_command( const char* __slashcmd ){
     else
         printf( "\n" );
     crprint( "Use `[bright magenta]/help[/]` to see all available slash commands.\n" );
+    free( slashcmd_headcmd_only_temp );
     return 1;
 }
 
@@ -797,6 +828,7 @@ void print_slash_command_help(){
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
     crprint( "    [bright magenta]/model[/] [bold]\\[model_name][/]\t\t- Change AI model\n" );
+    crprint( "    [bright magenta]/system[/] [bold]\\[new_prompt][/]\t\t- Modify the system prompt\n" );
     crprint( "    [bright magenta]/rand[/] [bold]\\[randomness][/]\t\t- Set Model sampling temperature (0~2)\n" );
     crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
     crprint( "    [bright magenta]/undo[/]\t\t\t- Undo the last question and remove its answer\n" );
@@ -804,6 +836,7 @@ void print_slash_command_help(){
     crprint( "    [bright magenta]/copy[/] [bold](all)[/]\t\t\t- Copy the full ChatGPT's last reply (raw) to Clipboard\n" );
     crprint( "    [bright magenta]/copy[/] [bold]code[/]\t\t\t- Copy the code in ChatGPT's last reply to Clipboard\n" );
     crprint( "    [bright magenta]/version[/]\t\t\t- Show cGPTerm local and remote version\n" );
+    crprint( "    [bright magenta]/list[/]\t\t\t- List all settings in use\n" );
     crprint( "    [bright magenta]/help[/]\t\t\t- Show this help message\n" );
     crprint( "    [bright magenta]/exit[/]\t\t\t- Exit the application\n" );
     return;
