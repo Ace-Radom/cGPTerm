@@ -59,6 +59,7 @@ void* openai_send_chatrequest( void* __data );
 void openai_free();
 
 int openai_set_model( char* __new_model );
+void openai_set_prompt( char* __new_prompt );
 void openai_set_temperature( double __new_temperature );
 int openai_save_history( FILE* __f );
 void openai_load_history( const char* __history_file );

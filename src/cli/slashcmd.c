@@ -9,6 +9,7 @@ const char* slash_commands[] = {
     "/usage",
     "/timeout",
     "/model",
+    "/system",
     "/rand",
     "/save",
     "/undo",
@@ -384,6 +385,39 @@ int handle_slash_command( const char* __slashcmd ){
         // clear last "Please input new Model" output
         goto ask_model;
     } // /model MODEL
+
+// ===================================================================================
+// ===================================== /system =====================================
+// ===================================================================================
+
+    if ( strncmp( __slashcmd , "/system" , 7 ) == 0 )
+    {
+        ezylog_logdebug( logger , "/system command triggered" );
+        char* new_prompt;
+
+        if ( strlen( __slashcmd ) == 7 )
+        {
+            disable_history_search();
+            new_prompt = readline( "Please input new system prompt: " );
+            enable_history_search();
+        }
+        else
+        {
+            char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+            strcpy( temp , __slashcmd );
+            char* token = strtok( temp , " " );
+            token = strtok( NULL , " " );
+            // get the second part str
+            new_prompt = ( char* ) malloc( strlen( token ) + 1 );
+            strcpy( new_prompt , token );
+            free( temp );
+        }
+        openai_set_prompt( new_prompt );
+        crprint( "[dim]System prompt has been modified to '%s'\n" , new_prompt );
+        ezylog_loginfo( logger , "System prompt has been modified to '%s'" , new_prompt );
+        free( new_prompt );
+        return 0;
+    }
 
 // =================================================================================
 // ===================================== /rand =====================================

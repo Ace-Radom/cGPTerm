@@ -210,6 +210,15 @@ int openai_set_model( char* __new_model ){
     return 0;
 }
 
+void openai_set_prompt( char* __new_prompt ){
+    if ( __new_prompt == NULL )
+        return;
+
+    json_t* prompt = json_array_get( openai -> messages , 0 );
+    json_object_set_new( prompt , "content" , json_string( __new_prompt ) );
+    return;
+}
+
 void openai_set_temperature( double __new_temperature ){
     openai -> temperature = __new_temperature;
     return;
