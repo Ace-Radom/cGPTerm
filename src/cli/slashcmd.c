@@ -604,6 +604,32 @@ int handle_slash_command( const char* __slashcmd ){
         return 0;
     } // /version
 
+// =================================================================================
+// ===================================== /list =====================================
+// =================================================================================
+
+    if ( strcmp( __slashcmd , "/list" ) == 0 )
+    {
+        char* api_key_hide = ( char* ) malloc( 16 );
+        strncpy( api_key_hide , OPENAI_API_KEY , 3 );
+        api_key_hide[3] = '\0';
+        strcat( api_key_hide , "..." );
+        strncat( api_key_hide , OPENAI_API_KEY + strlen( OPENAI_API_KEY ) - 4 , 4 );
+
+        crprint( "[bold]Settings List:\n" );
+        crprint( "    [bright magenta]OpenAI API Key:[/]\t\t%s\n"          , api_key_hide );
+        crprint( "    [bright magenta]Request Timeout:[/]\t\t%.2lfs\n"     , OPENAI_API_TIMEOUT );
+        crprint( "    [bright magenta]Use Auto Title Generation:[/]\t%s\n" , AUTO_GENERATE_TITLE ? "Yes" : "No" );
+        crprint( "    [bright magenta]Chat History Save Perfix:[/]\t%s\n"  , CHAT_SAVE_PERFIX );
+        crprint( "    [bright magenta]Log Level:[/]\t\t\t%s\n"             , parse_priority_to_str( LOG_LEVEL ) );
+        crprint( "\n" );
+        crprint( "    [bright magenta]Enable Raw Mode:[/]\t\t%s\n"         , raw_mode_enable ? "Yes" : "No" );
+        crprint( "    [bright magenta]AI Model:[/]\t\t\t%s\n"              , openai -> model );
+        crprint( "    [bright magenta]AI Randomness:[/]\t\t%.2lf\n"        , openai -> temperature );
+        free( api_key_hide );
+        return 0;
+    } // /list
+
 // ========================================================================================
 // ===================================== /help, /exit =====================================
 // ========================================================================================

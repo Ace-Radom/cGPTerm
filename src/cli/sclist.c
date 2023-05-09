@@ -15,6 +15,7 @@ const char* slash_commands[] = {
     "/last",
     "/copy",
     "/version",
+    "/list",
     "/help",
     "/exit",
     NULL
