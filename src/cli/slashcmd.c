@@ -1,5 +1,29 @@
 #include"cli/slashcmd.h"
 
+/**
+ * @brief all available slash commands. they will be searched by rl_completion_slash_command_search
+*/
+const char* slash_commands[] = {
+    "/raw",
+    "/tokens",
+    "/usage",
+    "/timeout",
+    "/model",
+    "/rand",
+    "/save",
+    "/undo",
+    "/last",
+    "/copy",
+    "/version",
+    "/list",
+    "/help",
+    "/exit",
+    NULL
+};
+
+#define maxn( x , y ) ( x > y ? x : y )
+#define minn( x , y ) ( x < y ? x : y )
+
 void disable_history_search( void ){
     rl_bind_keyseq( "\\e[A" , NULL ); // disable up arrow key
     rl_bind_keyseq( "\\e[B" , NULL ); // disable down arrow key
@@ -28,6 +52,68 @@ void search_codes( c_vector* __codelist , const char* __text ){
         start = strstr( end + 3 , "```" );
     }
     return;
+}
+
+double get_jaccard_similarity( const char* __s1 , const char* __s2 ){
+    size_t s1_len = strlen( __s1 );
+    size_t s2_len = strlen( __s2 );
+    char* unionSet = ( char* ) malloc( s1_len + s2_len + 1 );
+    char* intersectionSet = ( char* ) malloc( maxn( s1_len , s2_len ) + 1 );
+    int counter = 0;
+
+    strcpy( unionSet , __s1 );
+    counter = strlen( unionSet );
+    for ( size_t i = 0 ; i < s2_len ; i++ )
+    {
+        bool in_union = false;
+        for ( size_t j = 0 ; j < s1_len ; j++ )
+            if ( __s2[i] == __s1[j] )
+            {
+                in_union = true;
+                break;
+            }
+        if ( !in_union )
+            // strcat( unionSet , &__s2[i] );
+            unionSet[counter++] = __s2[i];
+    }
+    unionSet[counter] = '\0';
+    // union set
+
+    counter = 0;
+    for ( size_t i = 0 ; i < s1_len ; i++ )
+        for ( size_t j = 0 ; j < s2_len ; j++ )
+            if ( __s1[i] == __s2[j] )
+            {
+                intersectionSet[counter++] = __s1[i];
+                break;
+            }
+    intersectionSet[counter] = '\0';
+    // intersection set
+
+    return ( double ) strlen( intersectionSet ) / strlen( unionSet );
+}
+
+size_t get_levenshtein_distance( const char* __s1 , const char* __s2 ){
+    size_t s1_len = strlen( __s1 );
+    size_t s2_len = strlen( __s2 );
+
+    int v[s1_len+1][s2_len+1];
+    memset( v , 0 , sizeof( v ) );
+    for ( size_t i = 0 ; i <= s1_len ; i++ )
+    {
+        for ( size_t j = 0 ; j <= s2_len ; j++ )
+        {
+            if ( i == 0 )
+                v[i][j] = j;
+            else if ( j == 0 )
+                v[i][j] = i;
+            else if ( __s1[i-1] == __s2[j-1] )
+                v[i][j] = v[i-1][j-1];
+            else
+                v[i][j] = minn( v[i-1][j-1] , minn( v[i][j-1] , v[i-1][j] ) ) + 1;
+        }
+    }
+    return v[s1_len][s2_len];
 }
 
 /**
@@ -557,6 +643,7 @@ int handle_slash_command( const char* __slashcmd ){
             // illegal index input
             printf( "\033[2A\r\033[2K\r" );
             fflush( stdout );
+            free( code_index_str );
             goto ask_code_index;
 
         copy_code:
@@ -574,7 +661,6 @@ int handle_slash_command( const char* __slashcmd ){
 
             cv_clean( &codelist );
             free( temp );
-            free( code_index_str );
             free( code_raw );
         } // /copy code
         else
@@ -643,6 +729,30 @@ int handle_slash_command( const char* __slashcmd ){
     {
         return -1;
     } // /exit, ready to break
+
+    // unrecgonized command
+
+    size_t min_levenshtein_distance = strlen( __slashcmd );
+    int most_similar_cmd_index = -1;
+    for ( int i = 0 ; i < sizeof( slash_commands ) / sizeof( char* ) - 1 ; i++ )
+    {
+        size_t this_levenshtein_distance = get_levenshtein_distance( __slashcmd , slash_commands[i] );
+        // levenshtein distance between __slashcmd and this slash command
+        if ( minn( min_levenshtein_distance , this_levenshtein_distance ) < min_levenshtein_distance )
+        {
+            if ( get_jaccard_similarity( __slashcmd , slash_commands[i] ) >= 0.75 )
+            {
+                min_levenshtein_distance = this_levenshtein_distance;
+                most_similar_cmd_index = i;
+            } // update most similar index only if the jaccard similarity of these two greater than 75%
+        }
+    }
+    crprint( "Unrecognized Slash Command `[bright red]%s[/]`." , __slashcmd );
+    if ( most_similar_cmd_index != -1 )
+        crprint( " Do you mean `[bright magenta]%s[/]`?\n" , slash_commands[most_similar_cmd_index] );
+    else
+        printf( "\n" );
+    crprint( "Use `[bright magenta]/help[/]` to see all available slash commands.\n" );
     return 1;
 }
 
