@@ -1,7 +1,6 @@
 #include"openai_api.h"
 
 openai_t* openai = NULL;
-bool request_working = false;
 long HTTP_Response_code = 0;
 
 CURL* curl_using_now = NULL;
@@ -35,6 +34,7 @@ void openai_init(){
     openai -> model = ( char* ) malloc( 64 );
     strcpy( openai -> model , "gpt-3.5-turbo" );
     openai -> temperature = 1.0;
+    openai -> stream_mode = true;
     openai -> tokens_limit = 4096;
     openai -> total_tokens_spent = 0;
     openai -> current_tokens = 0;
@@ -74,7 +74,7 @@ void* openai_send_chatrequest( void* __data ){
 
     CURL* curl;
     CURLcode res;
-    curl_data_t response_data = { NULL , 0 };
+    curl_data_t response_data = { openai -> stream_mode ? OPENAI_STREAM_REQUEST : OPENAI_NORMAL_REQUEST , NULL , 0 };
     curl = curl_easy_init();
     if ( !curl )
     {
@@ -97,6 +97,7 @@ void* openai_send_chatrequest( void* __data ){
     json_object_set_new( request_json_root , "model" , json_string( openai -> model ) );
     json_object_set_new( request_json_root , "messages" , openai -> messages );
     json_object_set_new( request_json_root , "temperature" , json_real( openai -> temperature ) );
+    json_object_set_new( request_json_root , "stream" , json_boolean( openai -> stream_mode ) );
     char* request_data = json_dumps( request_json_root , JSON_COMPACT );
     ezylog_logdebug( logger , "Request raw: %s" , request_data );
     // make request data
@@ -119,7 +120,7 @@ void* openai_send_chatrequest( void* __data ){
         if ( curl_request_abort_called )
             goto request_stop;
         // res not CURLE_OK because of called abort
-        fprintf( stderr , "send request failed: %s\n" , curl_easy_strerror( res ) );
+        crprint( "[red]send request failed: %s\n" , curl_easy_strerror( res ) );
         ezylog_logerror( logger , "send request failed: %s" , curl_easy_strerror( res ) );
         text = NULL;
         goto request_stop;
@@ -133,37 +134,64 @@ void* openai_send_chatrequest( void* __data ){
     json_t* root;
     json_error_t error;
 
-    root = json_loads( response_data.ptr , 0 , &error );
-    if ( !root )
+    if ( !openai -> stream_mode )
     {
-        fprintf( stderr , "[openai_send_chatrequest] -> response json error at line %d: %s\n" , error.line , error.text );
-        ezylog_logerror( logger , "response json error at line %d: %s" , error.line , error.text );
-        ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
-        text = NULL;
-        goto request_stop;
-    } // json error
+        root = json_loads( response_data.ptr , 0 , &error );
+        if ( !root )
+        {
+            fprintf( stderr , "[openai_send_chatrequest] -> response json error at line %d: %s\n" , error.line , error.text );
+            ezylog_logerror( logger , "response json error at line %d: %s" , error.line , error.text );
+            ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
+            text = NULL;
+            goto request_stop;
+        } // json error
     
-    if ( HTTP_Response_code / 100 == 4 )
-    {
-        json_t* response_errormsg = json_object_get( root , "error" );
-        text = json_string_value( json_object_get( response_errormsg , "message" ) );
-        ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
-        ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
-        // because of unknown format problem (openai's error response contains \n), using json_dumps here
-    } // parse response code, match 4xx errros
+        if ( HTTP_Response_code / 100 == 4 )
+        {
+            json_t* response_errormsg = json_object_get( root , "error" );
+            text = json_string_value( json_object_get( response_errormsg , "message" ) );
+            ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
+            ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+            // because of unknown format problem (openai's error response contains \n), using json_dumps here
+        } // parse response code, match 4xx errros
+        else
+        {
+            json_t* response_msg = json_object_get( root , "choices" );
+            response_msg = json_array_get( response_msg , 0 );
+            response_msg = json_object_get( response_msg , "message" );
+            json_array_append_new( openai -> messages , response_msg );
+            text = json_string_value( json_object_get( response_msg , "content" ) );
+            ezylog_loginfo( logger , "ChatGPT: %s" , text );
+            ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
+            openai -> current_tokens = json_integer_value( json_object_get( json_object_get( root , "usage" ) , "total_tokens" ) );
+            openai -> total_tokens_spent += openai -> current_tokens;
+            // count tokens
+        } // response code 200 OK (most likely)
+    } // normal request mode (not stream)
     else
     {
-        json_t* response_msg = json_object_get( root , "choices" );
-        response_msg = json_array_get( response_msg , 0 );
-        response_msg = json_object_get( response_msg , "message" );
-        json_array_append_new( openai -> messages , response_msg );
-        text = json_string_value( json_object_get( response_msg , "content" ) );
-        ezylog_loginfo( logger , "ChatGPT: %s" , text );
-        ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
-        openai -> current_tokens = json_integer_value( json_object_get( json_object_get( root , "usage" ) , "total_tokens" ) );
-        openai -> total_tokens_spent += openai -> current_tokens;
-        // count tokens
-    } // response code 200 OK (most likely)
+        if ( HTTP_Response_code / 100 == 4 )
+        {
+            root = json_loads( response_data.ptr , 0 , &error );
+            if ( !root )
+            {
+                fprintf( stderr , "[openai_send_chatrequest] -> response json error at line %d: %s\n" , error.line , error.text );
+                ezylog_logerror( logger , "response json error at line %d: %s" , error.line , error.text );
+                ezylog_logerror( logger , "Response raw: %s" , response_data.ptr );
+                text = NULL;
+                goto request_stop;
+            }
+            json_t* response_errormsg = json_object_get( root , "error" );
+            text = json_string_value( json_object_get( response_errormsg , "message" ) );
+            ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
+            ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+        } // parse response code, match 4xx errors
+        // OpenAI also responses json when error occurs
+        else
+        {
+
+        } // no error, stream has already been printed
+    } // stream mode
 
 request_stop:
     if ( !curl_request_abort_called )
@@ -294,7 +322,7 @@ void openai_load_history( const char* __history_file ){
 void* openai_get_subscription(){
     CURL* curl;
     CURLcode res;
-    curl_data_t response_data = { NULL , 0 };
+    curl_data_t response_data = { OPENAI_USAGE_GET_REQUEST , NULL , 0 };
     curl = curl_easy_init();
     if ( !curl )
     {
@@ -370,7 +398,7 @@ void* openai_get_usage( void* __be_data ){
 
     CURL* curl;
     CURLcode res;
-    curl_data_t response_data = { NULL , 0 };
+    curl_data_t response_data = { OPENAI_USAGE_GET_REQUEST , NULL , 0 };
     curl = curl_easy_init();
     if ( !curl )
     {

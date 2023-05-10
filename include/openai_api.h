@@ -32,6 +32,7 @@ typedef struct {
     json_t* messages;
     char* model;
     double temperature;
+    bool stream_mode;
     int tokens_limit;
     long total_tokens_spent;
     int current_tokens;
@@ -49,7 +50,6 @@ typedef struct {
 } openai_datatransfer_t;
 
 extern openai_t* openai;
-extern bool request_working;
 extern long HTTP_Response_code;
 
 extern bool curl_request_abort_called;

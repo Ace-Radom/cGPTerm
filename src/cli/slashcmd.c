@@ -771,7 +771,7 @@ int handle_slash_command( const char* __slashcmd ){
         crprint( "    [bright magenta]Log Level:[/]\t\t\t%s\n"             , parse_priority_to_str( LOG_LEVEL ) );
         crprint( "\n" );
         crprint( "    [bright magenta]Enable Raw Mode:[/]\t\t%s\n"         , raw_mode_enable ? "Yes" : "No" );
-        // crprint( "    [bright magenta]Enable Stream Mode:[/]\t\t%s\n"      , openai -> stream_mode ? "Yes" : "No" );
+        crprint( "    [bright magenta]Enable Stream Mode:[/]\t\t%s\n"      , openai -> stream_mode ? "Yes" : "No" );
         crprint( "    [bright magenta]AI Model:[/]\t\t\t%s\n"              , openai -> model );
         crprint( "    [bright magenta]AI Randomness:[/]\t\t%.2lf\n"        , openai -> temperature );
         free( api_key_hide );

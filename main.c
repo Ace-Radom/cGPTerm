@@ -149,7 +149,7 @@ stopmain:
 void* get_remote_version(){
     CURL* curl;
     CURLcode res;
-    curl_data_t response_data = { NULL , 0 };
+    curl_data_t response_data = { GITHUB_REMOTE_VERSION_GET , NULL , 0 };
     curl = curl_easy_init();
     if ( !curl )
     {

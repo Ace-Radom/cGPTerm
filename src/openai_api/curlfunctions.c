@@ -12,9 +12,30 @@ size_t curl_write_callback_function( char* ptr , size_t size , size_t nmemb , vo
         return 0;
     } // realloc failed
 
+    if ( response_data -> request_type == OPENAI_STREAM_REQUEST )
+    {
+        char* temp = ( char* ) malloc( strlen( ptr ) + 1 );
+        strcpy( temp , ptr );
+        char* token = strtok( temp , "\n\n" );
+        SSE_event_handler( token );
+        while ( ( token = strtok( NULL , "\n\n" ) ) != NULL )
+            SSE_event_handler( token );
+        free( temp );
+    } // handle stream sse event
+
     memcpy( &( response_data -> ptr[response_data->size] ) , ptr , realsize );
     response_data -> size += realsize;
     response_data -> ptr[response_data->size] = '\0';
     // copy response this turn
     return realsize;
+}
+
+void SSE_event_handler( const char* SSEMSG ){
+    char* bpos;
+    if ( ( bpos = strstr( SSEMSG , "data" ) ) == NULL )
+        return;
+    // not SSE event (maybe stream mode enabled, but error responsed)
+
+    // ezylog_logdebug( logger , SSEMSG );
+    return;
 }
