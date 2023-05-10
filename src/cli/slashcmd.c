@@ -94,15 +94,15 @@ double get_jaccard_similarity( const char* __s1 , const char* __s2 ){
     return ( double ) strlen( intersectionSet ) / strlen( unionSet );
 }
 
-size_t get_levenshtein_distance( const char* __s1 , const char* __s2 ){
-    size_t s1_len = strlen( __s1 );
-    size_t s2_len = strlen( __s2 );
+int get_levenshtein_distance( const char* __s1 , const char* __s2 ){
+    int s1_len = strlen( __s1 );
+    int s2_len = strlen( __s2 );
 
     int v[s1_len+1][s2_len+1];
     memset( v , 0 , sizeof( v ) );
-    for ( size_t i = 0 ; i <= s1_len ; i++ )
+    for ( int i = 0 ; i <= s1_len ; i++ )
     {
-        for ( size_t j = 0 ; j <= s2_len ; j++ )
+        for ( int j = 0 ; j <= s2_len ; j++ )
         {
             if ( i == 0 )
                 v[i][j] = j;
@@ -771,6 +771,7 @@ int handle_slash_command( const char* __slashcmd ){
         crprint( "    [bright magenta]Log Level:[/]\t\t\t%s\n"             , parse_priority_to_str( LOG_LEVEL ) );
         crprint( "\n" );
         crprint( "    [bright magenta]Enable Raw Mode:[/]\t\t%s\n"         , raw_mode_enable ? "Yes" : "No" );
+        // crprint( "    [bright magenta]Enable Stream Mode:[/]\t\t%s\n"      , openai -> stream_mode ? "Yes" : "No" );
         crprint( "    [bright magenta]AI Model:[/]\t\t\t%s\n"              , openai -> model );
         crprint( "    [bright magenta]AI Randomness:[/]\t\t%.2lf\n"        , openai -> temperature );
         free( api_key_hide );
