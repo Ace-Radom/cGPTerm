@@ -45,6 +45,8 @@ void openai_init(){
     openai -> credit_plan = NULL;
     // basic init
 
+    stream_response_msg_only_buf = ( char* ) malloc( 65536 );
+
     char* authorization_bearer_header_str = ( char* ) malloc( 128 );
     sprintf( authorization_bearer_header_str , "%s%s" , "Authorization: Bearer " , OPENAI_API_KEY );
     openai -> headers = curl_slist_append( openai -> headers , "Content-Type: application/json" );
@@ -111,6 +113,9 @@ void* openai_send_chatrequest( void* __data ){
     // make curl request
 
     curl_using_now = curl;
+    // raise the curl function in progress now
+
+    strcpy( stream_response_msg_only_buf , "" );
 
     res = curl_easy_perform( curl );
     if ( res != CURLE_OK )
@@ -189,7 +194,12 @@ void* openai_send_chatrequest( void* __data ){
         // OpenAI also responses json when error occurs
         else
         {
-
+            ezylog_loginfo( logger , "ChatGPT: %s" , stream_response_msg_only_buf );
+            json_t* new_responsemsg = json_object();
+            json_object_set_new( new_responsemsg , "role" , json_string( "assistant" ) );
+            json_object_set_new( new_responsemsg , "content" , json_string( stream_response_msg_only_buf ) );
+            json_array_append_new( openai -> messages , new_responsemsg );
+            printf( "\n" );
         } // no error, stream has already been printed
     } // stream mode
 

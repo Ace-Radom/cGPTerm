@@ -52,6 +52,7 @@ int start_CLI(){
         pthread_create( &send_request , NULL , openai_send_chatrequest , ( void* ) &data ); // pthread return code
         usleep( 10000 );
         // start request; wait 10 ms in order to let openai_send_chatrequest to lock request_working (-> true)
+        wait_msg_working = true;
         while ( request_working )
         {
             crstatus( "[bold][bright cyan]ChatGPT is thinking...\r" , "green" );
@@ -60,6 +61,7 @@ int start_CLI(){
         // until request done: print wait msg
         printf( "\r\033[2K\r" );
         fflush( stdout );
+        wait_msg_working = false;
         pthread_join( send_request , NULL );
         // clean wait msg, request thread join
         reset_terattr();
@@ -93,7 +95,7 @@ int start_CLI(){
                 openai_msg_popback();
             } // request error, pop last user's msg
         }
-        else
+        else if ( !openai -> stream_mode )
             openai_msg_popback();
         // same: request error, pop last user's msg
 

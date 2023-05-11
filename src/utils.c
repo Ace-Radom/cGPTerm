@@ -22,3 +22,4 @@ char* curl_userangel_data = NULL;
 bool raw_mode_enable = false;
 
 bool request_working = false;
+bool wait_msg_working = false;
