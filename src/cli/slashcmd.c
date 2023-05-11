@@ -860,7 +860,7 @@ void print_slash_command_help(){
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
     crprint( "    [bright magenta]/model[/] [bold]\\[model_name][/]\t\t- Change AI model\n" );
-    crprint( "    [bright magenta]/system[/] [bold]\\[new_prompt][/]\t\t- Modify the system prompt\n" );
+    crprint( "    [bright magenta]/system[/] [bold]\\[new_prompt][/]\t- Modify the system prompt\n" );
     crprint( "    [bright magenta]/rand[/] [bold]\\[randomness][/]\t\t- Set Model sampling temperature (0~2)\n" );
     crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
     crprint( "    [bright magenta]/undo[/]\t\t\t- Undo the last question and remove its answer\n" );

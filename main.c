@@ -126,8 +126,7 @@ int main( int argc , char** argv ){
     
     printf( "Exiting...\n" );
     crprint( "[bright magenta]Total tokens spent: %ld\n" , openai -> total_tokens_spent );
-    // printf( "Total tokens spent: %ld\n" , openai -> total_tokens_spent );
-    ezylog_loginfo( logger , "Total tokens spent: %d" , openai -> total_tokens_spent );
+    ezylog_loginfo( logger , "Total tokens spent: %ld" , openai -> total_tokens_spent );
     openai_free();
     curl_global_cleanup();
 

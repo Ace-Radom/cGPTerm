@@ -170,6 +170,7 @@ void* openai_send_chatrequest( void* __data ){
             ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
             openai -> current_tokens = json_integer_value( json_object_get( json_object_get( root , "usage" ) , "total_tokens" ) );
             openai -> total_tokens_spent += openai -> current_tokens;
+            ezylog_loginfo( logger , "Tokens used this turn: %ld" , openai -> current_tokens );
             // count tokens
         } // response code 200 OK (most likely)
     } // normal request mode (not stream)
@@ -199,7 +200,12 @@ void* openai_send_chatrequest( void* __data ){
             json_object_set_new( new_responsemsg , "role" , json_string( "assistant" ) );
             json_object_set_new( new_responsemsg , "content" , json_string( stream_response_msg_only_buf ) );
             json_array_append_new( openai -> messages , new_responsemsg );
+            // append new response to message list
             printf( "\n" );
+            openai_count_tokens();
+            openai -> total_tokens_spent += openai -> current_tokens;
+            ezylog_loginfo( logger , "Tokens used this turn: %ld" , openai -> current_tokens );
+            // count current tokens
         } // no error, stream has already been printed
     } // stream mode
 
@@ -222,6 +228,31 @@ void openai_free(){
     if ( openai -> title )
         free( openai -> title );
     free( openai );
+    return;
+}
+
+void openai_count_tokens(){
+    char* whole_msg = ( char* ) malloc( 4096 );
+    size_t size = 4096;
+    strcpy( whole_msg , "" );
+    for ( int i = 0 ; i < json_array_size( openai -> messages ) ; i++ )
+    {
+        json_t* this_msg = json_array_get( openai -> messages , i );
+        const char* role = json_string_value( json_object_get( this_msg , "role" ) );
+        const char* content = json_string_value( json_object_get( this_msg , "content" ) );
+        char* this_msg_str = ( char* ) malloc( strlen( role ) + strlen( content ) + 32 );
+        sprintf( this_msg_str , "role: %s, content: %s" , role , content );
+        // build this message's str
+        if ( strlen( this_msg_str ) + strlen( whole_msg ) > size )
+        {
+            whole_msg = realloc( whole_msg , size + strlen( this_msg_str ) + 1 );
+            size += strlen( this_msg_str );
+        } // whole_msg cannot contain this msg
+        strcat( whole_msg , this_msg_str );
+        free( this_msg_str );
+    } // build whole message str
+    openai -> current_tokens = count_tokens( whole_msg );
+    free( whole_msg );
     return;
 }
 

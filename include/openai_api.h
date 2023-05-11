@@ -58,6 +58,8 @@ void openai_init();
 void* openai_send_chatrequest( void* __data );
 void openai_free();
 
+void openai_count_tokens();
+
 int openai_set_model( char* __new_model );
 void openai_set_prompt( char* __new_prompt );
 void openai_set_temperature( double __new_temperature );
