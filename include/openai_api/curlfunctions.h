@@ -13,6 +13,7 @@ extern "C" {
 #include<jansson.h>
 
 #include"ezylog.h"
+#include"crich.h"
 #include"utils.h"
 
 #define GITHUB_REMOTE_VERSION_GET 0x00

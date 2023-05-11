@@ -77,6 +77,8 @@ void SSE_event_handler( const char* SSEMSG ){
     response_msg = json_object_get( response_msg , "delta" );
     if ( ( response_msg = json_object_get( response_msg , "content" ) ) != NULL )
     {
+        if ( strlen( stream_response_msg_only_buf ) == 0 )
+            crprint( "[bold][bright cyan]ChatGPT:\n" );
         printf( "%s" , json_string_value( response_msg ) );
         fflush( stdout );
         strcat( stream_response_msg_only_buf , json_string_value( response_msg ) );
