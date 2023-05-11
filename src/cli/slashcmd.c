@@ -5,6 +5,7 @@
 */
 const char* slash_commands[] = {
     "/raw",
+    "/stream",
     "/tokens",
     "/usage",
     "/timeout",
@@ -172,6 +173,28 @@ int handle_slash_command( const char* __slashcmd ){
         free( slashcmd_headcmd_only_temp );
         return 0;
     } // /raw
+
+// ===================================================================================
+// ===================================== /stream =====================================
+// ===================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/stream" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/stream command triggered" );
+        openai -> stream_mode = !openai -> stream_mode;
+        if ( openai -> stream_mode )
+        {
+            ezylog_loginfo( logger , "Stream mode enabled" );
+            crprint( "[dim]Stream mode enabled, the answer will start outputting as soon as the first response arrives.\n" );
+        }
+        else
+        {
+            ezylog_loginfo( logger , "Stream mode disabled" );
+            crprint( "[dim]Stream mode disabled, the answer is being displayed after the server finishes responding.\n" );
+        }
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /stream
 
 // ===================================================================================
 // ===================================== /tokens =====================================
@@ -587,6 +610,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( slashcmd_headcmd_only , "/undo" ) == 0 )
     {
+        ezylog_logdebug( logger , "/undo command triggered" );
         openai_undo();
         free( slashcmd_headcmd_only_temp );
         return 0;
@@ -594,6 +618,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( slashcmd_headcmd_only , "/last" ) == 0 )
     {
+        ezylog_logdebug( logger , "/last command triggered" );
         const char* last_response = openai_getlast();
         if ( !last_response )
         {
@@ -623,6 +648,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( slashcmd_headcmd_only , "/copy" ) == 0 )
     {
+        ezylog_logdebug( logger , "/copy command triggered" );
         const char* last_response = openai_getlast();
         if ( !last_response )
         {
@@ -736,6 +762,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( slashcmd_headcmd_only , "/version" ) == 0 )
     {
+        ezylog_logdebug( logger , "/version command triggered" );
         pthread_mutex_lock( &remote_version_mutex );
         char* local_version_str = ( char* ) malloc( 36 );
         char* remote_version_str = ( char* ) malloc( 36 );
@@ -757,6 +784,7 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( slashcmd_headcmd_only , "/list" ) == 0 )
     {
+        ezylog_logdebug( logger , "/list command triggered" );
         char* api_key_hide = ( char* ) malloc( 16 );
         strncpy( api_key_hide , OPENAI_API_KEY , 3 );
         api_key_hide[3] = '\0';
@@ -785,12 +813,14 @@ int handle_slash_command( const char* __slashcmd ){
 
     if ( strcmp( slashcmd_headcmd_only , "/help" ) == 0 )
     {
+        ezylog_logdebug( logger , "/help command triggered" );
         print_slash_command_help();
         free( slashcmd_headcmd_only_temp );
         return 0;
     } // /help
     if ( strcmp( slashcmd_headcmd_only , "/exit" ) == 0 )
     {
+        ezylog_logdebug( logger , "/exit command triggered" );
         free( slashcmd_headcmd_only_temp );
         return -1;
     } // /exit, ready to break
@@ -825,6 +855,7 @@ int handle_slash_command( const char* __slashcmd ){
 void print_slash_command_help(){
     crprint( "[bold]Available commands:\n" );
     crprint( "    [bright magenta]/raw[/]\t\t\t- Toggle raw mode (showing raw text of ChatGPT's reply)\n" );
+    crprint( "    [bright magenta]/stream[/]\t\t\t- Toggle stream output mode (flow print the answer)\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
