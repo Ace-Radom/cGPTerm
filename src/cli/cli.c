@@ -94,8 +94,24 @@ int start_CLI(){
                 printf( "%s\n" , data.response );
                 openai_msg_popback();
             } // request error, pop last user's msg
-        }
-        else if ( !openai -> stream_mode )
+        } // normal mode
+        else if ( openai -> stream_mode )
+        {
+            if ( HTTP_Response_code / 100 == 4 )
+            {
+                crprint( "[bold][red]Request Error: " );
+                printf( "%s\n" , data.response );
+                openai_msg_popback();
+            }
+            else
+            {
+                if ( openai -> tokens_limit - openai -> current_tokens < 500 && openai -> tokens_limit - openai -> current_tokens >= 1 )
+                    crprint( "[dim]Approaching tokens limit: %d tokens left\n" , openai -> tokens_limit - openai -> current_tokens );
+                if ( openai -> tokens_limit - openai -> current_tokens < 1 )
+                    crprint( "[red]Reached tokens limit: %d\n" , openai -> tokens_limit );
+            }
+        } // stream mode
+        else
             openai_msg_popback();
         // same: request error, pop last user's msg
 
