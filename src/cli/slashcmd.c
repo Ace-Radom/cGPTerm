@@ -14,6 +14,7 @@ const char* slash_commands[] = {
     "/rand",
     "/save",
     "/undo",
+    "/delete",
     "/last",
     "/copy",
     "/version",
@@ -604,9 +605,9 @@ int handle_slash_command( const char* __slashcmd ){
         return 0;
     } // /usage
 
-// ========================================================================================
-// ===================================== /undo, /last =====================================
-// ========================================================================================
+// =================================================================================
+// ===================================== /undo =====================================
+// =================================================================================
 
     if ( strcmp( slashcmd_headcmd_only , "/undo" ) == 0 )
     {
@@ -615,6 +616,44 @@ int handle_slash_command( const char* __slashcmd ){
         free( slashcmd_headcmd_only_temp );
         return 0;
     } // /undo
+
+// ===================================================================================
+// ===================================== /delete =====================================
+// ===================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/delete" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/delete command triggered" );
+        
+        if ( strlen( __slashcmd ) == 7 )
+        {
+            openai_delete_first();
+            free( slashcmd_headcmd_only_temp );
+            return 0;
+        } // no other args given, delete first
+
+        char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+        char* second_arg;
+        strcpy( temp , __slashcmd );
+        second_arg = strtok( temp , " " );
+        second_arg = strtok( NULL , " " );
+
+        if ( strcmp( second_arg , "first" ) == 0 )
+            openai_delete_first();
+        // /delete first
+        else if ( strcmp( second_arg , "all" ) == 0 )
+            openai_delete_all();
+        else
+            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/delete first[/]` or `[bright magenta]/delete all[/]`\n" );
+        // /delete all
+        free( temp );
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /delete
+
+// =================================================================================
+// ===================================== /last =====================================
+// =================================================================================
 
     if ( strcmp( slashcmd_headcmd_only , "/last" ) == 0 )
     {
@@ -749,7 +788,7 @@ int handle_slash_command( const char* __slashcmd ){
             free( code_raw );
         } // /copy code
         else
-            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/copy code[/]` or `[bright magenta]/copy all[/]`" );
+            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/copy code[/]` or `[bright magenta]/copy all[/]`\n" );
         // /copy ?
 
         free( slashcmd_headcmd_only_temp );

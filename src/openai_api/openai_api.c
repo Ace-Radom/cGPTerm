@@ -612,6 +612,35 @@ void openai_undo(){
     return;
 }
 
+void openai_delete_first(){
+    size_t msglist_size = json_array_size( openai -> messages );
+    if ( msglist_size <= 1 )
+    {
+        crprint( "[dim]Nothing to delete\n" );
+        return;
+    }
+    const char* first_msg = json_string_value( json_object_get( json_array_get( openai -> messages , 1 ) , "content" ) );
+    crprint( "[dim]First question: '[green]%s[/]' and its answer has been deleted\n" , first_msg );
+    json_array_remove( openai -> messages , 1 );
+    json_array_remove( openai -> messages , 1 );
+    // delete first request and response
+    return;
+}
+
+void openai_delete_all(){
+    size_t msglist_size = json_array_size( openai -> messages );
+    if ( msglist_size <= 1 )
+    {
+        crprint( "[dim]Nothing to delete\n" );
+        return;
+    }
+    while ( json_array_size( openai -> messages ) > 1 )
+        json_array_remove( openai -> messages , 1 );
+    // remove all except prompt
+    crprint( "[dim]Current chat deleted.\n" );
+    return;
+}
+
 const char* openai_getlast(){
     size_t msglist_size = json_array_size( openai -> messages );
     if ( msglist_size <= 1 )

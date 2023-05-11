@@ -71,6 +71,8 @@ void* openai_get_usage_summary();
 void openai_request_abort();
 
 void openai_undo();
+void openai_delete_first();
+void openai_delete_all();
 const char* openai_getlast();
 void openai_msg_popback();
 
