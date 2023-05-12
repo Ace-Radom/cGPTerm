@@ -6,6 +6,7 @@
 const char* slash_commands[] = {
     "/raw",
     "/stream",
+    "/title",
     "/tokens",
     "/usage",
     "/timeout",
@@ -196,6 +197,42 @@ int handle_slash_command( const char* __slashcmd ){
         free( slashcmd_headcmd_only_temp );
         return 0;
     } // /stream
+
+// ==================================================================================
+// ===================================== /title =====================================
+// ==================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/title" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/title command triggered" );
+        AUTO_GENERATE_TITLE = !AUTO_GENERATE_TITLE;
+        if ( AUTO_GENERATE_TITLE )
+        {
+            ezylog_loginfo( logger , "Auto title generation enabled" );
+            crprint( "[dim]Auto title generation enabled." );
+            if ( openai_get_message_list_length() >= 3 && openai -> title == NULL )
+            {
+                crprint( "[dim] Generate a new title for current chat now...\n" );
+                
+                pthread_t generate_title_background;
+                pthread_attr_t generate_title_background_attr;
+                pthread_attr_init( &generate_title_background_attr );
+                pthread_attr_setdetachstate( &generate_title_background_attr , PTHREAD_CREATE_DETACHED );
+                ezylog_logdebug( logger , "title background generation triggered, call generate function" );
+                pthread_create( &generate_title_background , &generate_title_background_attr , openai_generate_title , ( void* ) openai_getfirst() );
+                pthread_attr_destroy( &generate_title_background_attr );
+            } // current chat not empty, generate one title now
+            else
+                printf( "\n" );
+        }
+        else
+        {
+            ezylog_loginfo( logger , "Auto title generation disabled" );
+            crprint( "[dim]Auto title generation disabled.\n" );
+        }
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /title
 
 // ===================================================================================
 // ===================================== /tokens =====================================
@@ -557,7 +594,6 @@ int handle_slash_command( const char* __slashcmd ){
         goto ask_temperature;
     } // /rand TEMPERATURE
 
-
 // ==================================================================================
 // ===================================== /usage =====================================
 // ==================================================================================
@@ -895,6 +931,7 @@ void print_slash_command_help(){
     crprint( "[bold]Available commands:\n" );
     crprint( "    [bright magenta]/raw[/]\t\t\t- Toggle raw mode (showing raw text of ChatGPT's reply)\n" );
     crprint( "    [bright magenta]/stream[/]\t\t\t- Toggle stream output mode (flow print the answer)\n" );
+    crprint( "    [bright magenta]/title[/]\t\t\t- Toggle whether to enable automatic title generation\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );

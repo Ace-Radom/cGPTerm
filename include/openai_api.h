@@ -78,6 +78,8 @@ void openai_request_abort();
 void openai_undo();
 void openai_delete_first();
 void openai_delete_all();
+size_t openai_get_message_list_length();
+const char* openai_getfirst();
 const char* openai_getlast();
 void openai_msg_popback();
 

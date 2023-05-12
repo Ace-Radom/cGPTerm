@@ -7,6 +7,7 @@ CURL* curl_using_now = NULL;
 bool curl_request_abort_called = false;
 
 CURL* title_background_generation_curl = NULL;
+pthread_mutex_t openai_title_change_mutex;
 
 typedef struct {
     cdate_t start_date;
@@ -66,6 +67,9 @@ void openai_init(){
 
     openai -> current_tokens += count_tokens_message( prompt );
     // count prompt tokens and add to current_tokens
+
+    pthread_mutex_init( &openai_title_change_mutex , NULL );
+    // mutex init
 
     return;
 }
@@ -226,7 +230,7 @@ void* openai_send_chatrequest( void* __data ){
         pthread_attr_t generate_title_background_attr;
         pthread_attr_init( &generate_title_background_attr );
         pthread_attr_setdetachstate( &generate_title_background_attr , PTHREAD_CREATE_DETACHED );
-        ezylog_logdebug( logger , "title background generation triggered, call" );
+        ezylog_logdebug( logger , "title background generation triggered, call generate function" );
         pthread_create( &generate_title_background , &generate_title_background_attr , openai_generate_title , ( void* ) first_msg );
         pthread_attr_destroy( &generate_title_background_attr );
     } // use auto generate title, and messages length is 3 (system prompt, first request, first response)
@@ -251,6 +255,7 @@ void openai_free(){
     if ( openai -> title )
         free( openai -> title );
     free( openai );
+    pthread_mutex_destroy( &openai_title_change_mutex );
     return;
 }
 
@@ -705,6 +710,8 @@ void* openai_generate_title( void* __data ){
         // add title generation tokens cost to total tokens spent
         ezylog_loginfo( logger , "Tokens used to generate title: %ld" , tokens_spent );
 
+        pthread_mutex_lock( &openai_title_change_mutex );
+
         if ( openai -> title != NULL )
         {
             free( openai -> title );
@@ -718,6 +725,9 @@ void* openai_generate_title( void* __data ){
         printf( "\033]0;%s\007" , openai -> title );
         fflush( stdout );
         // change CLI title
+
+        pthread_mutex_unlock( &openai_title_change_mutex );
+
     } // response code 200 OK (most likely)
 
 request_stop:
@@ -788,6 +798,25 @@ void openai_delete_all(){
     return;
 }
 
+size_t openai_get_message_list_length(){
+    return json_array_size( openai -> messages );
+}
+
+/**
+ * @brief get message list's first request content
+*/
+const char* openai_getfirst(){
+    if ( json_array_size( openai -> messages ) <= 1 )
+    {
+        return NULL;
+    }
+    const char* first_request = json_string_value( json_object_get( json_array_get( openai -> messages , 1 ) , "content" ) );
+    return first_request;
+}
+
+/**
+ * @brief get message list's last response content
+*/
 const char* openai_getlast(){
     size_t msglist_size = json_array_size( openai -> messages );
     if ( msglist_size <= 1 )
