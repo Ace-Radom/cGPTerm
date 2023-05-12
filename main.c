@@ -17,6 +17,8 @@
 #include"cli.h"
 #include"crich.h"
 
+CURL* get_remote_version_curl = NULL;
+
 void* get_remote_version();
 bool is_local_latest();
 
@@ -130,6 +132,18 @@ int main( int argc , char** argv ){
     openai_free();
     curl_global_cleanup();
 
+    if ( title_background_generation_curl != NULL )
+    {
+        curl_easy_cleanup( title_background_generation_curl );
+        title_background_generation_curl = NULL;
+    } // title generation still working
+
+    if ( get_remote_version_curl != NULL )
+    {
+        curl_easy_cleanup( get_remote_version_curl );
+        get_remote_version_curl = NULL;
+    } // get remote version still working        
+
     pthread_mutex_lock( &remote_version_mutex );
     if ( !is_local_latest() )
     {
@@ -167,6 +181,9 @@ void* get_remote_version(){
     curl_easy_setopt( curl , CURLOPT_TIMEOUT , 10 );
     // remote version ask's timeout is set to 10s
     // make curl request
+
+    get_remote_version_curl = curl;
+    // raise get remote version function's curl
 
     res = curl_easy_perform( curl );
     if ( res != CURLE_OK )
@@ -215,6 +232,7 @@ void* get_remote_version(){
 request_stop:
     curl_easy_cleanup( curl );
     free( response_data.ptr );
+    get_remote_version_curl = NULL;
     return NULL;
 }
 

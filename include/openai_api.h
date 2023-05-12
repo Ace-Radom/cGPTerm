@@ -26,6 +26,8 @@ extern "C" {
 #include"cvector.h"
 #include"ctiktoken.hpp"
 
+#define GEN_TITLE_PROMPT "Generate title shorter than 10 words for the following content in content's language. The tilte contains ONLY words. DO NOT include line-break."
+
 typedef struct {
     char* endpoint;
     struct curl_slist* headers;
@@ -54,6 +56,8 @@ extern long HTTP_Response_code;
 
 extern bool curl_request_abort_called;
 
+extern CURL* title_background_generation_curl;
+
 void openai_init();
 void* openai_send_chatrequest( void* __data );
 void openai_free();
@@ -67,6 +71,7 @@ int openai_save_history( FILE* __f );
 void openai_load_history( const char* __history_file );
 
 void* openai_get_usage_summary();
+void* openai_generate_title( void* __data );
 
 void openai_request_abort();
 

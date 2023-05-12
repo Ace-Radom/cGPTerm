@@ -117,6 +117,9 @@ int start_CLI(){
 
         if ( curl_request_abort_called )
         {
+            if ( openai -> stream_mode )
+                printf( "\n" );
+            // if using stream mode, endline first
             crprint( "[bold][bright cyan]Aborted\n" );
             curl_request_abort_called = false;
         } // request abort raised, print abort msg and reset this signal

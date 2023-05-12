@@ -16,10 +16,11 @@ extern "C" {
 #include"crich.h"
 #include"utils.h"
 
-#define GITHUB_REMOTE_VERSION_GET 0x00
-#define OPENAI_NORMAL_REQUEST     0x01
-#define OPENAI_STREAM_REQUEST     0x02
-#define OPENAI_USAGE_GET_REQUEST  0x03
+#define GITHUB_REMOTE_VERSION_GET          0x00
+#define OPENAI_NORMAL_REQUEST              0x01
+#define OPENAI_STREAM_REQUEST              0x02
+#define OPENAI_USAGE_GET_REQUEST           0x03
+#define OPENAI_BACKGROUND_TITLE_GENERATION 0x04
 
 typedef struct {
     unsigned char request_type;

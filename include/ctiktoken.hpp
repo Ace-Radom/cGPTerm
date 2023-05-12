@@ -12,7 +12,7 @@ extern "C" {
 
 #include<stdlib.h>
 
-void cout_tokens_init();
+void count_tokens_init();
 size_t count_tokens( const char* __text );
 
 #ifdef __cplusplus

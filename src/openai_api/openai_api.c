@@ -6,6 +6,8 @@ long HTTP_Response_code = 0;
 CURL* curl_using_now = NULL;
 bool curl_request_abort_called = false;
 
+CURL* title_background_generation_curl = NULL;
+
 typedef struct {
     cdate_t start_date;
     cdate_t end_date;
@@ -59,7 +61,7 @@ void openai_init(){
     json_array_append_new( openai -> messages , prompt );
     // prompt init
 
-    cout_tokens_init();
+    count_tokens_init();
     // tokens counter init
 
     openai -> current_tokens += count_tokens_message( prompt );
@@ -97,7 +99,8 @@ void* openai_send_chatrequest( void* __data ){
     // append new user msg to messages
     json_t* request_json_root = json_object();
     json_object_set_new( request_json_root , "model" , json_string( openai -> model ) );
-    json_object_set_new( request_json_root , "messages" , openai -> messages );
+    json_object_set_new( request_json_root , "messages" , json_copy( openai -> messages ) );
+    // copy a new message list, in order to free request_json_root and not destory original list
     json_object_set_new( request_json_root , "temperature" , json_real( openai -> temperature ) );
     json_object_set_new( request_json_root , "stream" , json_boolean( openai -> stream_mode ) );
     char* request_data = json_dumps( request_json_root , JSON_COMPACT );
@@ -157,6 +160,7 @@ void* openai_send_chatrequest( void* __data ){
             text = json_string_value( json_object_get( response_errormsg , "message" ) );
             ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
             ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+            goto request_stop;
             // because of unknown format problem (openai's error response contains \n), using json_dumps here
         } // parse response code, match 4xx errros
         else
@@ -191,6 +195,7 @@ void* openai_send_chatrequest( void* __data ){
             text = json_string_value( json_object_get( response_errormsg , "message" ) );
             ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
             ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+            goto request_stop;
         } // parse response code, match 4xx errors
         // OpenAI also responses json when error occurs
         else
@@ -209,12 +214,30 @@ void* openai_send_chatrequest( void* __data ){
         } // no error, stream has already been printed
     } // stream mode
 
+    // here: check if need to generate title background
+    // but if error occurs, there's no need to generate a title
+    // therefore add goto request_stop after each error part
+
+    if ( AUTO_GENERATE_TITLE && json_array_size( openai -> messages ) == 3 )
+    {
+        const char* first_msg = json_string_value( json_object_get( json_array_get( openai -> messages , 1 ) , "content" ) );
+
+        pthread_t generate_title_background;
+        pthread_attr_t generate_title_background_attr;
+        pthread_attr_init( &generate_title_background_attr );
+        pthread_attr_setdetachstate( &generate_title_background_attr , PTHREAD_CREATE_DETACHED );
+        ezylog_logdebug( logger , "title background generation triggered, call" );
+        pthread_create( &generate_title_background , &generate_title_background_attr , openai_generate_title , ( void* ) first_msg );
+        pthread_attr_destroy( &generate_title_background_attr );
+    } // use auto generate title, and messages length is 3 (system prompt, first request, first response)
+
 request_stop:
     if ( !curl_request_abort_called )
         curl_easy_cleanup( curl );
     // when abort called, curl has already been cleaned up
     free( request_data );
     free( response_data.ptr );
+    json_decref( request_json_root );
     data -> response = text;
     curl_using_now = NULL;
     request_working = false;
@@ -582,6 +605,130 @@ void* openai_get_usage_summary(){
     pthread_join( get_usage_this_month , NULL );
     openai -> credit_used_this_month = usage_this_month.usage;
     request_working = false;
+    return NULL;
+}
+
+void* openai_generate_title( void* __data ){
+    const char* __msg_used_to_gen_title = ( char* ) __data;
+    char* msg_used_to_gen_title = ( char* ) malloc( strlen( __msg_used_to_gen_title ) + 1 );
+    strcpy( msg_used_to_gen_title , __msg_used_to_gen_title );
+    // get message used to generate title
+
+    // copy msg transfered-in in order to prevent original msg be free before it's used here
+
+    CURL* curl;
+    CURLcode res;
+    curl_data_t response_data = { OPENAI_BACKGROUND_TITLE_GENERATION , NULL , 0 };
+    curl = curl_easy_init();
+    if ( !curl )
+    {
+        ezylog_logerror( logger , "curl init failed when generating title background" );
+        free( msg_used_to_gen_title );
+        return NULL;
+    } // curl init error
+
+    ezylog_loginfo( logger , "start to generate title background..." );
+
+    char* prompt = ( char* ) malloc( strlen( msg_used_to_gen_title ) + strlen( GEN_TITLE_PROMPT ) + 32 );
+    strcpy( prompt , GEN_TITLE_PROMPT );
+    strcat( prompt , "\n\nContent:\"\n" );
+    strcat( prompt , msg_used_to_gen_title );
+    strcat( prompt , "\n\"" );
+
+    json_t* request_msg = json_object();
+    json_object_set_new( request_msg , "role" , json_string( "user" ) );
+    json_object_set_new( request_msg , "content" , json_string( prompt ) );
+    json_t* request_msg_array = json_array();
+    json_array_append_new( request_msg_array , request_msg );
+    // build request message
+
+    json_t* request_json_root = json_object();
+    json_object_set_new( request_json_root , "model" , json_string( "gpt-3.5-turbo" ) );
+    json_object_set_new( request_json_root , "messages" , request_msg_array );
+    json_object_set_new( request_json_root , "temperature" , json_real( 0.5 ) );
+    char* request_data = json_dumps( request_json_root , JSON_COMPACT );
+    ezylog_logdebug( logger , "Generate Title Request raw: %s" , request_data );
+    // make request data
+
+    curl_easy_setopt( curl , CURLOPT_URL , openai -> endpoint );
+    curl_easy_setopt( curl , CURLOPT_HTTPHEADER , openai -> headers );
+    curl_easy_setopt( curl , CURLOPT_POSTFIELDS , request_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
+    curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , curl_write_callback_function );
+    curl_easy_setopt( curl , CURLOPT_TIMEOUT_MS , ( int ) ( OPENAI_API_TIMEOUT * 1000 ) );
+    // make curl request
+
+    title_background_generation_curl = curl;
+    // raise title background generation's curl
+
+    res = curl_easy_perform( curl );
+    if ( res != CURLE_OK )
+    {
+        ezylog_logerror( logger , "send request failed when generating title background: %s" , curl_easy_strerror( res ) );
+        goto request_stop;
+    }
+
+    ezylog_logdebug( logger , "Generate Title Response got, total size: %ld" , response_data.size );
+
+    long response_code;
+    curl_easy_getinfo( curl , CURLINFO_RESPONSE_CODE , &response_code );
+    // get api response code and parse it later
+
+    json_t* root;
+    json_error_t error;
+
+    root = json_loads( response_data.ptr , 0 , &error );
+    if ( !root )
+    {
+        ezylog_logerror( logger , "generate title response json error at line %d: %s" , error.line , error.text );
+        ezylog_logerror( logger , "Generate Title Response raw: %s" , response_data.ptr );
+        goto request_stop;
+    } // json error
+
+    if ( response_code / 100 == 4 )
+    {
+        json_t* response_errormsg = json_object_get( root , "error" );
+        const char* errormsg = json_string_value( json_object_get( response_errormsg , "message" ) );
+        ezylog_logerror( logger , "OpenAI API responsed Error when generating title background: Code %ld, Message: \"%s\"" , response_code , errormsg );
+        ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+    } // parse response code, match 4xx errors
+    else
+    {
+        json_t* response_msg = json_object_get( root , "choices" );
+        response_msg = json_array_get( response_msg , 0 );
+        response_msg = json_object_get( response_msg , "message" );
+        const char* title_generated = json_string_value( json_object_get( response_msg , "content" ) );
+        ezylog_loginfo( logger , "Title Generated: %s" , title_generated );
+        ezylog_logdebug( logger , "GPT Response raw: %s" , response_data.ptr );
+        long tokens_spent = json_integer_value( json_object_get( json_object_get( root , "usage" ) , "total_tokens" ) );
+        openai -> total_tokens_spent += tokens_spent;
+        // add title generation tokens cost to total tokens spent
+        ezylog_loginfo( logger , "Tokens used to generate title: %ld" , tokens_spent );
+
+        if ( openai -> title != NULL )
+        {
+            free( openai -> title );
+            openai -> title = NULL;
+        } // already generated title once
+        char* title_temp = ( char* ) malloc( strlen( title_generated ) + 1 );
+        strcpy( title_temp , title_generated );
+        openai -> title = title_temp;
+        // title_generated (which is taken from json objects) will be free when destroying json object, therefore copy it
+
+        printf( "\033]0;%s\007" , openai -> title );
+        fflush( stdout );
+        // change CLI title
+    } // response code 200 OK (most likely)
+
+request_stop:
+    curl_easy_cleanup( curl );
+    free( msg_used_to_gen_title );
+    free( prompt );
+    free( request_data );
+    free( response_data.ptr );
+    json_decref( request_json_root );
+    json_decref( root );
+    title_background_generation_curl = NULL;
     return NULL;
 }
 
