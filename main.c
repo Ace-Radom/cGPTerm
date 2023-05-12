@@ -134,7 +134,7 @@ int main( int argc , char** argv ){
     if ( !is_local_latest() )
     {
         crprint( "New Version Available: [bold][red]%s[/][/] -> [bold][green]%s[/][/]\n" , CGPTERM_VERSION , remote_version );
-        crprint( "Visit the GitHub Site [underline][bold][blue]https://github.com/Ace-Radom/cGPTerm[/][/][/] to see what have been changed!\n" );
+        crprint( "Visit the [bold][blue]\033]8;;https://github.com/Ace-Radom/cGPTerm\aGitHub Site\033]8;;\a[/][/] to see what have been changed!\n" );
     } // local not latest
     pthread_mutex_unlock( &remote_version_mutex );
 
