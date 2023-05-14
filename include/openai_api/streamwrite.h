@@ -16,6 +16,8 @@ extern "C" {
 #include"utils.h"
 
 extern char* stream_response_msg_only_buf;
+extern size_t print_begin_cursor_x;
+extern size_t print_begin_cursor_y;
 
 void write_stream( const char* __msg );
 

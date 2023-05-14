@@ -27,7 +27,7 @@ int get_cursor_position( size_t* x , size_t* y ){
     FD_SET( STDIN_FILENO , &readset );
     time.tv_sec = 0;
     time.tv_usec = 5000;
-    // wait 20ms for a terminal answer
+    // wait 5ms for a terminal answer
 
     if ( select( STDIN_FILENO + 1 , &readset , NULL , NULL , &time ) == 1 )
         if ( scanf( "\033[%ld;%ldR" , y , x ) == 2 )
@@ -51,15 +51,26 @@ void get_tinfo(){
     // get terminal size
 
     get_cursor_position( &print_begin_cursor_x , &print_begin_cursor_y );
+    if ( trow - print_begin_cursor_y < 10 && trow > 10 )
+    {
+        size_t empty_line_needed = 10 - ( trow - print_begin_cursor_y );
+        for ( int i = 0 ; i < empty_line_needed ; i++ )
+            printf( "\n" );
+        printf( "\033[%ldA\r" , empty_line_needed );
+        get_cursor_position( &print_begin_cursor_x , &print_begin_cursor_y );
+    } // to close to bottom, clean up a few empty lines (-> 10)
     return;
 }
 
 void write_stream( const char* __msg ){
+    static bool at_last_row = false;
+
     if ( strlen( stream_response_msg_only_buf ) == 0 )
     {
         crprint( "[bold][bright cyan]ChatGPT:\n" );
         get_tinfo();
         md_set( NULL );
+        at_last_row = false;
     }
     
     if ( raw_mode_enable )
@@ -69,14 +80,29 @@ void write_stream( const char* __msg ){
     } // raw mode
     else
     {
-        printf( "\033[%ld;%ldH\033[2K\033[J\r" , print_begin_cursor_y , print_begin_cursor_x );
-        fflush( stdout );
-        // clean output before
-        md_set( stream_response_msg_only_buf );
-        md_parse();
-        md_print();
-        fflush( stdout );
+        if ( !at_last_row )
+        {
+            size_t x , y;
+            get_cursor_position( &x , &y );
+            if ( y == trow )
+            {
+                at_last_row = true;
+                crprint( "\r\033[2K\r[bright cyan]......" );
+                fflush( stdout );
+            } // reach last row
+            else
+            {
+                printf( "\033[%ld;%ldH\033[2K\033[J\r" , print_begin_cursor_y , print_begin_cursor_x );
+                fflush( stdout );
+                // clean output before
+                md_set( stream_response_msg_only_buf );
+                md_parse();
+                md_print( false );
+                fflush( stdout );
+            }
+        }
     }
 
     strcat( stream_response_msg_only_buf , __msg );
+    return;
 }

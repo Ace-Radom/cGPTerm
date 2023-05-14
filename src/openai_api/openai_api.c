@@ -204,6 +204,14 @@ void* openai_send_chatrequest( void* __data ){
         // OpenAI also responses json when error occurs
         else
         {
+            printf( "\033[%ld;%ldH\033[2K\033[J\r" , print_begin_cursor_y , print_begin_cursor_x );
+            fflush( stdout );
+            // clean output before
+            md_set( stream_response_msg_only_buf );
+            md_parse();
+            md_print( true );
+            // print the last block
+
             ezylog_loginfo( logger , "ChatGPT: %s" , stream_response_msg_only_buf );
             json_t* new_responsemsg = json_object();
             json_object_set_new( new_responsemsg , "role" , json_string( "assistant" ) );
@@ -372,7 +380,7 @@ void openai_load_history( const char* __history_file ){
             {
                 md_set( content );
                 md_parse();
-                md_print();
+                md_print( true );
                 printf( "\n" );
             }
             
