@@ -37,6 +37,9 @@ extern char* curl_userangel_data;
 
 extern bool raw_mode_enable;
 
+extern bool request_working;
+extern bool wait_msg_working;
+
 #ifdef __cplusplus
 }
 #endif

@@ -49,9 +49,10 @@ int start_CLI(){
         data.response = NULL;
         // build transfer data
         pthread_t send_request;
-        int ptrc = pthread_create( &send_request , NULL , openai_send_chatrequest , ( void* ) &data ); // pthread return code
+        pthread_create( &send_request , NULL , openai_send_chatrequest , ( void* ) &data ); // pthread return code
         usleep( 10000 );
         // start request; wait 10 ms in order to let openai_send_chatrequest to lock request_working (-> true)
+        wait_msg_working = true;
         while ( request_working )
         {
             crstatus( "[bold][bright cyan]ChatGPT is thinking...\r" , "green" );
@@ -60,6 +61,7 @@ int start_CLI(){
         // until request done: print wait msg
         printf( "\r\033[2K\r" );
         fflush( stdout );
+        wait_msg_working = false;
         pthread_join( send_request , NULL );
         // clean wait msg, request thread join
         reset_terattr();
@@ -92,13 +94,32 @@ int start_CLI(){
                 printf( "%s\n" , data.response );
                 openai_msg_popback();
             } // request error, pop last user's msg
-        }
+        } // normal mode
+        else if ( openai -> stream_mode )
+        {
+            if ( HTTP_Response_code / 100 == 4 )
+            {
+                crprint( "[bold][red]Request Error: " );
+                printf( "%s\n" , data.response );
+                openai_msg_popback();
+            }
+            else
+            {
+                if ( openai -> tokens_limit - openai -> current_tokens < 500 && openai -> tokens_limit - openai -> current_tokens >= 1 )
+                    crprint( "[dim]Approaching tokens limit: %d tokens left\n" , openai -> tokens_limit - openai -> current_tokens );
+                if ( openai -> tokens_limit - openai -> current_tokens < 1 )
+                    crprint( "[red]Reached tokens limit: %d\n" , openai -> tokens_limit );
+            }
+        } // stream mode
         else
             openai_msg_popback();
         // same: request error, pop last user's msg
 
         if ( curl_request_abort_called )
         {
+            if ( openai -> stream_mode )
+                printf( "\n" );
+            // if using stream mode, endline first
             crprint( "[bold][bright cyan]Aborted\n" );
             curl_request_abort_called = false;
         } // request abort raised, print abort msg and reset this signal

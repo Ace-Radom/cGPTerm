@@ -1,5 +1,33 @@
 #include"cli/slashcmd.h"
 
+/**
+ * @brief all available slash commands. they will be searched by rl_completion_slash_command_search
+*/
+const char* slash_commands[] = {
+    "/raw",
+    "/stream",
+    "/title",
+    "/tokens",
+    "/usage",
+    "/timeout",
+    "/model",
+    "/system",
+    "/rand",
+    "/save",
+    "/undo",
+    "/delete",
+    "/last",
+    "/copy",
+    "/version",
+    "/list",
+    "/help",
+    "/exit",
+    NULL
+};
+
+#define maxn( x , y ) ( x > y ? x : y )
+#define minn( x , y ) ( x < y ? x : y )
+
 void disable_history_search( void ){
     rl_bind_keyseq( "\\e[A" , NULL ); // disable up arrow key
     rl_bind_keyseq( "\\e[B" , NULL ); // disable down arrow key
@@ -13,7 +41,6 @@ void enable_history_search( void ){
 char* chat_history_save_file_generated_path = NULL;
 
 void search_codes( c_vector* __codelist , const char* __text ){
-    size_t index = 0;
     char* start;
     char* end;
     start = strstr( __text , "```" );
@@ -29,6 +56,68 @@ void search_codes( c_vector* __codelist , const char* __text ){
         start = strstr( end + 3 , "```" );
     }
     return;
+}
+
+double get_jaccard_similarity( const char* __s1 , const char* __s2 ){
+    size_t s1_len = strlen( __s1 );
+    size_t s2_len = strlen( __s2 );
+    char* unionSet = ( char* ) malloc( s1_len + s2_len + 1 );
+    char* intersectionSet = ( char* ) malloc( maxn( s1_len , s2_len ) + 1 );
+    int counter = 0;
+
+    strcpy( unionSet , __s1 );
+    counter = strlen( unionSet );
+    for ( size_t i = 0 ; i < s2_len ; i++ )
+    {
+        bool in_union = false;
+        for ( size_t j = 0 ; j < s1_len ; j++ )
+            if ( __s2[i] == __s1[j] )
+            {
+                in_union = true;
+                break;
+            }
+        if ( !in_union )
+            // strcat( unionSet , &__s2[i] );
+            unionSet[counter++] = __s2[i];
+    }
+    unionSet[counter] = '\0';
+    // union set
+
+    counter = 0;
+    for ( size_t i = 0 ; i < s1_len ; i++ )
+        for ( size_t j = 0 ; j < s2_len ; j++ )
+            if ( __s1[i] == __s2[j] )
+            {
+                intersectionSet[counter++] = __s1[i];
+                break;
+            }
+    intersectionSet[counter] = '\0';
+    // intersection set
+
+    return ( double ) strlen( intersectionSet ) / strlen( unionSet );
+}
+
+int get_levenshtein_distance( const char* __s1 , const char* __s2 ){
+    int s1_len = strlen( __s1 );
+    int s2_len = strlen( __s2 );
+
+    int v[s1_len+1][s2_len+1];
+    memset( v , 0 , sizeof( v ) );
+    for ( int i = 0 ; i <= s1_len ; i++ )
+    {
+        for ( int j = 0 ; j <= s2_len ; j++ )
+        {
+            if ( i == 0 )
+                v[i][j] = j;
+            else if ( j == 0 )
+                v[i][j] = i;
+            else if ( __s1[i-1] == __s2[j-1] )
+                v[i][j] = v[i-1][j-1];
+            else
+                v[i][j] = minn( v[i-1][j-1] , minn( v[i][j-1] , v[i-1][j] ) ) + 1;
+        }
+    }
+    return v[s1_len][s2_len];
 }
 
 /**
@@ -66,11 +155,15 @@ void save_chat_history_startup_hook( void ){
 */
 int handle_slash_command( const char* __slashcmd ){
 
+    char* slashcmd_headcmd_only_temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+    strcpy( slashcmd_headcmd_only_temp , __slashcmd );
+    char* slashcmd_headcmd_only = strtok( slashcmd_headcmd_only_temp , " " );
+
 // ================================================================================
 // ===================================== /raw =====================================
 // ================================================================================
 
-    if ( strcmp( __slashcmd , "/raw" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/raw" ) == 0 )
     {
         ezylog_logdebug( logger , "/raw command triggered" );
         raw_mode_enable = !raw_mode_enable;
@@ -78,14 +171,74 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Raw mode enabled, use `[bright magenta]/last[/]` to display the last answer.\n" );
         else
             crprint( "[dim]Raw mode disabled, use `[bright magenta]/last[/]` to display the last answer.\n" );
+
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /raw
+
+// ===================================================================================
+// ===================================== /stream =====================================
+// ===================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/stream" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/stream command triggered" );
+        openai -> stream_mode = !openai -> stream_mode;
+        if ( openai -> stream_mode )
+        {
+            ezylog_loginfo( logger , "Stream mode enabled" );
+            crprint( "[dim]Stream mode enabled, the answer will start outputting as soon as the first response arrives.\n" );
+        }
+        else
+        {
+            ezylog_loginfo( logger , "Stream mode disabled" );
+            crprint( "[dim]Stream mode disabled, the answer is being displayed after the server finishes responding.\n" );
+        }
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /stream
+
+// ==================================================================================
+// ===================================== /title =====================================
+// ==================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/title" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/title command triggered" );
+        AUTO_GENERATE_TITLE = !AUTO_GENERATE_TITLE;
+        if ( AUTO_GENERATE_TITLE )
+        {
+            ezylog_loginfo( logger , "Auto title generation enabled" );
+            crprint( "[dim]Auto title generation enabled." );
+            if ( openai_get_message_list_length() >= 3 && openai -> title == NULL )
+            {
+                crprint( "[dim] Generate a new title for current chat now...\n" );
+                
+                pthread_t generate_title_background;
+                pthread_attr_t generate_title_background_attr;
+                pthread_attr_init( &generate_title_background_attr );
+                pthread_attr_setdetachstate( &generate_title_background_attr , PTHREAD_CREATE_DETACHED );
+                ezylog_logdebug( logger , "title background generation triggered, call generate function" );
+                pthread_create( &generate_title_background , &generate_title_background_attr , openai_generate_title , ( void* ) openai_getfirst() );
+                pthread_attr_destroy( &generate_title_background_attr );
+            } // current chat not empty, generate one title now
+            else
+                printf( "\n" );
+        }
+        else
+        {
+            ezylog_loginfo( logger , "Auto title generation disabled" );
+            crprint( "[dim]Auto title generation disabled.\n" );
+        }
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /title
 
 // ===================================================================================
 // ===================================== /tokens =====================================
 // ===================================================================================
 
-    if ( strcmp( __slashcmd , "/tokens" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/tokens" ) == 0 )
     {
         ezylog_logdebug( logger , "/tokens command triggered" );
         char* total_tokens_spent_str = ( char* ) malloc( 64 );
@@ -95,6 +248,7 @@ int handle_slash_command( const char* __slashcmd ){
         crpanel( "token_summary" , NULL , 40 , NULL , 2 , total_tokens_spent_str , current_tokens_str );
         free( total_tokens_spent_str );
         free( current_tokens_str );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /tokens
 
@@ -102,7 +256,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /save =====================================
 // =================================================================================
 
-    if ( strncmp( __slashcmd , "/save" , 5 ) == 0 )
+    if ( strncmp( slashcmd_headcmd_only , "/save" , 5 ) == 0 )
     {
         ezylog_logdebug( logger , "/save command triggered" );
         char* save_path;
@@ -133,6 +287,7 @@ int handle_slash_command( const char* __slashcmd ){
             char* errmsg = strerror( errno );
             // get error message
             ezylog_logerror( logger , "Save chat history to '%s' failed: errno %d, error message \"%s\"" , save_path , errno , errmsg );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // open save file failed; log error message
 
@@ -151,6 +306,7 @@ int handle_slash_command( const char* __slashcmd ){
         if ( chat_history_save_file_generated_path != NULL )
             free( chat_history_save_file_generated_path );
         free( save_path );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /save FILE
 
@@ -158,7 +314,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /timeout =====================================
 // ====================================================================================
 
-    if ( strncmp( __slashcmd , "/timeout" , 8 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/timeout" ) == 0 )
     {
         ezylog_logdebug( logger , "/timeout command triggered" );
         double new_timeout;
@@ -182,6 +338,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]API timeout set to [green]%.2lfs[/].\n" , OPENAI_API_TIMEOUT );
                 ezylog_loginfo( logger , "API timeout set to %lfs" , OPENAI_API_TIMEOUT );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -214,6 +371,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]API timeout set to [green]%.2lfs[/].\n" , OPENAI_API_TIMEOUT );
                 ezylog_loginfo( logger , "API timeout set to %lfs" , OPENAI_API_TIMEOUT );
                 free( new_timeout_str );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -246,7 +404,7 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /model =====================================
 // ==================================================================================
 
-    if ( strncmp( __slashcmd , "/model" , 6 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/model" ) == 0 )
     {
         ezylog_logdebug( logger , "/model command triggered" );
         char* new_model;
@@ -269,6 +427,7 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Model has been set to [green]'%s'[/].\n" , openai -> model );
             ezylog_loginfo( logger , "Model has been set to '%s'" , openai -> model );
             free( temp );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // set successfully
         else
@@ -287,6 +446,7 @@ int handle_slash_command( const char* __slashcmd ){
             crprint( "[dim]Model has been set to [green]'%s'[/].\n" , openai -> model );
             ezylog_loginfo( logger , "Model has been set to '%s'" , openai -> model );
             free( new_model );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // set successfully
         else
@@ -300,11 +460,45 @@ int handle_slash_command( const char* __slashcmd ){
         goto ask_model;
     } // /model MODEL
 
+// ===================================================================================
+// ===================================== /system =====================================
+// ===================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/system" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/system command triggered" );
+        char* new_prompt;
+
+        if ( strlen( __slashcmd ) == 7 )
+        {
+            disable_history_search();
+            new_prompt = readline( "Please input new system prompt: " );
+            enable_history_search();
+        }
+        else
+        {
+            char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+            strcpy( temp , __slashcmd );
+            char* token = strtok( temp , " " );
+            token = strtok( NULL , " " );
+            // get the second part str
+            new_prompt = ( char* ) malloc( strlen( token ) + 1 );
+            strcpy( new_prompt , token );
+            free( temp );
+        }
+        openai_set_prompt( new_prompt );
+        crprint( "[dim]System prompt has been modified to '%s'\n" , new_prompt );
+        ezylog_loginfo( logger , "System prompt has been modified to '%s'" , new_prompt );
+        free( new_prompt );
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    }
+
 // =================================================================================
 // ===================================== /rand =====================================
 // =================================================================================
 
-    if ( strncmp( __slashcmd , "/rand" , 5 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/rand" ) == 0 )
     {
         ezylog_logdebug( logger , "/rand command triggered" );
         double new_temperature;
@@ -328,6 +522,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -343,6 +538,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             } // temperature is 0
             else
@@ -366,6 +562,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( new_temperature_str );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             }
             else
@@ -383,6 +580,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]Randomness set to [green]%.2lf[/].\n" , openai -> temperature );
                 ezylog_loginfo( logger , "Randomness set to %lf" , openai -> temperature );
                 free( new_temperature_str );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             } // temperature is 0
             else
@@ -396,12 +594,11 @@ int handle_slash_command( const char* __slashcmd ){
         goto ask_temperature;
     } // /rand TEMPERATURE
 
-
 // ==================================================================================
 // ===================================== /usage =====================================
 // ==================================================================================
 
-    if ( strcmp( __slashcmd , "/usage" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/usage" ) == 0 )
     {
         ezylog_logdebug( logger , "/usage command triggered" );
         
@@ -440,25 +637,68 @@ int handle_slash_command( const char* __slashcmd ){
         free( used_this_month_str );
         free( used_total_str );
         free( plan_str );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /usage
 
-// ========================================================================================
-// ===================================== /undo, /last =====================================
-// ========================================================================================
+// =================================================================================
+// ===================================== /undo =====================================
+// =================================================================================
 
-    if ( strcmp( __slashcmd , "/undo" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/undo" ) == 0 )
     {
+        ezylog_logdebug( logger , "/undo command triggered" );
         openai_undo();
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /undo
 
-    if ( strcmp( __slashcmd , "/last" ) == 0 )
+// ===================================================================================
+// ===================================== /delete =====================================
+// ===================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/delete" ) == 0 )
     {
-        char* last_response = openai_getlast();
+        ezylog_logdebug( logger , "/delete command triggered" );
+        
+        if ( strlen( __slashcmd ) == 7 )
+        {
+            openai_delete_first();
+            free( slashcmd_headcmd_only_temp );
+            return 0;
+        } // no other args given, delete first
+
+        char* temp = ( char* ) malloc( strlen( __slashcmd ) + 1 );
+        char* second_arg;
+        strcpy( temp , __slashcmd );
+        second_arg = strtok( temp , " " );
+        second_arg = strtok( NULL , " " );
+
+        if ( strcmp( second_arg , "first" ) == 0 )
+            openai_delete_first();
+        // /delete first
+        else if ( strcmp( second_arg , "all" ) == 0 )
+            openai_delete_all();
+        else
+            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/delete first[/]` or `[bright magenta]/delete all[/]`\n" );
+        // /delete all
+        free( temp );
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /delete
+
+// =================================================================================
+// ===================================== /last =====================================
+// =================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/last" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/last command triggered" );
+        const char* last_response = openai_getlast();
         if ( !last_response )
         {
             crprint( "[dim]Nothing to print\n" );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         }
         crprint( "[bold][bright cyan]ChatGPT:\n" );
@@ -473,6 +713,7 @@ int handle_slash_command( const char* __slashcmd ){
             md_print();
             printf( "\n" );
         }
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /last
 
@@ -480,12 +721,14 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /copy =====================================
 // =================================================================================
 
-    if ( strncmp( __slashcmd , "/copy" , 5 ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/copy" ) == 0 )
     {
-        char* last_response = openai_getlast();
+        ezylog_logdebug( logger , "/copy command triggered" );
+        const char* last_response = openai_getlast();
         if ( !last_response )
         {
             crprint( "[dim]Nothing to copy\n" );
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // /copy command should not copy system prompt
 
@@ -493,6 +736,7 @@ int handle_slash_command( const char* __slashcmd ){
         {
             clipboard_copy( last_response );
             crprint( "[dim]Last reply copied to Clipboard.\n");
+            free( slashcmd_headcmd_only_temp );
             return 0;
         } // no other args given
 
@@ -519,6 +763,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[dim]No code found.\n" );
                 cv_clean( &codelist );
                 free( temp );
+                free( slashcmd_headcmd_only_temp );
                 return 0;
             } // no code found
             if ( cv_len( &codelist ) == 1 )
@@ -558,6 +803,7 @@ int handle_slash_command( const char* __slashcmd ){
             // illegal index input
             printf( "\033[2A\r\033[2K\r" );
             fflush( stdout );
+            free( code_index_str );
             goto ask_code_index;
 
         copy_code:
@@ -575,13 +821,13 @@ int handle_slash_command( const char* __slashcmd ){
 
             cv_clean( &codelist );
             free( temp );
-            free( code_index_str );
             free( code_raw );
         } // /copy code
         else
-            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/copy code[/]` or `[bright magenta]/copy all[/]`" );
+            crprint( "[dim]Nothing to do. Available copy command: `[bright magenta]/copy code[/]` or `[bright magenta]/copy all[/]`\n" );
         // /copy ?
 
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /copy
 
@@ -589,8 +835,9 @@ int handle_slash_command( const char* __slashcmd ){
 // ===================================== /version =====================================
 // ====================================================================================
 
-    if ( strcmp( __slashcmd , "/version" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/version" ) == 0 )
     {
+        ezylog_logdebug( logger , "/version command triggered" );
         pthread_mutex_lock( &remote_version_mutex );
         char* local_version_str = ( char* ) malloc( 36 );
         char* remote_version_str = ( char* ) malloc( 36 );
@@ -602,39 +849,104 @@ int handle_slash_command( const char* __slashcmd ){
         free( local_version_str );
         free( remote_version_str );
         pthread_mutex_unlock( &remote_version_mutex );
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /version
+
+// =================================================================================
+// ===================================== /list =====================================
+// =================================================================================
+
+    if ( strcmp( slashcmd_headcmd_only , "/list" ) == 0 )
+    {
+        ezylog_logdebug( logger , "/list command triggered" );
+        char* api_key_hide = ( char* ) malloc( 16 );
+        strncpy( api_key_hide , OPENAI_API_KEY , 3 );
+        api_key_hide[3] = '\0';
+        strcat( api_key_hide , "..." );
+        strncat( api_key_hide , OPENAI_API_KEY + strlen( OPENAI_API_KEY ) - 4 , 4 );
+
+        crprint( "[bold]Settings List:\n" );
+        crprint( "    [bright magenta]OpenAI API Key:[/]\t\t%s\n"          , api_key_hide );
+        crprint( "    [bright magenta]Request Timeout:[/]\t\t%.2lfs\n"     , OPENAI_API_TIMEOUT );
+        crprint( "    [bright magenta]Use Auto Title Generation:[/]\t%s\n" , AUTO_GENERATE_TITLE ? "Yes" : "No" );
+        crprint( "    [bright magenta]Chat History Save Perfix:[/]\t%s\n"  , CHAT_SAVE_PERFIX );
+        crprint( "    [bright magenta]Log Level:[/]\t\t\t%s\n"             , parse_priority_to_str( LOG_LEVEL ) );
+        crprint( "\n" );
+        crprint( "    [bright magenta]Enable Raw Mode:[/]\t\t%s\n"         , raw_mode_enable ? "Yes" : "No" );
+        crprint( "    [bright magenta]Enable Stream Mode:[/]\t\t%s\n"      , openai -> stream_mode ? "Yes" : "No" );
+        crprint( "    [bright magenta]AI Model:[/]\t\t\t%s\n"              , openai -> model );
+        crprint( "    [bright magenta]AI Randomness:[/]\t\t%.2lf\n"        , openai -> temperature );
+        free( api_key_hide );
+        free( slashcmd_headcmd_only_temp );
+        return 0;
+    } // /list
 
 // ========================================================================================
 // ===================================== /help, /exit =====================================
 // ========================================================================================
 
-    if ( strcmp( __slashcmd , "/help" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/help" ) == 0 )
     {
+        ezylog_logdebug( logger , "/help command triggered" );
         print_slash_command_help();
+        free( slashcmd_headcmd_only_temp );
         return 0;
     } // /help
-    if ( strcmp( __slashcmd , "/exit" ) == 0 )
+    if ( strcmp( slashcmd_headcmd_only , "/exit" ) == 0 )
     {
+        ezylog_logdebug( logger , "/exit command triggered" );
+        free( slashcmd_headcmd_only_temp );
         return -1;
     } // /exit, ready to break
+
+    // unrecgonized command
+
+    size_t min_levenshtein_distance = strlen( __slashcmd );
+    int most_similar_cmd_index = -1;
+    for ( int i = 0 ; i < sizeof( slash_commands ) / sizeof( char* ) - 1 ; i++ )
+    {
+        size_t this_levenshtein_distance = get_levenshtein_distance( __slashcmd , slash_commands[i] );
+        // levenshtein distance between __slashcmd and this slash command
+        if ( minn( min_levenshtein_distance , this_levenshtein_distance ) < min_levenshtein_distance )
+        {
+            if ( get_jaccard_similarity( __slashcmd , slash_commands[i] ) >= 0.75 )
+            {
+                min_levenshtein_distance = this_levenshtein_distance;
+                most_similar_cmd_index = i;
+            } // update most similar index only if the jaccard similarity of these two greater than 75%
+        }
+    }
+    crprint( "Unrecognized Slash Command `[bright red]%s[/]`." , __slashcmd );
+    if ( most_similar_cmd_index != -1 )
+        crprint( " Do you mean `[bright magenta]%s[/]`?\n" , slash_commands[most_similar_cmd_index] );
+    else
+        printf( "\n" );
+    crprint( "Use `[bright magenta]/help[/]` to see all available slash commands.\n" );
+    free( slashcmd_headcmd_only_temp );
     return 1;
 }
 
 void print_slash_command_help(){
     crprint( "[bold]Available commands:\n" );
     crprint( "    [bright magenta]/raw[/]\t\t\t- Toggle raw mode (showing raw text of ChatGPT's reply)\n" );
+    crprint( "    [bright magenta]/stream[/]\t\t\t- Toggle stream output mode (flow print the answer)\n" );
+    crprint( "    [bright magenta]/title[/]\t\t\t- Toggle whether to enable automatic title generation\n" );
     crprint( "    [bright magenta]/tokens[/]\t\t\t- Show the total tokens spent and the tokens for the current conversation\n" );
     crprint( "    [bright magenta]/usage[/]\t\t\t- Show total credits and current credits used\n" );
     crprint( "    [bright magenta]/timeout[/] [bold]\\[new_timeout][/]\t- Modify the api timeout\n" );
     crprint( "    [bright magenta]/model[/] [bold]\\[model_name][/]\t\t- Change AI model\n" );
+    crprint( "    [bright magenta]/system[/] [bold]\\[new_prompt][/]\t- Modify the system prompt\n" );
     crprint( "    [bright magenta]/rand[/] [bold]\\[randomness][/]\t\t- Set Model sampling temperature (0~2)\n" );
     crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
     crprint( "    [bright magenta]/undo[/]\t\t\t- Undo the last question and remove its answer\n" );
+    crprint( "    [bright magenta]/delete[/] [bold](first)[/]\t\t- Delete the first conversation in current chat\n" );
+    crprint( "    [bright magenta]/delete[/] [bold]all[/]\t\t\t- Clear all messages and conversations current chat\n" );
     crprint( "    [bright magenta]/last[/]\t\t\t- Display last ChatGPT's reply\n" );
     crprint( "    [bright magenta]/copy[/] [bold](all)[/]\t\t\t- Copy the full ChatGPT's last reply (raw) to Clipboard\n" );
     crprint( "    [bright magenta]/copy[/] [bold]code[/]\t\t\t- Copy the code in ChatGPT's last reply to Clipboard\n" );
     crprint( "    [bright magenta]/version[/]\t\t\t- Show cGPTerm local and remote version\n" );
+    crprint( "    [bright magenta]/list[/]\t\t\t- List all settings in use\n" );
     crprint( "    [bright magenta]/help[/]\t\t\t- Show this help message\n" );
     crprint( "    [bright magenta]/exit[/]\t\t\t- Exit the application\n" );
     return;

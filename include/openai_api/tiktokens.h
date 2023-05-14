@@ -11,8 +11,7 @@ extern "C" {
 
 #include<jansson.h>
 
-extern long count_tokens_cl100k_base( const char* ptr );
-// this is a rust FFI used to count tokens of a message with cl100k_base
+#include"ctiktoken.hpp"
 
 long count_tokens_message( const json_t* __msg );
 

@@ -17,7 +17,9 @@
 #include"cli.h"
 #include"crich.h"
 
-void get_remote_version();
+CURL* get_remote_version_curl = NULL;
+
+void* get_remote_version();
 bool is_local_latest();
 
 int main( int argc , char** argv ){
@@ -126,16 +128,27 @@ int main( int argc , char** argv ){
     
     printf( "Exiting...\n" );
     crprint( "[bright magenta]Total tokens spent: %ld\n" , openai -> total_tokens_spent );
-    // printf( "Total tokens spent: %ld\n" , openai -> total_tokens_spent );
-    ezylog_loginfo( logger , "Total tokens spent: %d" , openai -> total_tokens_spent );
+    ezylog_loginfo( logger , "Total tokens spent: %ld" , openai -> total_tokens_spent );
     openai_free();
     curl_global_cleanup();
+
+    if ( title_background_generation_curl != NULL )
+    {
+        curl_easy_cleanup( title_background_generation_curl );
+        title_background_generation_curl = NULL;
+    } // title generation still working
+
+    if ( get_remote_version_curl != NULL )
+    {
+        curl_easy_cleanup( get_remote_version_curl );
+        get_remote_version_curl = NULL;
+    } // get remote version still working        
 
     pthread_mutex_lock( &remote_version_mutex );
     if ( !is_local_latest() )
     {
         crprint( "New Version Available: [bold][red]%s[/][/] -> [bold][green]%s[/][/]\n" , CGPTERM_VERSION , remote_version );
-        crprint( "Visit the GitHub Site [underline][bold][blue]https://github.com/Ace-Radom/cGPTerm[/][/][/] to see what have been changed!\n" );
+        crprint( "Visit the [bold][blue]\033]8;;https://github.com/Ace-Radom/cGPTerm\aGitHub Site\033]8;;\a[/][/] to see what have been changed!\n" );
     } // local not latest
     pthread_mutex_unlock( &remote_version_mutex );
 
@@ -146,10 +159,10 @@ stopmain:
     return 0;
 } // main
 
-void get_remote_version(){
+void* get_remote_version(){
     CURL* curl;
     CURLcode res;
-    curl_data_t response_data = { NULL , 0 };
+    curl_data_t response_data = { GITHUB_REMOTE_VERSION_GET , NULL , 0 };
     curl = curl_easy_init();
     if ( !curl )
     {
@@ -157,7 +170,7 @@ void get_remote_version(){
         pthread_mutex_lock( &remote_version_mutex );
         remote_version = "Unknown";
         pthread_mutex_unlock( &remote_version_mutex );
-        return;
+        return NULL;
     } // curl init error, set remote_version to "Unknown"
 
     curl_easy_setopt( curl , CURLOPT_URL , "https://api.github.com/repos/Ace-Radom/cGPTerm/releases" );
@@ -168,6 +181,9 @@ void get_remote_version(){
     curl_easy_setopt( curl , CURLOPT_TIMEOUT , 10 );
     // remote version ask's timeout is set to 10s
     // make curl request
+
+    get_remote_version_curl = curl;
+    // raise get remote version function's curl
 
     res = curl_easy_perform( curl );
     if ( res != CURLE_OK )
@@ -216,7 +232,8 @@ void get_remote_version(){
 request_stop:
     curl_easy_cleanup( curl );
     free( response_data.ptr );
-    return;
+    get_remote_version_curl = NULL;
+    return NULL;
 }
 
 bool is_local_latest(){
