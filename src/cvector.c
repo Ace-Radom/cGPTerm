@@ -121,6 +121,8 @@ void* cv_delete( c_vector* __v , long long __pos ){
 }
 
 void cv_clean( c_vector* __v ){
+    for ( size_t i = 0 ; i < __v -> len ; i++ )
+        free( __v -> items[i] );
     free( __v -> items );
     __v -> cap = 1;
     __v -> len = 0;
