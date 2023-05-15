@@ -53,6 +53,21 @@ cGPTerm需要一个 OpenAI API 密钥。您需要注册 OpenAI 帐户并获得 A
 
 ## 编译
 
+-------
+
+**注意：** 所有开发工作是在 Debian 下使用 gcc 10.2.1 完成的。目前我已经发现了在使用别的 gcc 版本时可能出现在 ChatGPT 回复后出现段错误的情况。同时，在使用 cmake 的 release 预设时也会出现无法正常接受处理 SSE Event 的情况但我对这些问题毫无头绪。因此我建议在这个问题被解决前直接使用已经测试可用的编译好的包。
+
+我在编译时的设置为:
+
+```cmake
+set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-Wall -O2")
+```
+
+您可以自行编辑 CMakeLists 内的内容。
+
+-------
+
 您需要 GCC 和 CMake 来编译。请确保您的 GCC 支持 **C++20**。
 
 1. 使用以下命令克隆此 repo：
@@ -84,7 +99,7 @@ cGPTerm需要一个 OpenAI API 密钥。您需要注册 OpenAI 帐户并获得 A
 4. 配置 CMake
 
     ```
-    cmake -DCMAKE_BUILD_TYPE=Release -DCLIP_EXAMPLES=OFF -DCLIP_TESTS=OFF ..
+    cmake -DCLIP_EXAMPLES=OFF -DCLIP_TESTS=OFF ..
     ```
 
 5. 编译

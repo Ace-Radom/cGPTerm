@@ -53,6 +53,20 @@ You can also add this folder to environment path, in order to run cGPTerm anywhe
 
 ## Compilation
 
+-------
+
+**Attention:** All my development is done under Debian using gcc 10.2.1. And I've already found out that using another gcc version may result in a segmentation fault after ChatGPT responses. And also when compiling with the release preset of cmake, the program cannot accept SSE Event and I don't know why. Therefore I highly suggest to use the compiled package in releases before this problem is solved.
+My compile settings are:
+
+```cmake
+set(CMAKE_C_FLAGS "-Wall -g")
+set(CMAKE_CXX_FLAGS "-Wall -g -O2")
+```
+
+You may edit the CMakeLists by yourself.
+
+-------
+
 You need GCC and CMake to compile. Make sure that your GCC supports **C++20**.
 
 1.  clone this repo with:
@@ -84,7 +98,7 @@ You need GCC and CMake to compile. Make sure that your GCC supports **C++20**.
 4.  configure CMake with:
 
     ```
-    cmake -DCMAKE_BUILD_TYPE=Release -DCLIP_EXAMPLES=OFF -DCLIP_TESTS=OFF ..
+    cmake -DCLIP_EXAMPLES=OFF -DCLIP_TESTS=OFF ..
     ```
 
 5.  build
