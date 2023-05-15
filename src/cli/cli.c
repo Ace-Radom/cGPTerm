@@ -67,7 +67,7 @@ int start_CLI(){
         reset_terattr();
         write_ANSI( SHOW_CURSOR );
         // reset attr; show cursor
-        if ( data.response )
+        if ( data.response && !openai -> stream_mode )
         {
             if ( HTTP_Response_code / 100 != 4 )
             {
