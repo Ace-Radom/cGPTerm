@@ -214,13 +214,16 @@ void* openai_send_chatrequest( void* __data ){
         // OpenAI also responses json when error occurs
         else
         {
-            printf( "\033[%ld;%ldH\033[2K\033[J\r" , print_begin_cursor_y , print_begin_cursor_x );
-            fflush( stdout );
-            // clean output before
-            md_set( stream_response_msg_only_buf );
-            md_parse();
-            md_print( true );
-            // print the last block
+            if ( !raw_mode_enable )
+            {
+                printf( "\033[%ld;%ldH\033[2K\033[J\r" , print_begin_cursor_y , print_begin_cursor_x );
+                fflush( stdout );
+                // clean output before
+                md_set( stream_response_msg_only_buf );
+                md_parse();
+                md_print( true );
+                // print the last block
+            }
 
             ezylog_loginfo( logger , "ChatGPT: %s" , stream_response_msg_only_buf );
             json_t* new_responsemsg = json_object();
