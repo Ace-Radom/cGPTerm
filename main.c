@@ -111,6 +111,24 @@ int main( int argc , char** argv ){
     pthread_attr_destroy( &get_remote_version_thread_attr );
     // get remote version in background
 
+    if ( strlen( OPENAI_API_KEY ) == 0 )
+    {
+        printf( "API Key not found, please enter your API key\n> " );
+        scanf( "%s" , OPENAI_API_KEY );
+        printf( "Do you want to write this new key to config file? (y/N): " );
+        char c;
+        scanf( " %c" , &c );
+        if ( c == 'y' )
+        {
+            setcfg_OPENAI_API_KEY( OPENAI_API_KEY );
+            wconfig( cfginipath );
+            printf( "OPENAI_API_KEY set to '%s'\n" , OPENAI_API_KEY );
+            ezylog_logdebug( logger , "cfg -> OPENAI_API_KEY set to '%s'" , OPENAI_API_KEY );
+        } // write this given key to config file
+        else
+            printf( "Don't configure\n" );
+    } // OPENAI API KEY not found, ask
+
     ezylog_logdebug( logger , "config set not triggered, start initializing openai service" );
     openai_init();
     ezylog_logdebug( logger , "openai service initialization complete" );
