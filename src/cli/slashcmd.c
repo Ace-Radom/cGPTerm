@@ -867,6 +867,7 @@ int handle_slash_command( const char* __slashcmd ){
         strncat( api_key_hide , OPENAI_API_KEY + strlen( OPENAI_API_KEY ) - 4 , 4 );
 
         crprint( "[bold]Settings List:\n" );
+        crprint( "    [bright magenta]API Host:[/]\t\t\t%s\n"              , openai -> host );
         crprint( "    [bright magenta]OpenAI API Key:[/]\t\t%s\n"          , api_key_hide );
         crprint( "    [bright magenta]Request Timeout:[/]\t\t%.2lfs\n"     , OPENAI_API_TIMEOUT );
         crprint( "    [bright magenta]Use Auto Title Generation:[/]\t%s\n" , AUTO_GENERATE_TITLE ? "Yes" : "No" );
