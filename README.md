@@ -4,9 +4,7 @@
 [![简体中文 badge](https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue)](https://github.com/Ace-Radom/cGPTerm/blob/main/README.zh-CN.md)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
-<img src="https://img.shields.io/github/actions/workflow/status/Ace-Radom/cGPTerm/cmake.yml?branch=main" />
-<img src="https://img.shields.io/badge/Platform-Linux-green" />
-<img src="https://img.shields.io/github/license/Ace-Radom/cGPTerm">
+<img src="https://img.shields.io/github/actions/workflow/status/Ace-Radom/cGPTerm/cmake.yml?branch=main" /> <img src="https://img.shields.io/badge/Platform-Linux-green" /> <img src="https://img.shields.io/github/license/Ace-Radom/cGPTerm">
 
 This is a refactoring project of the original one [xiaoxx970/chatgpt-in-terminal](https://github.com/xiaoxx970/chatgpt-in-terminal) in C/C++.
 
@@ -18,99 +16,229 @@ Supports history retrieval with the up arrow key, stream output, and tokens coun
 
 Slash (/) commands are available in the chat box to toggle raw response mode, undo the last question and answer, modify the system prompt and more, see the available commands below for details.
 
-Supports saving chat messages to a JSON file and loading them from the file.
+It also supports saving chat messages to a JSON file and loading them from the file.
 
 Uses the gpt-3.5-turbo model as default model, which is the same model used by ChatGPT (Free Edition).
 
+You can also change API Host to configure proxy (See [Available Arguments](#available-arguments)).
+
 ## Preparation
 
-1. An OpenAI API key. You need to register an OpenAI account and obtain an API key.
+An OpenAI API key. You need to register an OpenAI account and obtain an API key.
 
-   OpenAI's API key can be generated on the page opened by clicking "View API keys" in the upper right corner of the homepage, direct link: https://platform.openai.com/account/api-keys
+OpenAI's API key can be generated on the page opened by clicking "View API keys" in the upper right corner of the homepage, direct link: https://platform.openai.com/account/api-keys
 
-   ![image-API_Key_Preparation](https://github.com/Ace-Radom/cGPTerm/blob/main/README.assets/image-API_Key_Preparation.png)
+![image-API_Key_Preparation](https://github.com/Ace-Radom/cGPTerm/blob/main/README.assets/image-API_Key_Preparation.png)
 
-2. [Python](https://www.python.org/downloads/) version 3.7 or higher.
+## Installation
 
-## 简介
+You can download all EXE file and DLLs within a zip file in [Release](https://github.com/Ace-Radom/cGPTerm/releases), but you can also compile this project by yourself (Please see [Section Compilation](#compilation)).
 
-这是一个将 @xiaoxx970 的使用Python实现的 [GPT-Term](https://github.com/xiaoxx970/chatgpt-in-terminal) 项目以近乎纯C实现的方式重构的计划
+Before or after downloading the release package, you should install all dependencies which are:
 
-目标为用近乎纯C实现CLI界面交互和后端 尽可能还原原版界面和各项功能 但在遇到还原功能困难的时候会选择用其他的实现方法替代【比如tokens计算使用了Rust现成的库 也因此编译需要Rust环境】
+| Library | Library name with APT | Installation Command with APT |
+| --- | --- | --- |
+| curl | libcurl4 | `sudo apt install libcurl4` |
+| argtable | libargtable2-0 | `sudo apt install libargtable2-0` |
+| jansson | libjansson4 | `sudo apt install libjansson4` |
+| readline | readline-common | `sudo apt install readline-common` |
+| x11 | x11-common | `sudo apt install x11-common` |
+| pcre2 | libpcre2-8-0 | `sudo apt install libpcre2-8-0` |
 
-开发工作在Linux环境下进行 由于这个项目更多是出于好玩和C语言练习的目的而发起的 目前不会太考虑可移植性问题
+You need to check your Package manager to see how to install these libraries.
 
-自现在起 main分支下是最近的功能实现版本 开发分支位于dev
+Then, unzip the package, run `./cgpterm` in the outcome folder. If all thing goes well, you should see cGPTerm start to work.
 
-### 项目进度
+You can also add this folder to environment path, in order to run cGPTerm anywhere.
 
-目前已经实现的功能：
+## Compilation
 
-- 自动创建config文件夹 位置为 `~/.cgpterm`
-- 自动创建 `config.ini` 配置文件
-- 通过命令行对 `config.ini` 内的值进行更改
-- 自建log库 支持 `DEBUG` `INFO` `ERROR` `FATAL` 层级
-- 基本的API访问：可以正常与ChatGPT交流和解析错误
-- 基本的交互界面
-    - 在等待GPT回复时显示 `ChatGPT is thinking...`
-    - 历史记录功能 记录在本次运行中的每一次输入
-    - 已经实现的斜杠命令可以按Tab补全【此处的补全逻辑和原版不同 在有多项可能时不会补全而是显示所有可能命令】
-- 基于 [tiktoken-rs](https://github.com/zurawiki/tiktoken-rs) 的tokens计算
-- 部分斜杠命令 (`/tokens` `/timeout` `/help` `/exit`)
+You need GCC and CMake to compile. Make sure that your GCC supports **C++20**.
 
-目前正在开发的功能：
+1.  clone this repo with:
 
-- 实现部分底层的斜杠命令：`/timeout` `/model` `/last` `/help` `/exit`
-- credit 统计 逐步实现 `/usage` 命令
-- `/copy` 命令 包括整个回答和代码段的拷贝
-- 优化斜杠命令自动补全的界面
-- 在输入未定义的斜杠命令时提示一个用户最有可能想输入的命令
-- 自建/封装富文本库 以一种类似于python的rich库的方式输出富文本
+    ```
+    git clone --recursive https://github.com/Ace-Radom/cGPTerm.git
+    ```
 
-已经计划实现 但在研究实现方法的功能：
+2.  install all dependencies' dev packages
 
-- 多行模式
-- 守护线程和自动标题生成
-- 聊天记录保存和加载
+    | Library | Installation Command with APT |
+    | --- | --- |
+    | curl | `sudo apt install libcurl4-openssl-dev` |
+    | argtable | `sudo apt install libargtable2-dev` |
+    | jansson | `sudo apt install libjansson-dev` |
+    | readline | `sudo apt install libreadline-dev` |
+    | x11 | `sudo apt install libx11-dev` |
+    | pcre2 | `sudo apt install libpcre2-dev` |
 
-目前计划中 但不清楚能力是否允许实现的功能：
+    Same, you need to check your own Package manager to see how to install these libraries, when you are not using apt.
 
-- 自建段落式Markdown解析库 用于适配流式输出的文本解析【若找到更好的替代方法会取消】
-- 流式输出
-- 使用C/C++实现一套tiktoken分词库 替代目前使用的Rust分词库库
+3.  make build directory with:
 
-### 编译 项目依赖
+    ```sh
+    mkdir build
+    cd build
+    ```
 
-编译需要GCC和Rust环境
+4.  configure CMake with:
 
-首先 clone本仓库
+    ```
+    cmake -DCMAKE_BUILD_TYPE=Release -DCLIP_EXAMPLES=OFF -DCLIP_TESTS=OFF ..
+    ```
 
-```
-git clone https://github.com/Ace-Radom/cGPTerm
-```
+5.  build
 
-然后 安装所有C的依赖项
+    ```
+    make
+    ```
 
-| 依赖库名 | 开发用版本 | 库功能 | 安装命令 (Debian, Ubuntu) |
-| --- | --- | --- | --- |
-| `argtable` | 2.13 | 命令行参数解析 | `sudo apt install libargtable2-dev` |
-| `curl4-openssl` | 7.74.0 | API对接 | `sudo apt install libcurl4-openssl-dev` |
-| `jansson` | 2.13.1 | json解析 | `sudo apt install libjansson-dev` |
-| `GNU readline` | 8.1 | 命令行输入 历史记录 Tab补全 | `sudo apt install libreadline-dev` |
+After that, you should see all EXE files, DLLs and static libraries under `$/bin`. You can run `./cgpterm` there and it should work.
 
-随后 依次执行以下命令
+## First launch
 
-```shell
-mkdir build && cd build
-cmake ..
-make
-```
+cGPTerm will automatic create log and config files under `~/.cgpterm` by the first launch.
 
-如果一切正常 所有生成的文件都会被存放在项目根文件夹下的bin文件夹内
-
-不过此处编译的是Debug版本 若需编译Release版本可以使用
+You should configure your API Key with:
 
 ```
-cmake -DCMAKE_BUILD_TYPE=Release .. 
-make
+./cgpterm --set-apikey <YOUR_API_KEY>
 ```
+
+Same as setting API Key, you don't need to open the config file (which is `~/.cgpterm/config.ini`) and edit it by yourself. cGPTerm provides a couple of commands to set all configs in config file. See [Available Arguments](#available-arguments) to learn more.
+
+## How To Use
+
+Run with the following command:
+
+```
+cgpterm
+```
+
+Use `Enter` to submit questions.
+
+Here are some common shortcut keys (also shortcut keys for the shell):
+
+- `Ctrl+L`: Clear screen, equivalent to `clear` command in shell
+- `Ctrl+C`: Stop the current request
+- `Tab`: Autocomplete commands or parameters
+- `Ctrl+U`: Delete all characters to the left of the cursor
+- `Ctrl+K`: Delete all characters to the right of the cursor
+- `Ctrl+W`: Delete the word to the left of the cursor
+
+> Original chat logs will be saved to `~/.cgpterm/chat.log`
+
+## Available Arguments
+
+cGPTerm provides a couple of arguments to control the software or set configs.
+
+| Arguments | Description | Example |
+| --- | --- | --- |
+| -h, --help | Show Help Messages and exit | `cgpterm --help` |
+| -r, --raw | Enable raw mode | `cgpterm --raw` |
+| --load FILE | Load chat history from file | `cgpterm --load chat_history_code_check.json` |
+| --set-host HOST | Set API Host to use | `cgpterm --set-host https://api.openai.com` |
+| --set-apikey KEY | Set API Key for OpenAI | `cgpterm --set-apikey sk-....` |
+| --set-timeout TIMEOUT | Set maximum waiting time for API requests | `cgpterm --set-timeout 40` |
+| --set-gentitle | Set whether to automatically generate a title for chat | `cgpterm --set-gentitle` |
+| --set-saveperfix PERFIX | Set chat history file's save perfix | `cgpterm --set-saveperfix chat_history_` |
+| --set-loglevel LEVEL | Set log level: DEBUG, INFO, ERROR, FATAL | `cgpterm --set-loglevel DEBUG` |
+
+> Multi-line mode and raw mode can be used simultaneously
+
+## Configuration File
+
+The configuration file is located at `~/.gpt-term/config.ini` and is autogenerated. It can be modified using the program's `--set` option or edited manually.
+
+The default configuration is as follows:
+
+```ini config.ini
+[DEFAULT]
+# API Host, use for configuring proxy
+# It must in format like "https://xxx.xxxxxx.xxx", no slash at the end is needed or allowed
+OPENAI_HOST=https://api.openai.com
+
+# API key for OpenAI
+OPENAI_API_KEY=
+
+# The maximum waiting time for API requests, the default is 30s
+OPENAI_API_TIMEOUT=30
+
+# Whether to automatically generate titles for conversations, enabled by default (generating titles will consume a small amount of tokens)
+AUTO_GENERATE_TITLE=True
+
+# Define the default file prefix when the /save command saves the chat history. The default value is "./chat_history_", which means that the chat history will be saved in the file starting with "chat_history_" in the current directory
+# At the same time, the prefix can also be specified as a directory + / to allow the program to save the chat history in a folder (note that the corresponding folder needs to be created in advance), for example: CHAT_SAVE_PERFIX=chat_history/
+CHAT_SAVE_PERFIX=./chat_history_
+
+# Log level, default is INFO, available value: DEBUG, INFO, ERROR, FATAL
+LOG_LEVEL=INFO
+```
+
+## Available Slash Commands
+
+- `/raw`: Switch response output style between raw and rendered Markdown format
+    > After switching, use the `/last` command to reprint the last reply
+- `/stream`: Toggle stream output mode
+    > In stream mode, the answer will start outputting as soon as the first response arrives, which can reducing waiting time. Stream mode is on by default.
+- `/title`: Toggle whether to enable automatic title generation
+    > When automatic title generation is on, cGPTerm will generate a new title after the first conversation of the current chat.
+- `/tokens`: Display the total tokens spent and the tokens for the current conversation
+    > GPT-3.5 has a token limit of 4096; use this command to check if you're approaching the limit
+- `/usage`: Show account credits summary
+- `/timeout [new_timeout]`: Modify the API timeout
+    > The default timeout is 30 seconds, it can also be configured by setting `OPENAI_API_TIMEOUT=` in the config file, or using `--set-timeout` argument.
+- `/model [model_name]`: Change AI model
+    > `gpt-3.5-turbo`, `gpt-4` and `gpt-4-32k` are supported.
+- `/system [new_prompt]`: Modify the system prompt
+- `/rand [randomness]`: Set Model sampling randomness (temperature in OpenAI official docs)
+    > Default 1.
+    > 
+    > Given randomness should be a real between 0 and 2.
+- `/save [filename_or_path]`: Save the chat history to the specified JSON file
+    > If no filename or path is provided, the filename `<SAVE PERFIX>YEAR-MONTH-DAY_HOUR,MINUTE,SECOND.json` will be suggested on input.
+- `/undo`: Delete the previous question and answer
+- `/delete` or `/delete first`: Delete the first conversation in current chat
+    > When the token is about to reach the upper limit, the user will be warned.
+- `/delete all`: Clear current chat, delete all questions and responses
+- `/last`: Display last ChatGPT's reply
+- `/copy` or `/copy all`: Copy the full ChatGPT's last reply (raw) to Clipboard
+- `/copy code`: Copy the code in ChatGPT's last reply to Clipboard
+- `/version`: Show cGPTerm local and remote version
+- `/list`: List all settings in use
+- `/help`: Show Slash Commands' help page
+- `/exit`: Exit the application
+
+## Exit Words
+
+You can submit Exit Words to exit cGPTerm. Exit words will be sent as a question to ChatGPT, and cGPTerm will exit after GPT replies.
+
+Exit words include:
+
+```
+['再见', 'bye', 'goodbye', '结束', 'end', '退出', 'exit', 'quit']
+```
+
+Upon exit, the token count for the chat session will be showed.
+
+## Third Party Components
+
+- [dacap/clip](https://github.com/dacap/clip): For accessing the clipboard.
+- [gh-markt/cpp-tiktoken](https://github.com/gh-markt/cpp-tiktoken): For tokens count when using stream mode.
+- [Ace-Radom/cpprich](https://github.com/Ace-Radom/cpprich): For rich text output and Markdown render. (Rich Format library subproject under cGPTerm) 
+- [ndevilla/iniparser](https://github.com/ndevilla/iniparser): For parsering ini config file.
+- [jonhoo/pthread_pool](https://github.com/jonhoo/pthread_pool): For thread-pool support.
+
+You can find their licenses in [THIRD_PARTY_LICENSE](https://github.com/Ace-Radom/cGPTerm/blob/main/THIRD_PARTY_LICENSE).
+
+Sincere thanks to the developers of these projects.
+
+## Contributing
+
+If you want, you can always dive in. Feel free to open an issue, submit PRs or report bugs!
+
+## License
+
+This project is licensed under the [GPLv3](https://github.com/Ace-Radom/cGPTerm/blob/main/LICENSE) License after v1.0.0 release.
+
+From v0.1.0 to v0.3.1 is licensed under the Apache-2.0 License.
