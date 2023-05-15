@@ -939,15 +939,15 @@ void print_slash_command_help(){
     crprint( "    [bright magenta]/system[/] [bold]\\[new_prompt][/]\t- Modify the system prompt\n" );
     crprint( "    [bright magenta]/rand[/] [bold]\\[randomness][/]\t\t- Set Model sampling temperature (0~2)\n" );
     crprint( "    [bright magenta]/save[/] [bold]\\[filename_or_path][/]\t- Save the chat history to a file, suggest title if filename_or_path not provided\n" );
-    crprint( "    [bright magenta]/undo[/]\t\t\t- Undo the last question and remove its answer\n" );
+    crprint( "    [bright magenta]/undo[/]\t\t\t- Delete the previous question and answer\n" );
     crprint( "    [bright magenta]/delete[/] [bold](first)[/]\t\t- Delete the first conversation in current chat\n" );
-    crprint( "    [bright magenta]/delete[/] [bold]all[/]\t\t\t- Clear all messages and conversations current chat\n" );
+    crprint( "    [bright magenta]/delete[/] [bold]all[/]\t\t\t- Clear current chat, delete all questions and responses\n" );
     crprint( "    [bright magenta]/last[/]\t\t\t- Display last ChatGPT's reply\n" );
     crprint( "    [bright magenta]/copy[/] [bold](all)[/]\t\t\t- Copy the full ChatGPT's last reply (raw) to Clipboard\n" );
     crprint( "    [bright magenta]/copy[/] [bold]code[/]\t\t\t- Copy the code in ChatGPT's last reply to Clipboard\n" );
     crprint( "    [bright magenta]/version[/]\t\t\t- Show cGPTerm local and remote version\n" );
     crprint( "    [bright magenta]/list[/]\t\t\t- List all settings in use\n" );
     crprint( "    [bright magenta]/help[/]\t\t\t- Show this help message\n" );
-    crprint( "    [bright magenta]/exit[/]\t\t\t- Exit the application\n" );
+    crprint( "    [bright magenta]/exit[/]\t\t\t- Exit cGPTerm\n" );
     return;
 }

@@ -142,6 +142,7 @@ int main( int argc , char** argv ){
     {
         curl_easy_cleanup( get_remote_version_curl );
         get_remote_version_curl = NULL;
+        remote_version = "Unknown";
     } // get remote version still working        
 
     pthread_mutex_lock( &remote_version_mutex );
