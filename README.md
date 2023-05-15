@@ -178,35 +178,63 @@ LOG_LEVEL=INFO
 ## Available Slash Commands
 
 - `/raw`: Switch response output style between raw and rendered Markdown format
+
     > After switching, use the `/last` command to reprint the last reply
+
 - `/stream`: Toggle stream output mode
+
     > In stream mode, the answer will start outputting as soon as the first response arrives, which can reducing waiting time. Stream mode is on by default.
+
 - `/title`: Toggle whether to enable automatic title generation
+
     > When automatic title generation is on, cGPTerm will generate a new title after the first conversation of the current chat.
+
 - `/tokens`: Display the total tokens spent and the tokens for the current conversation
+
     > GPT-3.5 has a token limit of 4096; use this command to check if you're approaching the limit
+
 - `/usage`: Show account credits summary
+
 - `/timeout [new_timeout]`: Modify the API timeout
+
     > The default timeout is 30 seconds, it can also be configured by setting `OPENAI_API_TIMEOUT=` in the config file, or using `--set-timeout` argument.
+    
 - `/model [model_name]`: Change AI model
+
     > `gpt-3.5-turbo`, `gpt-4` and `gpt-4-32k` are supported.
+
 - `/system [new_prompt]`: Modify the system prompt
+
 - `/rand [randomness]`: Set Model sampling randomness (temperature in OpenAI official docs)
+
     > Default 1.
     > 
     > Given randomness should be a real between 0 and 2.
+
 - `/save [filename_or_path]`: Save the chat history to the specified JSON file
+
     > If no filename or path is provided, the filename `<SAVE PERFIX>YEAR-MONTH-DAY_HOUR,MINUTE,SECOND.json` will be suggested on input.
+
 - `/undo`: Delete the previous question and answer
+
 - `/delete` or `/delete first`: Delete the first conversation in current chat
+
     > When the token is about to reach the upper limit, the user will be warned.
+
 - `/delete all`: Clear current chat, delete all questions and responses
+
 - `/last`: Display last ChatGPT's reply
+
 - `/copy` or `/copy all`: Copy the full ChatGPT's last reply (raw) to Clipboard
+
 - `/copy code`: Copy the code in ChatGPT's last reply to Clipboard
+
 - `/version`: Show cGPTerm local and remote version
+
 - `/list`: List all settings in use
+
 - `/help`: Show Slash Commands' help page
+
 - `/exit`: Exit the application
 
 ## Exit Words
