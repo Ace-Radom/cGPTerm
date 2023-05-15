@@ -1,9 +1,36 @@
 # cGPTerm
-Chat with GPT in Terminal
 
-<img src="https://img.shields.io/github/actions/workflow/status/Ace-Radom/cGPTerm/cmake.yml?branch=main" /> <img src="https://img.shields.io/github/languages/top/Ace-Radom/cGPTerm"> <img src="https://img.shields.io/github/license/Ace-Radom/cGPTerm"> <img src="https://img.shields.io/badge/Platform-Linux-green" />
+[![English badge](https://img.shields.io/badge/%E8%8B%B1%E6%96%87-English-blue)](https://github.com/Ace-Radom/cGPTerm/blob/main/README.md)
+[![简体中文 badge](https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-Simplified%20Chinese-blue)](https://github.com/Ace-Radom/cGPTerm/blob/main/README.zh-CN.md)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
-### README已经冻结准备1.0发布 目前进度请参考TODO.md
+<img src="https://img.shields.io/github/actions/workflow/status/Ace-Radom/cGPTerm/cmake.yml?branch=main" />
+<img src="https://img.shields.io/badge/Platform-Linux-green" />
+<img src="https://img.shields.io/github/license/Ace-Radom/cGPTerm">
+
+This is a refactoring project of the original one [xiaoxx970/chatgpt-in-terminal](https://github.com/xiaoxx970/chatgpt-in-terminal) in C/C++.
+
+cGPTerm enables chatting with ChatGPT in the terminal.
+
+It supports for rendering markdown contents from ChatGPT's API responses.
+
+Supports history retrieval with the up arrow key, stream output, and tokens counting.
+
+Slash (/) commands are available in the chat box to toggle raw response mode, undo the last question and answer, modify the system prompt and more, see the available commands below for details.
+
+Supports saving chat messages to a JSON file and loading them from the file.
+
+Uses the gpt-3.5-turbo model as default model, which is the same model used by ChatGPT (Free Edition).
+
+## Preparation
+
+1. An OpenAI API key. You need to register an OpenAI account and obtain an API key.
+
+   OpenAI's API key can be generated on the page opened by clicking "View API keys" in the upper right corner of the homepage, direct link: https://platform.openai.com/account/api-keys
+
+   ![image-API_Key_Preparation](https://github.com/Ace-Radom/cGPTerm/blob/main/README.assets/image-API_Key_Preparation.png)
+
+2. [Python](https://www.python.org/downloads/) version 3.7 or higher.
 
 ## 简介
 
