@@ -51,14 +51,14 @@ void get_tinfo(){
     // get terminal size
 
     get_cursor_position( &print_begin_cursor_x , &print_begin_cursor_y );
-    if ( trow - print_begin_cursor_y < 10 && trow > 10 )
+    if ( print_begin_cursor_y > trow / 2 )
     {
-        size_t empty_line_needed = 10 - ( trow - print_begin_cursor_y );
+        size_t empty_line_needed = trow / 2;
         for ( int i = 0 ; i < empty_line_needed ; i++ )
             printf( "\n" );
         printf( "\033[%ldA\r" , empty_line_needed );
         get_cursor_position( &print_begin_cursor_x , &print_begin_cursor_y );
-    } // to close to bottom, clean up a few empty lines (-> 10)
+    } // to close to bottom, clean up a few empty lines (-> trow/2)
     return;
 }
 
