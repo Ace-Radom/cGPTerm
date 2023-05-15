@@ -31,7 +31,13 @@ const chat_model_list_t chat_models[] = {
 
 void openai_init(){
     openai = ( openai_t* ) malloc( sizeof( openai_t ) );
-    openai -> endpoint = "https://api.openai.com/v1/chat/completions";
+    openai -> host = OPENAI_HOST;
+    openai -> endpoint = ( char* ) malloc( 256 );
+    sprintf( openai -> endpoint , "%s/v1/chat/completions" , openai -> host );
+    openai -> subscription_endpoint = ( char* ) malloc( 256 );
+    sprintf( openai -> subscription_endpoint , "%s/dashboard/billing/subscription" , openai -> host );
+    openai -> usage_endpoint = ( char* ) malloc( 256 );
+    sprintf( openai -> usage_endpoint , "%s/dashboard/billing/usage" , openai -> host );
     openai -> headers = NULL;
     openai -> messages = json_array();
     openai -> model = ( char* ) malloc( 64 );
@@ -47,6 +53,10 @@ void openai_init(){
     openai -> credit_used_this_month = 0.0;
     openai -> credit_plan = NULL;
     // basic init
+
+    ezylog_logdebug( logger , "OpenAI Chat Endpoint: %s" , openai -> endpoint );
+    ezylog_logdebug( logger , "OpenAI Subcription Endpoint: %s" , openai -> subscription_endpoint );
+    ezylog_logdebug( logger , "OpenAI Usage Endpoint: %s" , openai -> usage_endpoint );
 
     stream_response_msg_only_buf = ( char* ) malloc( 65536 );
 
@@ -259,6 +269,9 @@ request_stop:
 void openai_free(){
     curl_slist_free_all( openai -> headers );
     json_decref( openai -> messages );
+    free( openai -> endpoint );
+    free( openai -> subscription_endpoint );
+    free( openai -> usage_endpoint );
     free( openai -> model );
     if ( openai -> title )
         free( openai -> title );
@@ -411,7 +424,7 @@ void* openai_get_subscription(){
     } // curl init error
 
     curl_easy_setopt( curl , CURLOPT_HTTPGET , 1L );
-    curl_easy_setopt( curl , CURLOPT_URL , "https://api.openai.com/dashboard/billing/subscription" );
+    curl_easy_setopt( curl , CURLOPT_URL , openai -> subscription_endpoint );
     curl_easy_setopt( curl , CURLOPT_HTTPHEADER , openai -> headers );
     curl_easy_setopt( curl , CURLOPT_WRITEDATA , &response_data );
     curl_easy_setopt( curl , CURLOPT_WRITEFUNCTION , curl_write_callback_function );
@@ -484,12 +497,8 @@ void* openai_get_usage( void* __be_data ){
         return NULL;
     } // curl init error
 
-    char* get_usage_url = ( char* ) malloc( 128 );
-    strcpy( get_usage_url , "https://api.openai.com/dashboard/billing/usage" );
-    strcat( get_usage_url , "?start_date=" );
-    strcat( get_usage_url , start_date );
-    strcat( get_usage_url , "&end_date=" );
-    strcat( get_usage_url , end_date );
+    char* get_usage_url = ( char* ) malloc( 256 );
+    sprintf( get_usage_url , "%s?start_date=%s&end_date=%s" , openai -> usage_endpoint , start_date , end_date );
     // build get url
 
     curl_easy_setopt( curl , CURLOPT_HTTPGET , 1L );

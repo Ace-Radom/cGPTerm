@@ -19,6 +19,7 @@ typedef dictionary ini_t;
 extern ezylog_logger_t* logger;
 extern ini_t* config;
 
+extern char* OPENAI_HOST;
 extern char* OPENAI_API_KEY;
 extern double OPENAI_API_TIMEOUT;
 extern bool AUTO_GENERATE_TITLE;

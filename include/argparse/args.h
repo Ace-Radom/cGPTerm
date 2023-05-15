@@ -20,6 +20,7 @@ extern struct arg_str* arg_load;
 
 // ------------------------- set config args -------------------------
 
+extern struct arg_str* arg_set_host;
 extern struct arg_str* arg_set_apikey;
 extern struct arg_dbl* arg_set_timeout;
 extern struct arg_lit* arg_set_gentitle;

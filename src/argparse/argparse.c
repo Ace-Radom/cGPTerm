@@ -3,6 +3,13 @@
 int args_actions_setcfg(){
     int action_num = 0;
 
+    if ( gota_set_host )
+    {
+        action_num++;
+        setcfg_OPENAI_HOST( gav_set_host );
+        printf( "OPENAI_HOST set to '%s'\n" , gav_set_host );
+        ezylog_logdebug( logger , "cfg -> OPENAI_API_HOST set to '%s'" , gav_set_host );
+    }
     if ( gota_set_apikey )
     {
         action_num++;
