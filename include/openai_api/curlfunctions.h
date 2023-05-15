@@ -15,6 +15,7 @@ extern "C" {
 #include"ezylog.h"
 #include"crich.h"
 #include"utils.h"
+#include"streamwrite.h"
 
 #define GITHUB_REMOTE_VERSION_GET          0x00
 #define OPENAI_NORMAL_REQUEST              0x01
@@ -27,8 +28,6 @@ typedef struct {
     char* ptr;
     size_t size;
 } curl_data_t;
-
-extern char* stream_response_msg_only_buf;
 
 size_t curl_write_callback_function( char* ptr , size_t size , size_t nmemb , void* userdata );
 void SSE_event_handler( const char* SSEMSG );

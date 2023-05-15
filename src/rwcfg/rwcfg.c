@@ -1,5 +1,9 @@
 #include"rwcfg.h"
 
+int setcfg_OPENAI_HOST( const char* __host ){
+    return config_setstr( "DEFAULT:OPENAI_HOST" , __host );
+}
+
 int setcfg_OPENAI_API_KEY( const char* __api_key ){
     return config_setstr( "DEFAULT:OPENAI_API_KEY" , __api_key );
 }

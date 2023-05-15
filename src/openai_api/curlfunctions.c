@@ -1,6 +1,5 @@
 #include"openai_api/curlfunctions.h"
 
-char* stream_response_msg_only_buf = NULL;
 
 size_t curl_write_callback_function( char* ptr , size_t size , size_t nmemb , void* userdata ){
     curl_data_t* response_data = ( curl_data_t* ) userdata;
@@ -76,13 +75,7 @@ void SSE_event_handler( const char* SSEMSG ){
     response_msg = json_array_get( response_msg , 0 );
     response_msg = json_object_get( response_msg , "delta" );
     if ( ( response_msg = json_object_get( response_msg , "content" ) ) != NULL )
-    {
-        if ( strlen( stream_response_msg_only_buf ) == 0 )
-            crprint( "[bold][bright cyan]ChatGPT:\n" );
-        printf( "%s" , json_string_value( response_msg ) );
-        fflush( stdout );
-        strcat( stream_response_msg_only_buf , json_string_value( response_msg ) );
-    }
+        write_stream( json_string_value( response_msg ) );
 
     ezylog_logdebug( logger , "SSE event: %s" , SSEMSG );
     free( msg_json );

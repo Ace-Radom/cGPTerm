@@ -29,7 +29,10 @@ extern "C" {
 #define GEN_TITLE_PROMPT "Generate title shorter than 10 words for the following content in content's language. The tilte contains ONLY words. DO NOT include line-break."
 
 typedef struct {
+    char* host;
     char* endpoint;
+    char* subscription_endpoint;
+    char* usage_endpoint;
     struct curl_slist* headers;
     json_t* messages;
     char* model;

@@ -8,12 +8,13 @@ int create_config( const char* __inipath ){
         return -1;
     }
     ini_t* _config = iniparser_load( __inipath );
-    iniparser_set( _config , "DEFAULT"                     , NULL              ); // section DEFAULT
-    iniparser_set( _config , "DEFAULT:OPENAI_API_KEY"      , NULL              );
-    iniparser_set( _config , "DEFAULT:OPENAI_API_TIMEOUT"  , "30.0"            );
-    iniparser_set( _config , "DEFAULT:AUTO_GENERATE_TITLE" , "True"            );
-    iniparser_set( _config , "DEFAULT:CHAT_SAVE_PERFIX"    , "./chat_history_" );
-    iniparser_set( _config , "DEFAULT:LOG_LEVEL"           , "INFO"            );
+    iniparser_set( _config , "DEFAULT"                     , NULL                      ); // section DEFAULT
+    iniparser_set( _config , "DEFAULT:OPENAI_HOST"         , "https://api.openai.com/" );
+    iniparser_set( _config , "DEFAULT:OPENAI_API_KEY"      , NULL                      );
+    iniparser_set( _config , "DEFAULT:OPENAI_API_TIMEOUT"  , "30.0"                    );
+    iniparser_set( _config , "DEFAULT:AUTO_GENERATE_TITLE" , "True"                    );
+    iniparser_set( _config , "DEFAULT:CHAT_SAVE_PERFIX"    , "./chat_history_"         );
+    iniparser_set( _config , "DEFAULT:LOG_LEVEL"           , "INFO"                    );
     iniparser_dump_ini( _config , Fcfg );
     iniparser_freedict( _config );
     fclose( Fcfg );
@@ -37,9 +38,11 @@ int rconfig( const char* __inipath ){
         return -1;
     }
 
+    OPENAI_HOST = ( char* ) malloc( 128 );
     OPENAI_API_KEY = ( char* ) malloc( 64 );
     CHAT_SAVE_PERFIX = ( char* ) malloc( 64 );
 
+    strcpy( OPENAI_HOST , iniparser_getstring( config , "DEFAULT:OPENAI_HOST" , "https://api.openai.com/" ) );
     strcpy( OPENAI_API_KEY , iniparser_getstring( config , "DEFAULT:OPENAI_API_KEY" , NULL ) );
     OPENAI_API_TIMEOUT = iniparser_getdouble( config , "DEFAULT:OPENAI_API_TIMEOUT" , 30.0 );
     AUTO_GENERATE_TITLE = iniparser_getboolean( config , "DEFAULT:AUTO_GENERATE_TITLE" , true );

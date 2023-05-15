@@ -710,7 +710,7 @@ int handle_slash_command( const char* __slashcmd ){
         {
             md_set( last_response );
             md_parse();
-            md_print();
+            md_print( true );
             printf( "\n" );
         }
         free( slashcmd_headcmd_only_temp );
@@ -780,7 +780,7 @@ int handle_slash_command( const char* __slashcmd ){
                 crprint( "[yellow]Code [bright yellow]%d[/]:\n" , i + 1 );
                 md_set( ( char* ) codelist.items[i] );
                 md_parse();
-                md_print();
+                md_print( true );
                 printf( "\n" );
             }
 

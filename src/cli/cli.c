@@ -80,7 +80,7 @@ int start_CLI(){
                 {
                     md_set( data.response );
                     md_parse();
-                    md_print();
+                    md_print( true );
                     printf( "\n" );
                 }
                 if ( openai -> tokens_limit - openai -> current_tokens < 500 && openai -> tokens_limit - openai -> current_tokens >= 1 )

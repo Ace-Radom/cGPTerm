@@ -7,6 +7,7 @@ extern "C" {
 
 #include"rwcfg/ini.h"
 
+int setcfg_OPENAI_HOST( const char* __host );
 int setcfg_OPENAI_API_KEY( const char* __api_key );
 int setcfg_OPENAI_API_TIMEOUT( const double __timeout );
 int setcfg_AUTO_GENERATE_TITLE();
