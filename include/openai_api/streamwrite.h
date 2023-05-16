@@ -15,6 +15,12 @@ extern "C" {
 #include"crich.h"
 #include"utils.h"
 
+#ifdef READ_CURSOR_DELAY
+#define RCD READ_CURSOR_DELAY
+#else
+#define RCD 5000
+#endif
+
 extern char* stream_response_msg_only_buf;
 extern size_t print_begin_cursor_x;
 extern size_t print_begin_cursor_y;

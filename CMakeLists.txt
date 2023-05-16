@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 project(cGPTerm)
 
 add_compile_options(-fPIC)
-set(CMAKE_C_FLAGS "-Wall -g")
+option(BUILD_RELEASE OFF)
+if(BUILD_RELEASE)
+    set(CMAKE_C_FLAGS "-Wall")
+    set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -O2")
+else()
+    set(CMAKE_C_FLAGS "-Wall -g")
+    set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -g")
+endif()
 add_definitions(-D_DEFAULT_SOURCE)
 add_definitions(-D_GNU_SOURCE)
 
@@ -12,6 +19,12 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/VERSION)
 else()
     message(FATAL "VERSION doesn't exist")
 endif()
+
+add_definitions(-DREAD_CURSOR_DELAY=10000)
+# set cursor pos read delay to 10000us (10ms)
+# if this definition not defined, cursor pos read delay will be 5000us (5ms)
+# to add this definition is because, when setting delay to 5ms, sometimes it cannot read pos correctly
+# if some errors like cannot use markdown + stream correctly occur, you may make the delay length longer here
 
 set(LIBRARY_OUTPUT_PATH    ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
