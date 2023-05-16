@@ -134,7 +134,8 @@ Use `Enter` to submit questions.
 Here are some common shortcut keys (also shortcut keys for the shell):
 
 - `Ctrl+L`: Clear screen, equivalent to `clear` command in shell
-- `Ctrl+C`: Stop the current request
+- `Ctrl+C`: Stop the current chat request
+- `Ctrl+D`: Exit cGPTerm / Abort settings
 - `Tab`: Autocomplete commands or parameters
 - `Ctrl+U`: Delete all characters to the left of the cursor
 - `Ctrl+K`: Delete all characters to the right of the cursor
@@ -248,6 +249,8 @@ LOG_LEVEL=INFO
 - `/help`: Show Slash Commands' help page
 
 - `/exit`: Exit the application
+
+> You can press `Ctrl_D` to abort settings.
 
 ## Exit Words
 
