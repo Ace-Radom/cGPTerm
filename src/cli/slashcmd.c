@@ -268,6 +268,12 @@ int handle_slash_command( const char* __slashcmd ){
             // print default (generated) save file path
             save_path = readline( "Save to: " );
             enable_history_search();
+            if ( save_path == NULL )
+            {
+                crprint( "\r\033[2K\r[dim]Abort.\n" );
+                free( slashcmd_headcmd_only_temp );
+                return 0;
+            } // Ctrl_D pressed, break
         } // only input '/save', goto generate filename and save
         else
         {
@@ -361,6 +367,12 @@ int handle_slash_command( const char* __slashcmd ){
         disable_history_search();
         new_timeout_str = readline( "Please input new API timeout: " );
         enable_history_search();
+        if ( new_timeout_str == NULL )
+        {
+            crprint( "\r\033[2K\r[dim]Abort.\n" );
+            free( slashcmd_headcmd_only_temp );
+            return 0;
+        } // Ctrl_D pressed, break
         new_timeout = strtod( new_timeout_str , NULL );
         if ( new_timeout != 0 )
         {
@@ -440,6 +452,12 @@ int handle_slash_command( const char* __slashcmd ){
         disable_history_search();
         new_model = readline( "Please input new Model: " );
         enable_history_search();
+        if ( new_model == NULL )
+        {
+            crprint( "\r\033[2K\r[dim]Abort.\n" );
+            free( slashcmd_headcmd_only_temp );
+            return 0;
+        } // Ctrl_D pressed, break
         if ( openai_set_model( new_model ) == 0 )
         {
             printf( "\r\033[2K\r" );
@@ -474,6 +492,12 @@ int handle_slash_command( const char* __slashcmd ){
             disable_history_search();
             new_prompt = readline( "Please input new system prompt: " );
             enable_history_search();
+            if ( new_prompt == NULL )
+            {
+                crprint( "[dim]Abort.\n" );
+                free( slashcmd_headcmd_only_temp );
+                return 0;
+            } // Ctrl_D pressed, break
         }
         else
         {
@@ -552,6 +576,12 @@ int handle_slash_command( const char* __slashcmd ){
         disable_history_search();
         new_temperature_str = readline( "Please input new Randomness: " );
         enable_history_search();
+        if ( new_temperature_str == NULL )
+        {
+            crprint( "\r\033[2K\r[dim]Abort.\n" );
+            free( slashcmd_headcmd_only_temp );
+            return 0;
+        } // Ctrl_D pressed, break
         new_temperature = strtod( new_temperature_str , NULL );
         if ( new_temperature != 0 )
         {
@@ -788,6 +818,12 @@ int handle_slash_command( const char* __slashcmd ){
             disable_history_search();
             char* code_index_str = readline( "Please select which code to copy: " );
             enable_history_search();
+            if ( code_index_str == NULL )
+            {
+                crprint( "\r\033[2K\r[dim]Abort.\n" );
+                free( slashcmd_headcmd_only_temp );
+                return 0;
+            } // Ctrl_D pressed, break
             int code_index = atoi( code_index_str );
             if ( code_index > 0 && code_index <= cv_len( &codelist ) )
             {
