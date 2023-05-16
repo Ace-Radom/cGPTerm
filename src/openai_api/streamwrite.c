@@ -26,8 +26,8 @@ int get_cursor_position( size_t* x , size_t* y ){
     FD_ZERO( &readset );
     FD_SET( STDIN_FILENO , &readset );
     time.tv_sec = 0;
-    time.tv_usec = 10000;
-    // wait 10ms for a terminal answer
+    time.tv_usec = RCD;
+    // wait for a terminal answer
 
     if ( select( STDIN_FILENO + 1 , &readset , NULL , NULL , &time ) == 1 )
         if ( scanf( "\033[%ld;%ldR" , y , x ) == 2 )
