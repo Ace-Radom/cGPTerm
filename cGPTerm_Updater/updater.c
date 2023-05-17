@@ -26,8 +26,10 @@ int curl_progress_callback_function( char* progress_data , double dltotal , doub
 
 bool is_local_latest();
  
-int main( int argc, char **argv )
+int main( int argc, char** argv )
 {
+    printf( "cGPTerm Updater %s\n" , UPDATER_VERSION );
+
     char updater_path[PATH_MAX] = { 0 };
     char* install_path = NULL;
     ssize_t readlink_path_length = readlink( "/proc/self/exe" , updater_path , sizeof( updater_path ) - 1 );
@@ -35,11 +37,10 @@ int main( int argc, char **argv )
     {
         updater_path[readlink_path_length] = '\0';
         install_path = dirname( updater_path );
-        printf( "Found cGPTerm installed at %s\n" , install_path );
     }
     else
     {
-        fprintf( stderr , "Cannot find cGPTerm installed path, exit\n" );
+        fprintf( stderr , "Cannot find cGPTerm Updater installed path, exit\n" );
         return 128;
     }
     // get install path
@@ -119,16 +120,28 @@ int main( int argc, char **argv )
 
     printf( "Latest remote version: %s\n" , remote_version );
 
+    bool cgpterm_installed = true;
+
     FILE* cgpterm_version_pipe = NULL;
     char* cgpterm_version_cmd = ( char* ) malloc( PATH_MAX );
     sprintf( cgpterm_version_cmd , "%s/cgpterm" , install_path );
     if ( access( cgpterm_version_cmd , F_OK ) == -1 )
     {
         perror( "Cannot ask cGPTerm local version" );
-        fprintf( stderr , "This is an updater, not an installer, which means that you should install cGPTerm by yourself\n" );
+        printf( "If seems that you haven't installed cGPTerm, do you want to install it? [Y/n] " );
+        char confirm;
+        scanf( " %s" , &confirm );
+        if ( confirm == 'Y' )
+        {
+            free( cgpterm_version_cmd );
+            cgpterm_installed = false;
+            goto install;
+        }
+        printf( "Abort\n" );
         free( remote_version );
+        free( cgpterm_version_cmd );
         curl_global_cleanup();
-        return 128;
+        return 1;
     } // check if cGPTerm exists (cgpterm_version_cmd here is still the cGPTerm path)
     strcat( cgpterm_version_cmd , " --version" );
     cgpterm_version_pipe = popen( cgpterm_version_cmd , "r" );
@@ -169,7 +182,12 @@ int main( int argc, char **argv )
         return 1;
     } // abort
 
-    printf( "Start update cGPTerm to %s\n" , remote_version );
+install:
+
+    if ( cgpterm_installed )
+        printf( "Start update cGPTerm to %s\n" , remote_version );
+    else
+        printf( "Start install cGPTerm %s\n" , remote_version );
 
     char* download_url = ( char* ) malloc( 512 );
     char* download_tar_name = ( char* ) malloc( PATH_MAX );
@@ -246,37 +264,40 @@ int main( int argc, char **argv )
     fclose( tar );
     curl_easy_cleanup( curl );
 
-    printf( "Collecting installed cGPTerm files...\n" );
+    if ( cgpterm_installed )
+    {
+        printf( "Collecting installed cGPTerm files...\n" );
 
-    FILE* dfl = NULL;
-    char* dfl_path = ( char* ) malloc( PATH_MAX );
-    sprintf( dfl_path , "%s/DFL" , install_path );
-    dfl = fopen( dfl_path , "r" );
-    if ( dfl == NULL )
-    {
-        perror( "Open download file list failed" );
-        remove( download_tar_name );
-        free( remote_version );
-        free( local_version );
-        free( download_url );
-        free( download_tar_name );
-        curl_global_cleanup();
-        return 128;
+        FILE* dfl = NULL;
+        char* dfl_path = ( char* ) malloc( PATH_MAX );
+        sprintf( dfl_path , "%s/DFL" , install_path );
+        dfl = fopen( dfl_path , "r" );
+        if ( dfl == NULL )
+        {
+            perror( "Open download file list failed" );
+            remove( download_tar_name );
+            free( remote_version );
+            free( local_version );
+            free( download_url );
+            free( download_tar_name );
+            curl_global_cleanup();
+            return 128;
+        }
+        char* files = ( char* ) malloc( 64 );
+        while ( ( fgets( files , 64 , dfl ) ) != NULL )
+        {
+            char* this_file_path = ( char* ) malloc( PATH_MAX );
+            sprintf( this_file_path , "%s/%s" , install_path , files );
+            this_file_path[strlen(this_file_path)-1] = '\0';
+            // erase endline
+            printf( "Remove %s\n" , this_file_path );
+            remove( this_file_path );
+            free( this_file_path );
+        } // remove old files
+        free( files );
+        fclose( dfl );
+        free( dfl_path );
     }
-    char* files = ( char* ) malloc( 64 );
-    while ( ( fgets( files , 64 , dfl ) ) != NULL )
-    {
-        char* this_file_path = ( char* ) malloc( PATH_MAX );
-        sprintf( this_file_path , "%s/%s" , install_path , files );
-        this_file_path[strlen(this_file_path)-1] = '\0';
-        // delete endline
-        printf( "Remove %s\n" , this_file_path );
-        remove( this_file_path );
-        free( this_file_path );
-    } // remove old files
-    free( files );
-    fclose( dfl );
-    free( dfl_path );
 
     printf( "Install new cGPTerm release\nUnpacking package...\n" );
 
@@ -296,7 +317,10 @@ int main( int argc, char **argv )
         return 128;
     } // tar return not 0
 
-    printf( "Unpack success\ncGPTerm has been successfully updated to %s\n" , remote_version );
+    if ( cgpterm_installed )
+        printf( "Unpack success\ncGPTerm has been successfully updated to %s\n" , remote_version );
+    else
+        printf( "Unpack success\ncGPTerm %s has been successfully installed to %s\n" , remote_version , install_path );
     remove( download_tar_name );
     free( remote_version );
     free( local_version );
