@@ -121,7 +121,16 @@ int main( int argc, char **argv )
 
     FILE* cgpterm_version_pipe = NULL;
     char* cgpterm_version_cmd = ( char* ) malloc( PATH_MAX );
-    sprintf( cgpterm_version_cmd , "%s/cgpterm --version" , install_path );
+    sprintf( cgpterm_version_cmd , "%s/cgpterm" , install_path );
+    if ( access( cgpterm_version_cmd , F_OK ) == -1 )
+    {
+        perror( "Cannot ask cGPTerm local version" );
+        fprintf( stderr , "This is an updater, not an installer, which means that you should install cGPTerm by yourself\n" );
+        free( remote_version );
+        curl_global_cleanup();
+        return 128;
+    } // check if cGPTerm exists (cgpterm_version_cmd here is still the cGPTerm path)
+    strcat( cgpterm_version_cmd , " --version" );
     cgpterm_version_pipe = popen( cgpterm_version_cmd , "r" );
     if ( cgpterm_version_pipe == NULL )
     {
