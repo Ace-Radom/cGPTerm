@@ -12,6 +12,7 @@ extern "C" {
 // gota stands for Got Arg
 
 #define gota_help           arg_help           -> count > 0 ? true : false
+#define gota_version        arg_version        -> count > 0 ? true : false
 #define gota_raw            arg_raw            -> count > 0 ? true : false
 #define gota_load           arg_load           -> count > 0 ? true : false
 #define gota_set_host       arg_set_host       -> count > 0 ? true : false
@@ -24,6 +25,7 @@ extern "C" {
 // gav stands for Get Arg Value
 
 #define gav_help           gota_help
+#define gav_version        gota_version
 #define gav_raw            gota_raw
 #define gav_load           arg_load           -> sval[0]
 #define gav_set_host       arg_set_host       -> sval[0]

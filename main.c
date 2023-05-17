@@ -75,6 +75,12 @@ int main( int argc , char** argv ){
         ezylog_logdebug( logger , "help message printed" );
         goto stopmain;
     }
+    if ( gota_version )
+    {
+        printf( CGPTERM_VERSION );
+        ezylog_logdebug( logger , "version printed" );
+        goto stopmain;
+    }
     int action_setcfg_num = args_actions_setcfg();
     if ( action_setcfg_num == -1 )
     {

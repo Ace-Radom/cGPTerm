@@ -143,6 +143,24 @@ Here are some common shortcut keys (also shortcut keys for the shell):
 
 > Original chat logs will be saved to `~/.cgpterm/chat.log`
 
+### cGPTerm Updater
+
+This project also provides an updater to fetch the lastest release package from GitHub and install it automatically. You can use it to update your cGPTerm to latest version since v1.1.0.
+
+Run with the following command:
+
+```
+cgpterm-update
+```
+
+This updater will first check if the local version is out of date. If it is, it will then try to download the latest release package from GitHub and install it.
+
+You should put the updater in the same folder as other cGPTerm installed files. Otherwise the updater cannot find cGPTerm and will ask you if you want to install it (yes, it's also an installer).
+
+The updater needs `tar` to unpack release package. Use `which tar` to see if it is installed.
+
+> If you are using a version prior to v1.1.0, you can first remove all local installed cGPTerm files (excluding configuration files) and install the new version using the updater.
+
 ## Available Arguments
 
 cGPTerm provides a couple of arguments to control the software or set configs.

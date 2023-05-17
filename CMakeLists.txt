@@ -49,6 +49,8 @@ add_subdirectory(cpp-tiktoken)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+add_subdirectory(cGPTerm_Updater)
+# build updater
 
 add_executable(cgpterm main.c ${UTILS})
 target_link_libraries(cgpterm
