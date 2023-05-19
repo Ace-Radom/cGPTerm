@@ -88,7 +88,7 @@ void write_stream( const char* __msg ){
             if ( y == trow )
             {
                 at_last_row = true;
-                crprint( "\r\033[2K\r[bright cyan]......" );
+                crprint( "\r\033[2K\r\033[%ld;%ldH[bright cyan]• • •" , y , tcol / 2 - 3 );
                 fflush( stdout );
             } // reach last row
             else
