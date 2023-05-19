@@ -1,6 +1,7 @@
 #include"openai_api/streamwrite.h"
 
 char* stream_response_msg_only_buf = NULL;
+size_t stream_response_msg_only_buf_size = 0;
 
 size_t trow;                 // terminal row
 size_t tcol;                 // terminal col
@@ -103,6 +104,11 @@ void write_stream( const char* __msg ){
         }
     }
 
+    if ( strlen( stream_response_msg_only_buf ) + strlen( __msg ) >= stream_response_msg_only_buf_size )
+    {
+        stream_response_msg_only_buf_size += strlen( __msg ) + 1;
+        stream_response_msg_only_buf = realloc( stream_response_msg_only_buf , stream_response_msg_only_buf_size );
+    }
     strcat( stream_response_msg_only_buf , __msg );
     return;
 }

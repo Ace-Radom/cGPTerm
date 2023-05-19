@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 extern char* stream_response_msg_only_buf;
+extern size_t stream_response_msg_only_buf_size;
 extern size_t print_begin_cursor_x;
 extern size_t print_begin_cursor_y;
 

@@ -58,8 +58,6 @@ void openai_init(){
     ezylog_logdebug( logger , "OpenAI Subcription Endpoint: %s" , openai -> subscription_endpoint );
     ezylog_logdebug( logger , "OpenAI Usage Endpoint: %s" , openai -> usage_endpoint );
 
-    stream_response_msg_only_buf = ( char* ) malloc( 65536 );
-
     char* authorization_bearer_header_str = ( char* ) malloc( 128 );
     sprintf( authorization_bearer_header_str , "%s%s" , "Authorization: Bearer " , OPENAI_API_KEY );
     openai -> headers = curl_slist_append( openai -> headers , "Content-Type: application/json" );
@@ -132,7 +130,12 @@ void* openai_send_chatrequest( void* __data ){
     curl_using_now = curl;
     // raise the curl function in progress now
 
-    strcpy( stream_response_msg_only_buf , "" );
+    if ( openai -> stream_mode )
+    {
+        stream_response_msg_only_buf = ( char* ) malloc( 1024 );
+        stream_response_msg_only_buf_size = 1024;
+        strcpy( stream_response_msg_only_buf , "" );
+    }
 
     res = curl_easy_perform( curl );
     if ( res != CURLE_OK )
@@ -209,6 +212,7 @@ void* openai_send_chatrequest( void* __data ){
             text = json_string_value( json_object_get( response_errormsg , "message" ) );
             ezylog_logerror( logger , "OpenAI API responsed Error: Code %ld, Message: \"%s\"" , HTTP_Response_code , text );
             ezylog_logdebug( logger , "GPT Response raw: %s" , json_dumps( root , JSON_COMPACT ) );
+            free( stream_response_msg_only_buf );
             goto request_stop;
         } // parse response code, match 4xx errors
         // OpenAI also responses json when error occurs
@@ -236,6 +240,7 @@ void* openai_send_chatrequest( void* __data ){
             openai -> total_tokens_spent += openai -> current_tokens;
             ezylog_loginfo( logger , "Tokens used this turn: %ld" , openai -> current_tokens );
             // count current tokens
+            free( stream_response_msg_only_buf );
         } // no error, stream has already been printed
     } // stream mode
 
