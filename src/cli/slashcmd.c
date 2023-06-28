@@ -423,7 +423,7 @@ int handle_slash_command( const char* __slashcmd ){
 
         if ( strlen( __slashcmd ) == 6 )
         {
-            crprint( "\n[green]Model list: '[bold]gpt-3.5-turbo[/]', '[bold]gpt-4[/]', '[bold]gpt-4-32k[/]'\033[1A\r" );
+            crprint( "\n[green]Model list: '[bold]gpt-3.5-turbo[/]', '[bold]gpt-3.5-turbo-16k[/]', '[bold]gpt-4[/]', '[bold]gpt-4-32k[/]'\033[1A\r" );
             goto ask_model;
         }
         // only input "/model", goto ask new model
